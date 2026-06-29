@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<!-- STYLE GUIDE: ralph-richardson-styleguide-v1-20260628 -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ralph Richardson Brand and Style Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1A1A1A; --ink-2:#23211E; --ink-soft:#3A3631;
+    --cream:#F5F1EA; --cream-2:#EFE8DB; --cream-3:#E7DECC;
+    --gold:#C9A961; --gold-bright:#D8BC7C; --gold-deep:#9A7A33;
+    --taupe:#B3A693;
+    --line:#D9CFBE; --line-light:rgba(245,241,234,.16);
+    --disp:"Playfair Display",Georgia,serif;
+    --body:"EB Garamond",Georgia,serif;
+    --util:"Jost",system-ui,sans-serif;
+    --wordmark:"Bebas Neue",sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,monospace;
+    --maxw:840px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;background:var(--cream-3);color:var(--ink);
+    font-family:var(--body);font-size:18px;line-height:1.6;
+    -webkit-font-smoothing:antialiased;padding:38px 16px 70px;
+  }
+  .doc{max-width:var(--maxw);margin:0 auto;background:var(--cream);
+    border:1px solid var(--line);box-shadow:0 30px 70px -34px rgba(26,26,26,.5);overflow:hidden;}
+  .inner{padding:clamp(26px,5vw,64px);}
+  a{color:var(--gold-deep);}
+
+  /* eyebrow */
+  .eyebrow{font-family:var(--util);font-weight:500;font-size:.66rem;letter-spacing:.26em;
+    text-transform:uppercase;color:var(--gold-deep);margin:0;}
+  .eyebrow .star{color:var(--gold);margin-right:.5em;}
+
+  /* cover */
+  .cover{background:var(--ink);color:var(--cream);padding:clamp(34px,6vw,60px) clamp(26px,5vw,64px);position:relative;}
+  .cover .star-lg{color:var(--gold);font-size:1.4rem;letter-spacing:.3em;}
+  .cover .wordmark{font-family:var(--wordmark);font-size:clamp(42px,9vw,86px);line-height:.92;
+    letter-spacing:.02em;margin:.28em 0 0;color:var(--cream);}
+  .cover .tagline{font-family:var(--disp);font-style:italic;font-size:clamp(1.1rem,2.4vw,1.5rem);
+    color:var(--gold-bright);margin:.2em 0 0;}
+  .cover .title{font-family:var(--util);font-weight:400;font-size:.74rem;letter-spacing:.24em;
+    text-transform:uppercase;color:rgba(245,241,234,.62);margin-top:1.8em;}
+  .cover .rule{height:1px;background:var(--line-light);margin:1.4em 0;}
+  .cover p{color:rgba(245,241,234,.78);max-width:54ch;font-size:1.05rem;margin:0;}
+
+  /* sections */
+  h2.section{font-family:var(--disp);font-weight:700;font-size:clamp(1.6rem,3.4vw,2.2rem);
+    margin:clamp(44px,6vw,68px) 0 6px;line-height:1.05;}
+  h2.section .num{font-family:var(--util);font-weight:500;font-size:.8rem;color:var(--gold-deep);
+    letter-spacing:.16em;margin-right:14px;vertical-align:middle;}
+  h2.section em{font-style:italic;color:var(--gold-deep);}
+  .lead{color:var(--ink-soft);margin:0 0 24px;max-width:64ch;}
+  h3.sub{font-family:var(--util);font-weight:600;font-size:.7rem;text-transform:uppercase;
+    letter-spacing:.18em;color:var(--gold-deep);margin:30px 0 14px;}
+
+  /* 60-30-10 ratio bar */
+  .ratio{display:flex;height:120px;overflow:hidden;border:1px solid var(--line);margin-bottom:10px;}
+  .ratio div{display:flex;flex-direction:column;justify-content:flex-end;padding:14px;}
+  .ratio .big{font-family:var(--disp);font-size:1.7rem;font-weight:600;line-height:1;}
+  .ratio .sm{font-family:var(--util);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;margin-top:.5em;}
+  .ratio .d60{flex:60;background:var(--cream);color:var(--ink);}
+  .ratio .d30{flex:30;background:var(--ink);color:var(--cream);}
+  .ratio .d10{flex:10;background:var(--gold);color:var(--ink);}
+  .ratio-note{font-size:.95rem;color:var(--ink-soft);margin:0 0 6px;}
+
+  /* swatches */
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(166px,1fr));gap:12px;}
+  .sw{border:1px solid var(--line);overflow:hidden;background:#fff;}
+  .sw .chip{height:64px;}
+  .sw .meta{padding:11px 12px;background:var(--cream);}
+  .sw .nm{font-family:var(--disp);font-size:1.02rem;font-weight:600;}
+  .sw .hex{font-family:var(--mono);font-size:.74rem;color:var(--gold-deep);margin-top:3px;letter-spacing:.02em;}
+  .sw .use{font-size:.86rem;color:var(--ink-soft);margin-top:7px;line-height:1.4;}
+
+  /* type families */
+  .fam{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:10px;}
+  .famcard{border:1px solid var(--line);padding:20px;background:var(--cream-2);}
+  .famcard .big{font-size:2.1rem;line-height:1.04;color:var(--ink);}
+  .famcard .nm{font-family:var(--util);font-size:.66rem;color:var(--gold-deep);text-transform:uppercase;
+    letter-spacing:.18em;margin-top:14px;}
+  .famcard .role{font-size:.95rem;color:var(--ink-soft);margin-top:7px;line-height:1.45;}
+
+  .typerow{display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--line);
+    padding:15px 0;flex-wrap:wrap;}
+  .typerow .demo{flex:1;min-width:220px;color:var(--ink);}
+  .typerow .spec{font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);white-space:nowrap;}
+
+  /* canvas for live components */
+  .canvas{background:var(--cream-2);border:1px solid var(--line);padding:24px;margin:8px 0 8px;}
+  .canvas.dark{background:var(--ink);border-color:var(--ink-2);}
+  .cap{font-family:var(--util);font-size:.62rem;color:var(--gold-deep);text-transform:uppercase;
+    letter-spacing:.18em;margin:20px 0 8px;}
+
+  /* live: buttons */
+  .btn{display:inline-flex;align-items:center;gap:.6em;font-family:var(--util);font-weight:500;
+    font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;padding:1em 1.7em;border:1px solid transparent;
+    cursor:default;text-decoration:none;transition:all .3s;}
+  .btn.gold{background:var(--gold);color:var(--ink);}
+  .btn.gold:hover{background:var(--gold-bright);}
+  .btn.ghost{background:transparent;border-color:var(--ink);color:var(--ink);}
+  .btn.on-dark{background:var(--gold);color:var(--ink);}
+  .btn.ghost.on-dark{background:transparent;border-color:rgba(245,241,234,.5);color:var(--cream);}
+  .btnrow{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+
+  /* live: eyebrow + rule + card */
+  .demo-eyebrow{font-family:var(--util);font-weight:500;font-size:.72rem;letter-spacing:.26em;
+    text-transform:uppercase;color:var(--gold-deep);}
+  .demo-eyebrow.on-dark{color:var(--gold-bright);}
+  .hr-gold{height:1px;width:64px;background:var(--gold);margin:14px 0;}
+  .card{background:var(--cream);border:1px solid var(--line);padding:22px;}
+  .card .ttl{font-family:var(--disp);font-size:1.3rem;font-weight:600;margin:.2em 0 .35em;}
+  .card .bd{color:var(--ink-soft);font-size:1rem;margin:0;}
+  .price{font-family:var(--disp);font-size:1.7rem;font-weight:600;}
+  .price .sold{font-family:var(--util);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--gold-deep);margin-left:.6em;vertical-align:middle;}
+
+  /* badges */
+  .badges{display:flex;gap:10px;flex-wrap:wrap;}
+  .badge{font-family:var(--util);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;
+    padding:.5em .85em;}
+  .badge.active{background:#2f5d3a;color:#eaf3ec;}
+  .badge.sold{background:var(--gold-deep);color:var(--cream);}
+  .badge.soon{background:var(--taupe);color:var(--ink);}
+
+  /* voice do/dont */
+  .vt{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .vt .col{border:1px solid var(--line);padding:18px 20px;background:var(--cream-2);}
+  .vt .col h4{font-family:var(--util);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;margin:0 0 12px;}
+  .vt .yes h4{color:#3b6d3b;} .vt .no h4{color:#9a3b2b;}
+  .vt p{margin:0 0 10px;font-size:1rem;color:var(--ink-soft);}
+  .vt p:last-child{margin-bottom:0;}
+  .vt b{color:var(--ink);font-weight:600;}
+  @media(max-width:640px){.vt{grid-template-columns:1fr;}}
+
+  /* principle list */
+  .principles{list-style:none;margin:0;padding:0;border-top:1px solid var(--line);}
+  .principles li{padding:15px 0 15px 30px;border-bottom:1px solid var(--line);position:relative;color:var(--ink-soft);}
+  .principles li::before{content:"\2726";position:absolute;left:0;top:15px;color:var(--gold);}
+  .principles b{color:var(--ink);font-weight:600;font-family:var(--disp);font-size:1.08rem;}
+
+  /* tokens */
+  pre{background:var(--ink);color:var(--cream);font-family:var(--mono);font-size:.82rem;line-height:1.7;
+    padding:24px;overflow-x:auto;border:1px solid var(--ink-2);}
+  pre .c{color:var(--taupe);} pre .v{color:var(--gold-bright);} pre .k{color:#cfc6b6;}
+
+  /* footer */
+  .foot{background:var(--ink);color:var(--cream);text-align:center;padding:40px 24px;}
+  .foot .star{color:var(--gold);letter-spacing:.3em;}
+  .foot .fname{font-family:var(--wordmark);font-size:2.2rem;letter-spacing:.04em;margin:.4em 0 .1em;}
+  .foot .fsub{font-family:var(--util);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,241,234,.55);}
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <!-- COVER -->
+  <div class="cover">
+    <span class="star-lg">&#10022;</span>
+    <div class="wordmark">Ralph Richardson</div>
+    <div class="tagline">Results That Move You</div>
+    <div class="title">Brand &amp; Style Guide &nbsp;&middot;&nbsp; v1 &nbsp;&middot;&nbsp; 2026</div>
+    <div class="rule"></div>
+    <p>The single source of truth for the List With Ralph brand. Across the website, flyers, the Seller Portal, and every printed piece, this is what keeps the look consistent: a calm luxury palette built on the 60-30-10 rule, two classic typefaces, and a single gold accent that signals quality. When something looks off, match it back to this page.</p>
+  </div>
+
+  <div class="inner">
+
+  <!-- 1. THE 60-30-10 RULE -->
+  <h2 class="section"><span class="num">01</span>The 60-30-10 <em>rule</em></h2>
+  <p class="lead">Every layout follows one proportion. Cream carries most of the space and keeps everything light and confident. Charcoal grounds the design and carries the words. Gold appears last and least, reserved for the moments that should feel special. Keep gold scarce and it stays luxurious.</p>
+
+  <div class="ratio">
+    <div class="d60"><span class="big">60</span><span class="sm">Cream &middot; Dominant</span></div>
+    <div class="d30"><span class="big">30</span><span class="sm">Charcoal &middot; Secondary</span></div>
+    <div class="d10"><span class="big">10</span><span class="sm">Gold &middot; Accent</span></div>
+  </div>
+  <p class="ratio-note"><b>60 Cream:</b> page and section backgrounds, cards, breathing room.</p>
+  <p class="ratio-note"><b>30 Charcoal:</b> dark sections, body text, primary buttons, photography.</p>
+  <p class="ratio-note"><b>10 Gold:</b> eyebrows, hairline rules, the signature mark, calls to action.</p>
+
+  <!-- 2. COLOR -->
+  <h2 class="section"><span class="num">02</span>Color</h2>
+  <p class="lead">A warm, restrained palette. The three core colors do almost all the work. The supporting tints exist only to add depth: slightly different creams for layering surfaces, softer charcoals for text, two extra golds for hovers and contrast.</p>
+
+  <h3 class="sub">60 &middot; Dominant &middot; Cream</h3>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#F5F1EA;border-bottom:1px solid var(--line)"></div><div class="meta"><div class="nm">Cream</div><div class="hex">#F5F1EA</div><div class="use">Primary background, light sections.</div></div></div>
+    <div class="sw"><div class="chip" style="background:#EFE8DB"></div><div class="meta"><div class="nm">Cream 2</div><div class="hex">#EFE8DB</div><div class="use">Cards, alternating bands, quiet surfaces.</div></div></div>
+    <div class="sw"><div class="chip" style="background:#E7DECC"></div><div class="meta"><div class="nm">Cream 3</div><div class="hex">#E7DECC</div><div class="use">Deeper tint, image placeholders, edges.</div></div></div>
+  </div>
+
+  <h3 class="sub">30 &middot; Secondary &middot; Charcoal</h3>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#1A1A1A"></div><div class="meta"><div class="nm">Ink</div><div class="hex">#1A1A1A</div><div class="use">Body text, dark sections, primary button.</div></div></div>
+    <div class="sw"><div class="chip" style="background:#23211E"></div><div class="meta"><div class="nm">Ink 2</div><div class="hex">#23211E</div><div class="use">Dark highlight bands, footer.</div></div></div>
+    <div class="sw"><div class="chip" style="background:#3A3631"></div><div class="meta"><div class="nm">Ink soft</div><div class="hex">#3A3631</div><div class="use">Secondary text, captions, body copy.</div></div></div>
+  </div>
+
+  <h3 class="sub">10 &middot; Accent &middot; Gold</h3>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#C9A961"></div><div class="meta"><div class="nm">Gold</div><div class="hex">#C9A961</div><div class="use">The accent. Eyebrows, rules, the mark, CTAs.</div></div></div>
+    <div class="sw"><div class="chip" style="background:#D8BC7C"></div><div class="meta"><div class="nm">Gold bright</div><div class="hex">#D8BC7C</div><div class="use">Hover states, gold text on dark.</div></div></div>
+    <div class="sw"><div class="chip" style="background:#9A7A33"></div><div class="meta"><div class="nm">Gold deep</div><div class="hex">#9A7A33</div><div class="use">Gold text and links on cream (readable).</div></div></div>
+  </div>
+
+  <h3 class="sub">Supporting</h3>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#B3A693"></div><div class="meta"><div class="nm">Taupe</div><div class="hex">#B3A693</div><div class="use">Muted accent, "coming soon" states.</div></div></div>
+    <div class="sw"><div class="chip" style="background:#D9CFBE"></div><div class="meta"><div class="nm">Line</div><div class="hex">#D9CFBE</div><div class="use">Hairline borders and dividers on cream.</div></div></div>
+    <div class="sw"><div class="chip" style="background:#2f5d3a"></div><div class="meta"><div class="nm">Active green</div><div class="hex">#2F5D3A</div><div class="use">"For Sale" listing status only.</div></div></div>
+  </div>
+
+  <!-- 3. TYPOGRAPHY -->
+  <h2 class="section"><span class="num">03</span>Typography</h2>
+  <p class="lead">Four typefaces, each with one job. A high-contrast serif for headlines, a classic serif for reading, a clean sans for labels, and a single display face reserved for the name. Body text runs a touch large on purpose, so it stays comfortable for every reader.</p>
+
+  <div class="fam">
+    <div class="famcard"><div class="big" style="font-family:var(--disp);font-weight:600">Sold for more.</div><div class="nm">Playfair Display</div><div class="role">Headlines, section titles, prices. Italic in gold for emphasis.</div></div>
+    <div class="famcard"><div class="big" style="font-family:var(--body)">Honest, careful guidance.</div><div class="nm">EB Garamond</div><div class="role">Body copy and ledes. Set around 1.2rem for readability.</div></div>
+    <div class="famcard"><div class="big" style="font-family:var(--util);font-weight:500;letter-spacing:.04em">FREE CONSULTATION</div><div class="nm">Jost</div><div class="role">Eyebrows, labels, nav, buttons, tags. Uppercase, tracked.</div></div>
+    <div class="famcard"><div class="big" style="font-family:var(--wordmark);font-size:2.6rem;letter-spacing:.03em">RALPH RICHARDSON</div><div class="nm">Bebas Neue</div><div class="role">The wordmark only. Never used for body or headings.</div></div>
+  </div>
+
+  <h3 class="sub">Type scale</h3>
+  <div class="typerow"><div class="demo" style="font-family:var(--disp);font-weight:700;font-size:2.6rem;line-height:1">Results that <em style="font-style:italic;color:var(--gold-deep)">move you</em>.</div><div class="spec">Playfair 700 &middot; display H1</div></div>
+  <div class="typerow"><div class="demo" style="font-family:var(--disp);font-weight:700;font-size:1.9rem">The people behind your sale.</div><div class="spec">Playfair 700 &middot; section title</div></div>
+  <div class="typerow"><div class="demo" style="font-family:var(--body);font-size:1.3rem;color:var(--ink-soft)">A smooth, transparent selling experience.</div><div class="spec">EB Garamond &middot; 1.3rem lede</div></div>
+  <div class="typerow"><div class="demo" style="font-family:var(--body);font-size:1.15rem;color:var(--ink-soft)">From the first walkthrough to the closing table, every detail is handled for you.</div><div class="spec">EB Garamond &middot; 1.15rem body</div></div>
+  <div class="typerow"><div class="demo demo-eyebrow">&#10022;&nbsp; Southern California Listing Agent</div><div class="spec">Jost 500 &middot; .72rem eyebrow</div></div>
+
+  <!-- 4. THE SIGNATURE MARK -->
+  <h2 class="section"><span class="num">04</span>The signature <em>mark</em></h2>
+  <p class="lead">A four-point gold star sits at the heart of the brand. It marks eyebrows, list items, success states, and quiet dividers. Use it small and in gold. It is punctuation, not a logo, so it never competes with the wordmark.</p>
+  <div class="canvas" style="text-align:center">
+    <div style="color:var(--gold);font-size:2.4rem;letter-spacing:.4em;">&#10022;</div>
+    <div style="font-family:var(--util);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px">Signature mark &middot; &amp;#10022; &middot; Gold</div>
+  </div>
+  <h3 class="sub">Wordmark</h3>
+  <p class="lead" style="margin-bottom:14px">The name is always set in Bebas Neue, in charcoal on light or cream on dark, paired with the tagline in italic Playfair. Do not recreate it in another font, stretch it, or add effects.</p>
+  <div class="canvas dark" style="text-align:center">
+    <div style="font-family:var(--wordmark);font-size:clamp(34px,7vw,58px);color:var(--cream);letter-spacing:.03em;line-height:.95">Ralph Richardson</div>
+    <div style="font-family:var(--util);font-size:.6rem;letter-spacing:.34em;text-transform:uppercase;color:var(--gold-bright);margin-top:8px">Results That Move You</div>
+  </div>
+
+  <!-- 5. COMPONENTS -->
+  <h2 class="section"><span class="num">05</span>Components</h2>
+  <p class="lead">The recurring pieces, built from the rules above. Notice the proportion at work: cream surfaces, charcoal type, and gold used only on the action or the accent.</p>
+
+  <div class="cap">Buttons</div>
+  <div class="canvas">
+    <div class="btnrow">
+      <span class="btn gold">Free Consultation</span>
+      <span class="btn ghost">Learn more</span>
+    </div>
+  </div>
+  <div class="canvas dark">
+    <div class="btnrow">
+      <span class="btn on-dark">Schedule your consultation &rarr;</span>
+      <span class="btn ghost on-dark">View listings</span>
+    </div>
+  </div>
+
+  <div class="cap">Eyebrow, rule, and card</div>
+  <div class="canvas">
+    <div class="demo-eyebrow">&#10022;&nbsp; Now on the market</div>
+    <div class="hr-gold"></div>
+    <div class="card">
+      <div class="badges" style="margin-bottom:14px"><span class="badge active">For Sale</span></div>
+      <div class="price">$725,000</div>
+      <div class="ttl">19795 Beavertail Way</div>
+      <p class="bd">Riverside, CA &middot; 4 Bd &middot; 2 Ba &middot; 1,882 Sq Ft</p>
+    </div>
+  </div>
+
+  <div class="cap">Status badges</div>
+  <div class="canvas">
+    <div class="badges">
+      <span class="badge active">For Sale</span>
+      <span class="badge soon">Coming Soon</span>
+      <span class="badge sold">Sold</span>
+    </div>
+  </div>
+
+  <div class="cap">Price treatments</div>
+  <div class="canvas">
+    <div class="price" style="margin-bottom:8px">$1,295,000</div>
+    <div class="price">$980,000 <span class="sold">Sold</span></div>
+  </div>
+
+  <!-- 6. VOICE & TONE -->
+  <h2 class="section"><span class="num">06</span>Voice &amp; tone</h2>
+  <p class="lead">Confident, warm, and plain-spoken. Ralph sounds like a trusted expert who tells it straight: no hype, no jargon, no pressure. Lead with the seller's benefit, back it with what actually gets done, and always keep things transparent.</p>
+
+  <ul class="principles">
+    <li><b>Client first.</b> Speak to the seller's goals, timeline, and peace of mind before features.</li>
+    <li><b>Transparent.</b> Plain language about what happens and what comes next. Never leave them guessing.</li>
+    <li><b>Confident, not loud.</b> Results speak. Avoid exclamation marks and salesy superlatives.</li>
+    <li><b>Warm and human.</b> Write the way Ralph talks, like a knowledgeable friend in the business.</li>
+  </ul>
+
+  <h3 class="sub">The em dash rule</h3>
+  <p class="lead" style="margin-bottom:14px">Never use em dashes anywhere in Ralph's content. Use commas, colons, periods, or parentheses instead. This applies to the website, flyers, documents, and social posts.</p>
+  <div class="vt">
+    <div class="col yes">
+      <h4>&#10022; On brand</h4>
+      <p>"Results that move you."</p>
+      <p>"You are never left guessing. The Seller Portal shows you exactly what is happening."</p>
+      <p>"Buy before you sell, with no upfront cost, paid at closing."</p>
+    </div>
+    <div class="col no">
+      <h4>&times; Off brand</h4>
+      <p>"We're the #1 BEST agents in town!!!"</p>
+      <p>"Total transparency &mdash; you'll never wonder again."</p>
+      <p>"Unlock unbeatable synergy and maximize your ROI."</p>
+    </div>
+  </div>
+
+  <!-- 7. TOKENS -->
+  <h2 class="section"><span class="num">07</span>Design tokens</h2>
+  <p class="lead">Drop these custom properties into the site stylesheet and reference them everywhere. One source for every value above, so a brand change propagates in a single edit.</p>
+<pre><span class="c">/* Ralph Richardson brand tokens */</span>
+<span class="k">:root</span> {
+  <span class="c">/* 60 dominant */</span>
+  <span class="k">--cream</span>:    <span class="v">#F5F1EA</span>;  <span class="k">--cream-2</span>: <span class="v">#EFE8DB</span>;  <span class="k">--cream-3</span>: <span class="v">#E7DECC</span>;
+  <span class="c">/* 30 secondary */</span>
+  <span class="k">--ink</span>:      <span class="v">#1A1A1A</span>;  <span class="k">--ink-2</span>:   <span class="v">#23211E</span>;  <span class="k">--ink-soft</span>: <span class="v">#3A3631</span>;
+  <span class="c">/* 10 accent */</span>
+  <span class="k">--gold</span>:     <span class="v">#C9A961</span>;  <span class="k">--gold-bright</span>: <span class="v">#D8BC7C</span>;  <span class="k">--gold-deep</span>: <span class="v">#9A7A33</span>;
+  <span class="c">/* supporting */</span>
+  <span class="k">--taupe</span>:   <span class="v">#B3A693</span>;  <span class="k">--line</span>: <span class="v">#D9CFBE</span>;
+  <span class="c">/* type */</span>
+  <span class="k">--disp</span>: <span class="v">"Playfair Display", Georgia, serif</span>;   <span class="c">/* headlines, prices */</span>
+  <span class="k">--body</span>: <span class="v">"EB Garamond", Georgia, serif</span>;       <span class="c">/* body copy ~1.2rem */</span>
+  <span class="k">--util</span>: <span class="v">"Jost", system-ui, sans-serif</span>;        <span class="c">/* eyebrows, labels */</span>
+  <span class="k">--mark</span>: <span class="v">"Bebas Neue", sans-serif</span>;             <span class="c">/* wordmark only */</span>
+}</pre>
+
+  </div>
+
+  <div class="foot">
+    <span class="star">&#10022;</span>
+    <div class="fname">Ralph Richardson</div>
+    <div class="fsub">ListWithRalph.com &middot; DRE #02054110 &middot; Keller Williams Corona</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -127,6 +127,20 @@
   .menu-btn span{width:26px;height:1.5px;background:var(--cream);display:block;transition:transform .3s,opacity .3s,background .4s}
   .nav.scrolled .menu-btn span{background:var(--ink)}
   .menu-btn.open span{background:var(--ink)}
+  /* ---- dropdown ---- */
+  .nav-item.has-sub{position:relative;display:flex;align-items:center}
+  .nav-top{background:none;border:0;cursor:pointer;font-family:var(--util);font-weight:400;font-size:.82rem;letter-spacing:.06em;color:var(--cream);display:inline-flex;align-items:center;gap:.45em;padding:4px 0;transition:color .4s ease}
+  .nav.scrolled nav.links .nav-top{color:var(--ink)}
+  .nav-item.has-sub.current .nav-top{color:var(--gold-bright)}
+  .nav.scrolled .nav-item.has-sub.current .nav-top{color:var(--gold-deep)}
+  .caret{font-size:.72em;transition:transform .3s ease;display:inline-block}
+  .nav-item.has-sub:hover .caret,.nav-item.has-sub.open .caret{transform:rotate(180deg)}
+  .sub{position:absolute;top:100%;left:0;min-width:236px;background:var(--cream);border:1px solid var(--line);box-shadow:0 24px 50px -26px rgba(26,26,26,.5);padding:8px 0;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .25s ease,transform .25s ease,visibility .25s;z-index:90}
+  .sub::before{content:"";position:absolute;top:-14px;left:0;right:0;height:14px}
+  .nav-item.has-sub:hover .sub,.nav-item.has-sub:focus-within .sub,.nav-item.has-sub.open .sub{opacity:1;visibility:visible;transform:translateY(0)}
+  nav.links .sub a{display:block;padding:11px 24px;font-family:var(--util);font-size:.76rem;letter-spacing:.06em;color:var(--ink);white-space:nowrap;transition:background .2s,color .2s}
+  nav.links .sub a::after{display:none}
+  nav.links .sub a:hover{background:var(--cream-2);color:var(--gold-deep)}
 
   /* ============ HERO ============ */
   .hero{position:relative;min-height:100vh;display:flex;align-items:flex-end;background:linear-gradient(165deg,#221e19 0%,#161513 55%,#0f0e0d 100%);overflow:hidden}
@@ -141,7 +155,11 @@
   .hero h1 em{color:var(--gold-bright);font-style:italic;font-weight:500}
   .hero .lede{color:rgba(245,241,234,.86);max-width:48ch;font-size:clamp(1.18rem,1.7vw,1.46rem)}
   .hero-actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:2rem}
-  .scroll-cue{position:absolute;bottom:26px;right:var(--pad);z-index:3;
+  /* homepage hero only (interior heroes keep their bottom-left layout) */
+  .hero:not(.subhero){align-items:center}
+  .hero:not(.subhero) .hero-inner{text-align:center;padding-top:96px;padding-bottom:96px}
+  .hero:not(.subhero) .hero-actions{justify-content:center}
+  .scroll-cue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:3;
     font-family:var(--util);font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(245,241,234,.6);
     display:flex;flex-direction:column;align-items:center;gap:9px}
   .scroll-cue .bar{width:1px;height:42px;background:linear-gradient(var(--gold),transparent);animation:cue 2.4s ease-in-out infinite}
@@ -315,20 +333,29 @@
     .app-grid{grid-template-columns:1fr;gap:54px}
     .app-grid .phone-wrap{order:-1}
   }
-  @media (max-width:760px){
-    body{font-size:1.12rem}
+  /* nav shows the full menu down to ~1080px (it needs ~1044px); collapses to a button below */
+  @media (max-width:1080px){
     nav.links{position:fixed;inset:0 0 0 auto;width:min(82vw,340px);background:var(--cream);
       flex-direction:column;align-items:flex-start;justify-content:center;gap:26px;padding:40px;
       transform:translateX(100%);transition:transform .4s cubic-bezier(.2,.7,.2,1);box-shadow:-30px 0 60px -30px rgba(0,0,0,.4);z-index:70}
     nav.links.open{transform:none}
     nav.links a{font-size:1.05rem;color:var(--ink)}
     .nav.scrolled nav.links a{color:var(--ink)}
-    .scroll-cue{display:none}
     nav.links .btn{margin-top:8px}
     .menu-btn{display:flex;z-index:80}
     .menu-btn.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
     .menu-btn.open span:nth-child(2){opacity:0}
     .menu-btn.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+    .nav-item.has-sub{flex-direction:column;align-items:flex-start;gap:14px;width:100%}
+    .nav-top{font-size:1.05rem;color:var(--ink)}
+    .caret{display:none}
+    .sub{position:static;opacity:1;visibility:visible;transform:none;border:0;box-shadow:none;background:transparent;padding:4px 0 0 16px;min-width:0}
+    .sub::before{display:none}
+    nav.links .sub a{padding:9px 0;font-size:.98rem}
+  }
+  @media (max-width:760px){
+    body{font-size:1.12rem}
+    .scroll-cue{display:none}
     .svc-grid{grid-template-columns:1fr}
     .mk-grid{grid-template-columns:1fr}
     .app-features{grid-template-columns:1fr}
@@ -338,6 +365,10 @@
   }
   .nav-scrim{position:fixed;inset:0;background:rgba(26,26,26,.4);opacity:0;pointer-events:none;transition:opacity .4s;z-index:65}
   .nav-scrim.show{opacity:1;pointer-events:auto}
+  .intro-statement{background:var(--cream);padding:clamp(60px,11vh,128px) 0;text-align:center}
+  .intro-statement .wrap{max-width:880px}
+  .intro-lede{font-family:var(--body);font-weight:400;font-size:clamp(1.35rem,2.7vw,1.95rem);line-height:1.46;color:var(--ink);margin:0}
+  .intro-lede em{font-style:italic;color:var(--gold-deep)}
 
   .hero.subhero{min-height:64vh}
   nav.links a.current{color:var(--gold-bright)}
@@ -395,12 +426,19 @@
   </a>
   <div class="nav-scrim" id="scrim"></div>
   <nav class="links" id="navlinks" aria-label="Primary">
-    <a href="index.html#difference">Why Ralph</a>
-    <a href="index.html#services">Services</a>
+    <div class="nav-item has-sub">
+      <button class="nav-top" type="button" aria-haspopup="true" aria-expanded="false">Sell Your Home <span class="caret" aria-hidden="true">&#9662;</span></button>
+      <div class="sub">
+        <a href="property-listing-service.html">Property Listing Service</a>
+        <a href="buy-before-you-sell.html">Buy Before You Sell</a>
+        <a href="repair-before-you-sell.html">Repair Before You Sell</a>
+        <a href="home-valuation.html">Home Valuation</a>
+      </div>
+    </div>
     <a href="the-selling-process.html">The Selling Process</a>
     <a href="exclusive-listings.html">Listings</a>
-    <a href="index.html#app">The App</a>
     <a href="about.html">About</a>
+    <a href="the-app.html">The App</a>
     <a class="btn gold" href="contact.html">Free Consultation</a>
   </nav>
   <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
@@ -462,12 +500,11 @@
     </div>
     <div class="foot-col">
       <h4>Explore</h4>
-      <a href="index.html#difference">Why Ralph</a>
-      <a href="index.html#services">Services</a>
+      <a href="property-listing-service.html">Sell Your Home</a>
       <a href="the-selling-process.html">The Selling Process</a>
       <a href="exclusive-listings.html">Listings</a>
       <a href="about.html">About Ralph</a>
-      <a href="index.html#app">Seller Portal</a>
+      <a href="the-app.html">The App</a>
     </div>
     <div class="foot-col">
       <h4>Contact</h4>
@@ -478,7 +515,7 @@
     </div>
   </div>
   <div class="foot-util">
-    <a href="https://www.listwithralph.com/open-house-sign-in">Open House Sign-In</a>
+    <a href="open-house.html">Open House Sign-In</a>
     <a href="https://www.listwithralph.com/yard-sign">Yard Sign</a>
     <a href="https://www.directhl.com/todays-rates/">Today's Rates</a>
     <a href="https://www.listwithralph.com/privacy-policy">Privacy Policy</a>
@@ -523,6 +560,24 @@
   /* graceful image fallback */
   document.querySelectorAll('img').forEach(function(img){
     img.addEventListener('error', function(){ img.style.opacity='0'; });
+  });
+
+  /* dropdown toggle (click and touch; hover handles the rest) */
+  document.querySelectorAll('.nav-item.has-sub > .nav-top').forEach(function(t){
+    t.addEventListener('click', function(e){
+      e.preventDefault();
+      var item = t.parentNode;
+      var open = item.classList.toggle('open');
+      t.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  });
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.nav-item.has-sub')){
+      document.querySelectorAll('.nav-item.has-sub.open').forEach(function(i){
+        i.classList.remove('open');
+        var b = i.querySelector('.nav-top'); if(b) b.setAttribute('aria-expanded','false');
+      });
+    }
   });
 })();
 </script>
