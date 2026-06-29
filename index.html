@@ -142,7 +142,11 @@
   .hero h1 em{color:var(--gold-bright);font-style:italic;font-weight:500}
   .hero .lede{color:rgba(245,241,234,.86);max-width:48ch;font-size:clamp(1.18rem,1.7vw,1.46rem)}
   .hero-actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:2rem}
-  .scroll-cue{position:absolute;bottom:26px;right:var(--pad);z-index:3;
+  /* homepage hero only (interior heroes keep their bottom-left layout) */
+  .hero:not(.subhero){align-items:center}
+  .hero:not(.subhero) .hero-inner{text-align:center;padding-top:96px;padding-bottom:96px}
+  .hero:not(.subhero) .hero-actions{justify-content:center}
+  .scroll-cue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:3;
     font-family:var(--util);font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(245,241,234,.6);
     display:flex;flex-direction:column;align-items:center;gap:9px}
   .scroll-cue .bar{width:1px;height:42px;background:linear-gradient(var(--gold),transparent);animation:cue 2.4s ease-in-out infinite}
@@ -316,20 +320,23 @@
     .app-grid{grid-template-columns:1fr;gap:54px}
     .app-grid .phone-wrap{order:-1}
   }
-  @media (max-width:760px){
-    body{font-size:1.12rem}
+  /* nav collapses to a menu button before the links can overflow (they need ~1085px) */
+  @media (max-width:1120px){
     nav.links{position:fixed;inset:0 0 0 auto;width:min(82vw,340px);background:var(--cream);
       flex-direction:column;align-items:flex-start;justify-content:center;gap:26px;padding:40px;
       transform:translateX(100%);transition:transform .4s cubic-bezier(.2,.7,.2,1);box-shadow:-30px 0 60px -30px rgba(0,0,0,.4);z-index:70}
     nav.links.open{transform:none}
     nav.links a{font-size:1.05rem;color:var(--ink)}
     .nav.scrolled nav.links a{color:var(--ink)}
-    .scroll-cue{display:none}
     nav.links .btn{margin-top:8px}
     .menu-btn{display:flex;z-index:80}
     .menu-btn.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
     .menu-btn.open span:nth-child(2){opacity:0}
     .menu-btn.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+  }
+  @media (max-width:760px){
+    body{font-size:1.12rem}
+    .scroll-cue{display:none}
     .svc-grid{grid-template-columns:1fr}
     .mk-grid{grid-template-columns:1fr}
     .app-features{grid-template-columns:1fr}
@@ -339,6 +346,10 @@
   }
   .nav-scrim{position:fixed;inset:0;background:rgba(26,26,26,.4);opacity:0;pointer-events:none;transition:opacity .4s;z-index:65}
   .nav-scrim.show{opacity:1;pointer-events:auto}
+  .intro-statement{background:var(--cream);padding:clamp(60px,11vh,128px) 0;text-align:center}
+  .intro-statement .wrap{max-width:880px}
+  .intro-lede{font-family:var(--body);font-weight:400;font-size:clamp(1.35rem,2.7vw,1.95rem);line-height:1.46;color:var(--ink);margin:0}
+  .intro-lede em{font-style:italic;color:var(--gold-deep)}
 </style>
 </head>
 <body>
@@ -368,12 +379,9 @@
     <img src="https://images.squarespace-cdn.com/content/v1/67e998f0d2ba4223fdba3c38/0b5ff46d-9dfd-4659-b787-e4aa0ae335fe/luxury-cape-cod-kitchen.jpg?format=2500w" alt="A bright, beautifully styled Southern California kitchen">
   </div>
   <div class="hero-inner">
-    <p class="eyebrow reveal-load d1">Southern California Listing Agent</p>
     <h1 class="reveal-load d2">Results that <em>move you</em>.</h1>
-    <p class="lede reveal-load d3">From strategic pricing to powerful marketing and skilled negotiation, Ralph Richardson and his team deliver a smooth, transparent selling experience built to get your home sold for top dollar, in the shortest possible time.</p>
-    <div class="hero-actions reveal-load d4">
-      <a class="btn on-dark" href="#contact">Schedule your free consultation <span class="arr">&rarr;</span></a>
-      <a class="btn ghost on-dark" href="#difference">Why sellers choose Ralph</a>
+    <div class="hero-actions reveal-load d3">
+      <a class="btn on-dark" href="contact.html">Schedule your free consultation <span class="arr">&rarr;</span></a>
     </div>
   </div>
   <div class="scroll-cue" aria-hidden="true"><span>Scroll</span><span class="bar"></span></div>
@@ -384,6 +392,37 @@
   <div class="wrap">
     <span class="label">Proudly serving</span>
     <span class="places">The Inland Empire &nbsp;&middot;&nbsp; Orange County &nbsp;&middot;&nbsp; Los Angeles</span>
+  </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section class="about" id="about">
+  <div class="about-grid">
+    <div class="about-portrait reveal">
+      <span class="frame" aria-hidden="true"></span>
+      <img src="https://images.squarespace-cdn.com/content/v1/67e998f0d2ba4223fdba3c38/db4f3d10-365d-4179-b60c-467acd4f42d3/DSC01814.JPEG?format=1200w" alt="Ralph Richardson">
+      <span class="cap">Ralph Richardson &nbsp;&middot;&nbsp; <b>Listing Agent</b></span>
+    </div>
+    <div class="about-text reveal">
+      <p class="eyebrow">Meet Ralph</p>
+      <h2 class="section-title">Your trusted partner in life's <em>big moves</em>.</h2>
+      <p class="lede">Whether you are upgrading to your dream home, downsizing to simplify life, or moving out of town, Ralph makes the transition smooth, strategic, and stress-free.</p>
+      <p>With over seven years of experience, Ralph does not just sell homes. He helps you move forward, with a client-first approach built around your goals, your timeline, and your peace of mind. He stays hands-on and responsive from the first conversation through closing day, so you always know where things stand and never feel like just another transaction.</p>
+      <p class="signoff">List with Ralph, and let's make your next move your best move.</p>
+      <div class="creds">
+        <div class="cred"><div class="n">7+</div><div class="l">Years of experience</div></div>
+        <div class="cred"><div class="n">5<span style="color:var(--gold-deep)">&#9733;</span></div><div class="l">Rating</div></div>
+        <div class="cred"><div class="n">KW</div><div class="l">Keller Williams Corona</div></div>
+      </div>
+      <a class="btn ghost" href="about.html" style="margin-top:1.8rem">Meet Ralph and the team <span class="arr">&rarr;</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== INTRO STATEMENT ===== -->
+<section class="intro-statement">
+  <div class="wrap reveal">
+    <p class="intro-lede">From strategic pricing to powerful marketing and skilled negotiation, Ralph Richardson and his team deliver a smooth, transparent selling experience built to get your home sold for <em>top dollar</em>, in the shortest possible time.</p>
   </div>
 </section>
 
@@ -440,30 +479,6 @@
         <div class="stat"><div class="num">3,770</div><div class="lab">Square Feet</div></div>
       </div>
       <a class="btn on-dark" href="exclusive-listings.html">View all listings <span class="arr">&rarr;</span></a>
-    </div>
-  </div>
-</section>
-
-<!-- ===== ABOUT ===== -->
-<section class="about" id="about">
-  <div class="about-grid">
-    <div class="about-portrait reveal">
-      <span class="frame" aria-hidden="true"></span>
-      <img src="https://images.squarespace-cdn.com/content/v1/67e998f0d2ba4223fdba3c38/db4f3d10-365d-4179-b60c-467acd4f42d3/DSC01814.JPEG?format=1200w" alt="Ralph Richardson">
-      <span class="cap">Ralph Richardson &nbsp;&middot;&nbsp; <b>Oscar Garcia</b></span>
-    </div>
-    <div class="about-text reveal">
-      <p class="eyebrow">Meet Ralph</p>
-      <h2 class="section-title">Your trusted partner in life's <em>big moves</em>.</h2>
-      <p class="lede">Whether you are upgrading to your dream home, downsizing to simplify life, or moving out of town, Ralph makes the transition smooth, strategic, and stress-free.</p>
-      <p>With over seven years of experience, Ralph does not just sell homes. He helps you move forward, with a client-first approach built around your goals, your timeline, and your peace of mind. Alongside Oscar Garcia, the team combines expert preparation, compelling marketing, and proven negotiation to help every client reach an exceptional result.</p>
-      <p class="signoff">List with Ralph, and let's make your next move your best move.</p>
-      <div class="creds">
-        <div class="cred"><div class="n">7+</div><div class="l">Years of experience</div></div>
-        <div class="cred"><div class="n" style="color:var(--gold-deep);font-size:1.5rem;letter-spacing:.06em">&#9733;&#9733;&#9733;&#9733;&#9733;</div><div class="l">Client rated</div></div>
-        <div class="cred"><div class="n">KW</div><div class="l">Keller Williams Corona</div></div>
-      </div>
-      <a class="btn ghost" href="about.html" style="margin-top:1.8rem">Meet Ralph and the team <span class="arr">&rarr;</span></a>
     </div>
   </div>
 </section>
