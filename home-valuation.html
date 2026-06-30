@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- home-valuation build: val-form-wired-v1 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Home Valuation | Ralph Richardson</title>
@@ -491,6 +493,7 @@
         <div class="field"><label for="vba">Bathrooms</label><input id="vba" name="baths" type="number" min="0" inputmode="numeric"></div>
         <div class="field full"><label for="vsf">Approximate square feet</label><input id="vsf" name="sqft" type="number" min="0" inputmode="numeric"></div>
         <div class="field full"><label for="vm">Anything else Ralph should know? (optional)</label><textarea id="vm" name="message"></textarea></div>
+        <div class="field full" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label for="vhp">Do not fill this in</label><input id="vhp" name="hp" type="text" tabindex="-1" autocomplete="off"></div>
         <div class="full submit"><button class="btn gold" type="submit">Request my valuation <span class="arr">&rarr;</span></button></div>
         <p class="form-note full">Or call Ralph directly at <a href="tel:19096454394" style="color:var(--gold-deep);border-bottom:1px solid var(--gold)">909.645.4394</a>.</p>
       </form>
@@ -498,6 +501,7 @@
         <h3>Thank you. Your request is in.</h3>
         <p>Ralph will review your home and reach out, usually within one business day, with your personalized valuation.</p>
       </div>
+      <p class="form-note full" id="valError" style="display:none;color:#b9442f">Something went wrong sending your request. Please try again, or call Ralph at <a href="tel:19096454394" style="color:var(--gold-deep);border-bottom:1px solid var(--gold)">909.645.4394</a>.</p>
     </div>
   </div>
 </section>
@@ -600,23 +604,61 @@
 })();
 </script>
 <script>
-  // ===== Personalized valuation form =====
-  // NOTE: not yet wired to the database. Currently shows a confirmation on the page without sending anywhere.
+  // ===== Personalized valuation form -> Supabase leads =====
   (function () {
+    var SB = window.supabase.createClient(
+      "https://emguqhnftdvhbufcddtz.supabase.co",
+      "sb_publishable_emkrL8EVhWO0CAH4R0Wiug_BZtPGv9T"
+    );
     var f = document.getElementById("valForm");
     if (!f) return;
-    f.addEventListener("submit", function (e) {
+    function val(n){ var el = f.querySelector('[name="'+n+'"]'); return el && el.value.trim() ? el.value.trim() : null; }
+
+    f.addEventListener("submit", async function (e) {
       e.preventDefault();
+      document.getElementById("valError").style.display = "none";
+
       var req = f.querySelectorAll("[required]"), ok = true, first = null;
       req.forEach(function (el) {
         if (!el.value.trim()) { ok = false; el.style.borderColor = "#b9442f"; if(!first) first = el; }
         else { el.style.borderColor = ""; }
       });
       if (!ok) { if (first) first.focus(); return; }
-      f.style.display = "none";
-      var s = document.getElementById("valSuccess");
-      s.classList.add("show");
-      s.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      function showSuccess(){
+        f.style.display = "none";
+        var s = document.getElementById("valSuccess");
+        s.classList.add("show");
+        s.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      // honeypot: if filled, it is a bot. Show success but do not send.
+      if (val("hp")) { showSuccess(); return; }
+
+      var btn = f.querySelector('[type="submit"]');
+      btn.disabled = true;
+      try {
+        var payload = {
+          source: "valuation",
+          name: val("name"),
+          email: val("email"),
+          phone: val("phone"),
+          details: {
+            timeframe: val("timeframe"),
+            address: val("address"),
+            beds: val("beds"),
+            baths: val("baths"),
+            sqft: val("sqft"),
+            message: val("message")
+          }
+        };
+        var res = await SB.from("leads").insert(payload);
+        if (res.error) throw res.error;
+        showSuccess();
+      } catch (err) {
+        btn.disabled = false;
+        document.getElementById("valError").style.display = "";
+      }
     });
   })();
 </script>
