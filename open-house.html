@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- open-house build: oh-form-wired-v1 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Open House Sign-In | Ralph Richardson</title>
@@ -471,6 +473,7 @@
       <div class="field"><label for="ol">Are you looking to</label><select id="ol" name="looking"><option value="">Select one</option><option>Buy a home</option><option>Sell a home</option><option>Both</option><option>Just browsing</option></select></div>
       <div class="field"><label for="of">Financing</label><select id="of" name="financing"><option value="">Select one</option><option>Pre-approved</option><option>Not yet</option><option>Paying cash</option></select></div>
       <div class="field full"><label for="oh">How did you hear about this open house? (optional)</label><input id="oh" name="heard" type="text"></div>
+      <div class="field full" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label for="ohp">Do not fill this in</label><input id="ohp" name="hp" type="text" tabindex="-1" autocomplete="off"></div>
       <div class="full submit"><button class="btn gold" type="submit">Sign in <span class="arr">&rarr;</span></button></div>
     </form>
     <div class="form-success" id="ohSuccess">
@@ -574,11 +577,13 @@
 })();
 </script>
 <script>
-  /* Open house sign-in.
-     1) Update the property line each week below.
-     2) Connect this form to your email or CRM (it currently confirms on-screen only). */
+  /* Open house sign-in. Update the property line each week below. */
   var OPEN_HOUSE_PROPERTY = "19795 Beavertail Way, Riverside";
   (function(){
+    var SB = window.supabase.createClient(
+      "https://emguqhnftdvhbufcddtz.supabase.co",
+      "sb_publishable_emkrL8EVhWO0CAH4R0Wiug_BZtPGv9T"
+    );
     if (OPEN_HOUSE_PROPERTY) {
       var p = document.getElementById("ohProp");
       p.textContent = "Today's home: " + OPEN_HOUSE_PROPERTY;
@@ -588,7 +593,15 @@
     var s = document.getElementById("ohSuccess");
     var w = document.getElementById("ohWelcome");
     if (!f) return;
-    f.addEventListener("submit", function(e){
+    function val(n){ var el = f.querySelector('[name="'+n+'"]'); return el && el.value.trim() ? el.value.trim() : null; }
+    function welcome(){
+      var name = (document.getElementById("on").value || "").trim().split(" ")[0];
+      w.textContent = name ? ("Welcome, " + name + ". Thanks for signing in.") : "Welcome, and thanks for signing in.";
+      f.style.display = "none";
+      s.classList.add("show");
+      s.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    f.addEventListener("submit", async function(e){
       e.preventDefault();
       var req = f.querySelectorAll("[required]"), ok = true, first = null;
       req.forEach(function(el){
@@ -596,11 +609,22 @@
         else { el.style.borderColor = ""; }
       });
       if (!ok) { if (first) first.focus(); return; }
-      var name = (document.getElementById("on").value || "").trim().split(" ")[0];
-      w.textContent = name ? ("Welcome, " + name + ". Thanks for signing in.") : "Welcome, and thanks for signing in.";
-      f.style.display = "none";
-      s.classList.add("show");
-      s.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (val("hp")) { welcome(); return; }
+      var btn = f.querySelector('[type="submit"]'); btn.disabled = true;
+      try{
+        var payload = {
+          source: "open_house",
+          name: val("name"), email: val("email"), phone: val("phone"),
+          details: { agent: val("agent"), looking: val("looking"), financing: val("financing"), heard: val("heard") }
+        };
+        var res = await SB.from("leads").insert(payload);
+        if (res.error) throw res.error;
+      }catch(err){
+        // kiosk: never block the guest. Log for debugging if a save fails.
+        console.error("Open house lead save failed:", err);
+      }
+      btn.disabled = false;
+      welcome();
     });
     document.getElementById("ohAnother").addEventListener("click", function(){
       f.reset();
