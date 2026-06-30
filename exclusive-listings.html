@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- exclusive-listings build: public-listings-v1 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Exclusive Listings | Ralph Richardson</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta name="description" content="Current active listings and recently sold homes represented by Ralph Richardson across the Inland Empire, Orange County, and Los Angeles.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -411,6 +413,9 @@
   .badge.sold{background:var(--gold-deep);color:var(--cream)}
   .badge.active{background:#2f5d3a;color:#eaf3ec}
   .badge.soon{background:var(--taupe);color:var(--ink)}
+  .badge.pending{background:var(--ink);color:var(--gold-bright)}
+  .lcard-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;color:var(--taupe);font-size:2.4rem}
+  .lgrid .empty-note{grid-column:1/-1;text-align:center;color:var(--ink-soft);font-family:var(--util);font-size:.8rem;letter-spacing:.04em;padding:30px 0}
   .lcard-body{padding:clamp(18px,2vw,26px);display:flex;flex-direction:column;gap:5px;flex:1}
   .lcard-price{font-family:var(--disp);font-size:clamp(1.4rem,2.2vw,1.8rem);font-weight:600;color:var(--ink);line-height:1}
   .lcard-price .sold-tag{font-family:var(--util);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep);margin-left:.6em;vertical-align:middle}
@@ -447,7 +452,7 @@
   <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
 </header>
 <section class="hero subhero" id="top">
-  <div class="hero-bg"><img src="https://images.squarespace-cdn.com/content/v1/67e998f0d2ba4223fdba3c38/d017cb30-5d86-4e83-9e95-6924123e7e98/DSC08758.jpg?format=2000w" alt=""></div>
+  <div class="hero-bg"></div>
   <div class="hero-inner">
     <p class="eyebrow reveal-load d1">Exclusive Listings</p>
     <h1 class="reveal-load d2">Homes worth <em>moving</em> for.</h1>
@@ -568,41 +573,57 @@
 })();
 </script>
 <script>
-/* ===== Listings collection =====
-   In production this array is supplied by the CMS. Each object is one listing record.
-   Sold entries below are sample placeholders to be replaced with real sold data. */
+/* ===== Listings from Supabase ===== */
 (function(){
-  var DET = "19795-beavertail-way.html"; // example detail page; each listing gets its own in the CMS
-  var LISTINGS = [
-    {status:"active",label:"For Sale &middot; Open House",price:725000,address:"19795 Beavertail Way",city:"Riverside",state:"CA",beds:4,baths:2,sqft:1882,href:DET,image:"https://images.squarespace-cdn.com/content/v1/67e998f0d2ba4223fdba3c38/464c9788-621b-46db-ba0a-593aaaf5869b/19795+Beavertail+Way+-+Twilight.jpg?format=1200w"},
-    {status:"active",label:"For Sale",price:1295000,address:"17113 Hidden Valley Lane",city:"Riverside",state:"CA",beds:4,baths:4,sqft:3770,href:DET,image:"https://images.squarespace-cdn.com/content/v1/67e998f0d2ba4223fdba3c38/d017cb30-5d86-4e83-9e95-6924123e7e98/DSC08758.jpg?format=1200w"},
-    {status:"soon",label:"Coming Soon",price:null,address:"2210 Vista Grande Avenue",city:"Corona",state:"CA",beds:5,baths:3,sqft:3240,href:DET,image:"https://images.squarespace-cdn.com/content/v1/67e998f0d2ba4223fdba3c38/0b5ff46d-9dfd-4659-b787-e4aa0ae335fe/luxury-cape-cod-kitchen.jpg?format=1200w"},
-    {status:"sold",label:"Sold",soldPrice:1150000,address:"2841 Crystalaire Drive",city:"Corona",state:"CA",beds:5,baths:4,sqft:3420,href:DET,image:"https://images.squarespace-cdn.com/content/v1/67e998f0d2ba4223fdba3c38/f9fc52f9-538c-4acc-97ea-64563142e85a/20250411_0919_Choosing+Between+Houses_simple_compose_01jrjt9dqxfjq8ex0wbw7jm2s7.png?format=1200w"},
-    {status:"sold",label:"Sold",soldPrice:980000,address:"13355 Old Oak Lane",city:"Corona",state:"CA",beds:5,baths:3,sqft:3100,href:DET,image:"https://images.squarespace-cdn.com/content/v1/67e998f0d2ba4223fdba3c38/d7341567-7d5c-4256-a9d2-f118864cc69c/image_fx_+%2855%29.jpg?format=1200w"},
-    {status:"sold",label:"Sold",soldPrice:1040000,address:"7218 Sanctuary Drive",city:"Eastvale",state:"CA",beds:5,baths:4,sqft:3540,href:DET,image:"https://images.squarespace-cdn.com/content/v1/67e998f0d2ba4223fdba3c38/c0d4d13d-af94-4e97-a2f5-412a6697489f/20250417_2215_Luxury+Home+Desk_simple_compose_01js3n29mtf9bsjcgkd2vr02re.png?format=1200w"},
-    {status:"sold",label:"Sold",soldPrice:865000,address:"9420 Whitewater Place",city:"Riverside",state:"CA",beds:4,baths:3,sqft:2610,href:DET,image:"https://images.squarespace-cdn.com/content/v1/67e998f0d2ba4223fdba3c38/03385a1c-697f-4f5c-902b-4bc8117f0615/DSC03519.jpg?format=1200w"},
-    {status:"sold",label:"Sold",soldPrice:912000,address:"18602 Amberwood Lane",city:"Riverside",state:"CA",beds:4,baths:3,sqft:2780,href:DET,image:"https://images.squarespace-cdn.com/content/v1/67e998f0d2ba4223fdba3c38/2b1d1a64-1534-454c-b1ef-d004e2be3b41/DSC03603.jpg?format=1200w"},
-    {status:"sold",label:"Sold",soldPrice:760000,address:"4521 Ridgeline Avenue",city:"Riverside",state:"CA",beds:4,baths:2,sqft:2150,href:DET,image:"https://images.squarespace-cdn.com/content/v1/67e998f0d2ba4223fdba3c38/0b5ff46d-9dfd-4659-b787-e4aa0ae335fe/luxury-cape-cod-kitchen.jpg?format=1200w"}
-  ];
-  function money(n){ return "$" + Number(n).toLocaleString("en-US"); }
-  function card(l){
-    var sold = l.status === "sold";
-    var priceLine;
-    if (sold) priceLine = '<div class="lcard-price">'+money(l.soldPrice)+' <span class="sold-tag">Sold</span></div>';
-    else if (l.price) priceLine = '<div class="lcard-price">'+money(l.price)+'</div>';
-    else priceLine = '<div class="lcard-price">Price upon request</div>';
-    var stats = l.beds+' Bd &middot; '+l.baths+' Ba &middot; '+Number(l.sqft).toLocaleString("en-US")+' Sq Ft';
-    return '<a class="lcard" href="'+l.href+'">'
-      + '<div class="lcard-img"><span class="badge '+l.status+'">'+l.label+'</span>'
-      + '<img src="'+l.image+'" alt="'+l.address+'" loading="lazy" onerror="this.style.opacity=0"></div>'
-      + '<div class="lcard-body">'+priceLine
-      + '<div class="lcard-addr">'+l.address+'</div>'
-      + '<div class="lcard-city">'+l.city+', '+l.state+'</div>'
-      + '<div class="lcard-stats">'+stats+'</div></div></a>';
+  var SB = window.supabase.createClient(
+    "https://emguqhnftdvhbufcddtz.supabase.co",
+    "sb_publishable_emkrL8EVhWO0CAH4R0Wiug_BZtPGv9T"
+  );
+  function money(n){ return (n||n===0) ? "$"+Number(n).toLocaleString("en-US") : ""; }
+  function initial(a){ return (a||"?").trim().charAt(0).toUpperCase(); }
+  function statsLine(l){
+    var p=[];
+    if(l.beds) p.push(l.beds+' Bd');
+    if(l.baths) p.push(l.baths+' Ba');
+    if(l.sqft) p.push(Number(l.sqft).toLocaleString("en-US")+' Sq Ft');
+    return p.join(' &middot; ');
   }
-  function render(id, items){ var el=document.getElementById(id); if(el) el.innerHTML = items.map(card).join(""); }
-  render("activeGrid", LISTINGS.filter(function(l){return l.status!=="sold";}));
-  render("soldGrid", LISTINGS.filter(function(l){return l.status==="sold";}));
+  function priceLine(l){
+    if(l.status==="sold"){ var sp=money(l.sold_price); return '<div class="lcard-price">'+(sp||'Sold')+(sp?' <span class="sold-tag">Sold</span>':'')+'</div>'; }
+    if(l.price) return '<div class="lcard-price">'+money(l.price)+'</div>';
+    return '<div class="lcard-price">Price upon request</div>';
+  }
+  function card(l){
+    var label = l.status_label || ({soon:"Coming Soon",active:"For Sale",pending:"In Escrow",sold:"Sold"}[l.status]||"");
+    var media = l.hero_image
+      ? '<img src="'+l.hero_image+'" alt="'+l.address+'" loading="lazy" onerror="this.style.opacity=0">'
+      : '<span class="lcard-ph">'+initial(l.address)+'</span>';
+    var stats = statsLine(l);
+    return '<a class="lcard" href="/listings/'+l.slug+'">'
+      + '<div class="lcard-img"><span class="badge '+l.status+'">'+label+'</span>'+media+'</div>'
+      + '<div class="lcard-body">'+priceLine(l)
+      + '<div class="lcard-addr">'+l.address+'</div>'
+      + '<div class="lcard-city">'+[l.city,l.state].filter(Boolean).join(', ')+'</div>'
+      + (stats ? '<div class="lcard-stats">'+stats+'</div>' : '')
+      + '</div></a>';
+  }
+  function render(id, items, emptyMsg){
+    var el=document.getElementById(id); if(!el) return;
+    el.innerHTML = items.length ? items.map(card).join("") : '<div class="empty-note">'+emptyMsg+'</div>';
+  }
+  (async function(){
+    try{
+      var res = await SB.from("listings").select("*").eq("published", true)
+        .order("sort_order",{ascending:true}).order("created_at",{ascending:false});
+      if(res.error) throw res.error;
+      var rows = res.data || [];
+      render("activeGrid", rows.filter(function(l){return l.status!=="sold";}), "No active listings right now. Check back soon.");
+      render("soldGrid", rows.filter(function(l){return l.status==="sold";}), "Sold listings will appear here.");
+    }catch(e){
+      render("activeGrid", [], "Listings are temporarily unavailable.");
+      render("soldGrid", [], "");
+    }
+  })();
 })();
 </script>
 </body>
