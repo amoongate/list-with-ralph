@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v4 -->
+<!-- admin.html build: cms-live-v5 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Listings CMS · List With Ralph</title>
@@ -236,6 +236,9 @@
   .reorder button{font-family:var(--util);font-size:.85rem;line-height:1;padding:.4em .62em;border:1px solid var(--line);background:var(--cream);color:var(--ink);cursor:pointer;transition:background .15s,border-color .15s}
   .reorder button:hover:not(:disabled){background:var(--cream-3);border-color:var(--gold)}
   .reorder button:disabled{opacity:.28;cursor:default}
+  .btn.star{font-size:.98rem;line-height:1;padding:.36em .56em;color:var(--ink-soft)}
+  .btn.star.on{color:var(--gold-deep);border-color:var(--gold);background:var(--cream-3)}
+  .feat-tag{display:inline-block;margin-left:.6em;font-family:var(--util);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;background:var(--gold);color:var(--ink);padding:.3em .6em;vertical-align:middle}
 
   .lead-row{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:15px 18px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .2s}
   .lead-row:last-child{border-bottom:0}
@@ -284,7 +287,7 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v4</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v5</div>
 </div>
 
 <div class="topbar">
@@ -419,7 +422,7 @@ function fromRow(r){
     openHouse:r.open_house||"", heroImage:r.hero_image||"",
     gallery:r.gallery||[], floorPlans:r.floor_plans||[], tours:r.tours||[],
     highlights:r.highlights||[], description:r.description||[],
-    published:r.published!==false, sortOrder:r.sort_order||0, _key:r.slug
+    published:r.published!==false, sortOrder:r.sort_order||0, featured:r.featured===true, _key:r.slug
   };
 }
 function toRow(d){
@@ -549,7 +552,7 @@ function render(){
     <div class="row ${l.published===false?'is-hidden':''}">
       <div class="thumb">${imgOrPlaceholder(l.heroImage,l.address)}</div>
       <div class="rmeta">
-        <div class="addr">${l.address||"Untitled listing"}${l.published===false?'<span class="hidden-tag">Hidden</span>':''}</div>
+        <div class="addr">${l.address||"Untitled listing"}${l.featured?'<span class="feat-tag">Featured</span>':''}${l.published===false?'<span class="hidden-tag">Hidden</span>':''}</div>
         <div class="city">${[l.city,l.state].filter(Boolean).join(", ")}</div>
         <div class="price">${priceLine(l)}</div>
         <div class="specs">${specs(l)}</div>
@@ -559,6 +562,7 @@ function render(){
           <button onclick="moveListing('${l.id}',-1)" ${idx===0?'disabled':''} aria-label="Move up" title="Move up">&uarr;</button>
           <button onclick="moveListing('${l.id}',1)" ${idx===items.length-1?'disabled':''} aria-label="Move down" title="Move down">&darr;</button>
         </div>` : ``}
+        <button class="btn ghost sm star ${l.featured?'on':''}" onclick="quickFeature('${l.id}')" title="${l.featured?'Featured on the home page (tap to clear)':'Set as the featured listing'}" aria-label="Featured listing">${l.featured?'\u2605':'\u2606'}</button>
         <span class="badge ${STATUS[l.status].cls}">${STATUS[l.status].label}</span>
         <select class="statussel" aria-label="Change status" onchange="quickStatus('${l.id}', this.value)">
           ${ORDER.map(s => `<option value="${s}" ${s===l.status?'selected':''}>${STATUS[s].label}</option>`).join("")}
@@ -602,6 +606,32 @@ async function moveListing(id, dir){
     await Promise.all(changes.map(l => sb.from("listings").update({sort_order:l.sortOrder}).eq("id", l.id)));
   }catch(e){
     toast("Could not save the new order: " + (e.message||e));
+  }
+}
+
+async function quickFeature(id){
+  const l = LISTINGS.find(x => x.id===id);
+  if(!l) return;
+  const makeFeatured = !l.featured;
+  LISTINGS.forEach(x => x.featured = false);
+  l.featured = makeFeatured;
+  render();
+  try{
+    await sb.from("listings").update({featured:false}).eq("featured", true);
+    if(makeFeatured){
+      const { error } = await sb.from("listings").update({featured:true}).eq("id", id);
+      if(error) throw error;
+    }
+  }catch(e){
+    toast("Could not update the featured listing: " + (e.message||e));
+    return;
+  }
+  if(makeFeatured){
+    toast(l.published===false
+      ? `<b>${l.address}</b> is featured, but it is hidden so it will not show until you make it visible`
+      : `<b>${l.address}</b> is now the featured listing`);
+  } else {
+    toast("Featured listing cleared. The home page will show no featured listing.");
   }
 }
 

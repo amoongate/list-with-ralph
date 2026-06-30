@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- index build: featured-dynamic-v1 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ralph Richardson | Southern California Listing Agent</title>
@@ -488,22 +490,18 @@
 </section>
 
 <!-- ===== FEATURED LISTING ===== -->
-<section class="featured" id="listing">
+<section class="featured" id="listing" style="display:none">
   <div class="featured-grid">
     <div class="featured-img">
       <span class="featured-tag">Featured Listing</span>
-      <img src="/images/hero-home.jpg" alt="A two story pool home in Riverside, California">
+      <img id="featImg" src="" alt="" style="display:none">
     </div>
     <div class="featured-text reveal">
-      <p class="eyebrow">For Sale &nbsp;&middot;&nbsp; Riverside</p>
-      <h3>Two Story Pool Home</h3>
-      <p class="addr">17113 Hidden Valley Lane, Riverside, CA 92503</p>
-      <div class="stats">
-        <div class="stat"><div class="num">4</div><div class="lab">Bedrooms</div></div>
-        <div class="stat"><div class="num">4</div><div class="lab">Bathrooms</div></div>
-        <div class="stat"><div class="num">3,770</div><div class="lab">Square Feet</div></div>
-      </div>
-      <a class="btn on-dark" href="/exclusive-listings">View all listings <span class="arr">&rarr;</span></a>
+      <p class="eyebrow" id="featEyebrow"></p>
+      <h3 id="featTitle"></h3>
+      <p class="addr" id="featAddr"></p>
+      <div class="stats" id="featStats"></div>
+      <a class="btn on-dark" id="featLink" href="#">View this home <span class="arr">&rarr;</span></a>
     </div>
   </div>
 </section>
@@ -742,6 +740,45 @@
       });
     }
   });
+})();
+</script>
+<script>
+(function(){
+  var SB = window.supabase.createClient("https://emguqhnftdvhbufcddtz.supabase.co","sb_publishable_emkrL8EVhWO0CAH4R0Wiug_BZtPGv9T");
+  function num(n){ return Number(n).toLocaleString("en-US"); }
+  function esc(s){ s=(s==null?"":String(s)); return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  var STATUS = {soon:"Coming Soon", active:"For Sale", pending:"In Escrow", sold:"Sold"};
+
+  (async function(){
+    try{
+      var res = await SB.from("listings").select("*").eq("featured", true).eq("published", true).limit(1);
+      if(res.error || !res.data || !res.data.length) return; // no featured listing -> section stays hidden
+      var l = res.data[0];
+
+      var img = document.getElementById("featImg");
+      var src = l.hero_image || (Array.isArray(l.gallery) && l.gallery[0] && l.gallery[0].url) || "";
+      if(src){ img.src = src; img.alt = l.address || "Featured listing"; img.style.display = ""; }
+
+      var label = l.status_label || STATUS[l.status] || "";
+      document.getElementById("featEyebrow").innerHTML = [esc(label), esc(l.city||"")].filter(Boolean).join(" &nbsp;&middot;&nbsp; ");
+      document.getElementById("featTitle").textContent = l.title || l.address || "Featured listing";
+      document.getElementById("featAddr").textContent = [l.address, [l.city,l.state].filter(Boolean).join(", "), l.zip].filter(Boolean).join(", ");
+
+      var stats = [];
+      if(l.beds) stats.push([l.beds, "Bedrooms"]);
+      if(l.baths) stats.push([l.baths, "Bathrooms"]);
+      if(l.sqft) stats.push([num(l.sqft), "Square Feet"]);
+      document.getElementById("featStats").innerHTML = stats.map(function(s){
+        return '<div class="stat"><div class="num">'+s[0]+'</div><div class="lab">'+s[1]+'</div></div>';
+      }).join("");
+
+      document.getElementById("featLink").href = "/listings/" + l.slug;
+
+      var sec = document.getElementById("listing");
+      sec.style.display = "";
+      sec.querySelectorAll(".reveal").forEach(function(el){ el.classList.add("in"); });
+    }catch(e){ /* on error, leave the section hidden */ }
+  })();
 })();
 </script>
 </body>
