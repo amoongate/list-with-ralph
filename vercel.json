@@ -2,6 +2,6 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/listings/:slug", "destination": "/listing.html" }
+    { "source": "/listings/:slug", "destination": "/listing" }
   ]
 }
