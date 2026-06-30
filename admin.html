@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v1 -->
+<!-- admin.html build: cms-live-v2 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Listings CMS · List With Ralph</title>
@@ -102,6 +102,9 @@
   .rmeta .price .tag{font-family:var(--util);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep);margin-left:.5em}
   .ractions{display:flex;align-items:center;gap:10px;flex:none}
   .statussel{font-family:var(--util);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;padding:.6em .7em;border:1px solid var(--line);background:var(--cream)}
+  .row.is-hidden{opacity:.55}
+  .row.is-hidden .thumb{filter:grayscale(.45)}
+  .hidden-tag{display:inline-block;margin-left:.6em;font-family:var(--util);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;background:var(--cream-3);color:var(--ink-soft);padding:.3em .6em;vertical-align:middle}
 
   /* ===== badge (matches live site) ===== */
   .badge{display:inline-block;font-family:var(--util);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;padding:.5em .85em;background:var(--ink);color:var(--cream);white-space:nowrap}
@@ -276,7 +279,7 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v1</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v2</div>
 </div>
 
 <div class="topbar">
@@ -537,10 +540,10 @@ function render(){
     return;
   }
   $("#list").innerHTML = `<div class="rows">` + items.map(l => `
-    <div class="row">
+    <div class="row ${l.published===false?'is-hidden':''}">
       <div class="thumb">${imgOrPlaceholder(l.heroImage,l.address)}</div>
       <div class="rmeta">
-        <div class="addr">${l.address||"Untitled listing"}</div>
+        <div class="addr">${l.address||"Untitled listing"}${l.published===false?'<span class="hidden-tag">Hidden</span>':''}</div>
         <div class="city">${[l.city,l.state].filter(Boolean).join(", ")}</div>
         <div class="price">${priceLine(l)}</div>
         <div class="specs">${specs(l)}</div>
@@ -550,6 +553,7 @@ function render(){
         <select class="statussel" aria-label="Change status" onchange="quickStatus('${l.id}', this.value)">
           ${ORDER.map(s => `<option value="${s}" ${s===l.status?'selected':''}>${STATUS[s].label}</option>`).join("")}
         </select>
+        <button class="btn ghost sm" onclick="quickPublish('${l.id}', ${l.published===false})">${l.published===false?'Show':'Hide'}</button>
         <button class="btn ghost sm" onclick="openEditor('${l.id}')">Edit</button>
       </div>
     </div>`).join("") + `</div>`;
@@ -563,6 +567,16 @@ async function quickStatus(id, s){
   const { error } = await sb.from("listings").update({status:s, status_label:STATUS[s].label}).eq("id", id);
   if(error){ l.status = prev.status; l.statusLabel = prev.statusLabel; render(); toast("Update failed: "+error.message); return; }
   toast(`Moved <b>${l.address}</b> to ${STATUS[s].label}`);
+}
+
+async function quickPublish(id, show){
+  const l = LISTINGS.find(x => x.id===id);
+  if(!l) return;
+  const prev = l.published;
+  l.published = show; render();
+  const { error } = await sb.from("listings").update({published: show}).eq("id", id);
+  if(error){ l.published = prev; render(); toast("Update failed: "+error.message); return; }
+  toast(show ? `<b>${l.address}</b> is now visible on the site` : `<b>${l.address}</b> is now hidden from the site`);
 }
 
 /* ---------- editor ---------- */
