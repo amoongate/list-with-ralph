@@ -463,7 +463,6 @@
       <p class="eyebrow">Sign in</p>
       <h2 class="section-title">Tell us a little about <em>you</em>.</h2>
       <p>It takes about thirty seconds, and there is no obligation.</p>
-      <span class="oh-prop" id="ohProp" hidden></span>
     </div>
     <form class="vform" id="ohForm" novalidate>
       <div class="field"><label for="on">Full name</label><input id="on" name="name" type="text" autocomplete="name" required></div>
@@ -577,18 +576,12 @@
 })();
 </script>
 <script>
-  /* Open house sign-in. Update the property line each week below. */
-  var OPEN_HOUSE_PROPERTY = "19795 Beavertail Way, Riverside";
+  /* Open house sign-in. */
   (function(){
     var SB = window.supabase.createClient(
       "https://emguqhnftdvhbufcddtz.supabase.co",
       "sb_publishable_emkrL8EVhWO0CAH4R0Wiug_BZtPGv9T"
     );
-    if (OPEN_HOUSE_PROPERTY) {
-      var p = document.getElementById("ohProp");
-      p.textContent = "Today's home: " + OPEN_HOUSE_PROPERTY;
-      p.hidden = false;
-    }
     var f = document.getElementById("ohForm");
     var s = document.getElementById("ohSuccess");
     var w = document.getElementById("ohWelcome");
