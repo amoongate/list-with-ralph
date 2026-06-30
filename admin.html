@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v2 -->
+<!-- admin.html build: cms-live-v3 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Listings CMS · List With Ralph</title>
@@ -231,6 +231,7 @@
   .badge.oh{background:var(--green);color:var(--green-fg)}
   .badge.ct{background:var(--ink);color:var(--cream)}
   .badge.vl{background:var(--gold-deep);color:var(--cream)}
+  .badge.ys{background:var(--taupe);color:var(--ink)}
 
   .lead-row{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:15px 18px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .2s}
   .lead-row:last-child{border-bottom:0}
@@ -279,7 +280,7 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v2</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v3</div>
 </div>
 
 <div class="topbar">
@@ -986,9 +987,10 @@ async function deleteCurrent(){
 const SOURCE = {
   open_house:{label:"Open House", cls:"oh"},
   contact:{label:"Contact", cls:"ct"},
-  valuation:{label:"Valuation", cls:"vl"}
+  valuation:{label:"Valuation", cls:"vl"},
+  yard_sign:{label:"Yard Sign", cls:"ys"}
 };
-const SORDER = ["open_house","contact","valuation"];
+const SORDER = ["open_house","contact","valuation","yard_sign"];
 
 /* sample leads (stand-ins for real form submissions) */
 let LEADS = [];
@@ -1018,12 +1020,10 @@ function setView(v){
 function setLeadFilter(k){ leadFilter = k; renderLeads(); }
 
 function renderLeadSummary(){
-  const counts = {open_house:0, contact:0, valuation:0};
-  LEADS.forEach(l => counts[l.source]++);
-  const colors = {open_house:"var(--green)", contact:"var(--ink)", valuation:"var(--gold-deep)"};
-  let html = `<div class="scard"><div class="n">${LEADS.length}</div><div class="l">Total leads</div></div>`;
-  html += SORDER.map(s => `<div class="scard"><div class="n">${counts[s]}</div><div class="l"><span class="dot" style="background:${colors[s]}"></span>${SOURCE[s].label}</div></div>`).join("");
-  $("#leadSummary").innerHTML = html;
+  const counts = {}; SORDER.forEach(s => counts[s] = 0);
+  LEADS.forEach(l => { if(counts[l.source]!==undefined) counts[l.source]++; });
+  const colors = {open_house:"var(--green)", contact:"var(--ink)", valuation:"var(--gold-deep)", yard_sign:"var(--taupe)"};
+  $("#leadSummary").innerHTML = SORDER.map(s => `<div class="scard"><div class="n">${counts[s]}</div><div class="l"><span class="dot" style="background:${colors[s]}"></span>${SOURCE[s].label}</div></div>`).join("");
 }
 function renderLeadChips(){
   const items = [["all","All ("+LEADS.length+")"]].concat(SORDER.map(s => [s, SOURCE[s].label]));
@@ -1036,6 +1036,7 @@ function leadSnippet(l){
   if(l.source==="open_house") return [d.looking, d.financing].filter(Boolean).join("  \u00b7  ");
   if(l.source==="valuation")  return [d.address, d.timeframe].filter(Boolean).join("  \u00b7  ");
   if(l.source==="contact")    return [d.topic, (d.message||"").slice(0,56)].filter(Boolean).join("  \u00b7  ");
+  if(l.source==="yard_sign")  return [d.address, d.interest].filter(Boolean).join("  \u00b7  ");
   return "";
 }
 function renderLeads(){
@@ -1080,7 +1081,8 @@ async function toggleLeadStatus(id){
 const LEAD_FIELDS = {
   open_house:[["agent","Working with an agent"],["looking","Looking to"],["financing","Financing"],["heard","Heard about it"]],
   contact:[["topic","Topic"],["message","Message"]],
-  valuation:[["timeframe","Timeframe"],["address","Property address"],["beds","Beds"],["baths","Baths"],["sqft","Sq ft"],["message","Notes"]]
+  valuation:[["timeframe","Timeframe"],["address","Property address"],["beds","Beds"],["baths","Baths"],["sqft","Sq ft"],["message","Notes"]],
+  yard_sign:[["interest","Interested in"],["address","Property"],["message","Message"]]
 };
 function openLead(id){
   currentLead = id;
