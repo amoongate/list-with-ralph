@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- admin.html build: cms-live-v1 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Listings CMS · List With Ralph</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1A1A1A; --ink-2:#23211E; --ink-soft:#3A3631;
+    --cream:#F5F1EA; --cream-2:#EFE8DB; --cream-3:#E7DECC;
+    --gold:#C9A961; --gold-bright:#D8BC7C; --gold-deep:#9A7A33;
+    --taupe:#B3A693; --line:rgba(26,26,26,.14);
+    --green:#2f5d3a; --green-fg:#eaf3ec;
+    --disp:"Playfair Display",Georgia,serif;
+    --body:"EB Garamond",Georgia,serif;
+    --util:"Jost","Helvetica Neue",Arial,sans-serif;
+    --wordmark:"Bebas Neue","Jost",sans-serif;
+    --paper-shadow:0 30px 70px -40px rgba(26,26,26,.45);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--body);font-size:16px;-webkit-font-smoothing:antialiased}
+  button{font-family:var(--util);cursor:pointer}
+  :focus-visible{outline:2px solid var(--gold-deep);outline-offset:2px}
+  input,select,textarea{font-family:var(--body);font-size:1rem}
+
+  /* ===== login gate ===== */
+  .gate{position:fixed;inset:0;z-index:100;background:var(--ink);color:var(--cream);display:flex;align-items:center;justify-content:center;flex-direction:column;padding:24px;transition:opacity .35s}
+  .gate.hidden{opacity:0;pointer-events:none}
+  .gate .name{font-family:var(--wordmark);font-size:2.4rem;letter-spacing:.04em;line-height:1}
+  .gate .sub{font-family:var(--util);font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-top:9px}
+  .pwbox{margin-top:34px;width:min(340px,100%);text-align:center}
+  .pwbox label{display:block;font-family:var(--util);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--taupe);margin-bottom:10px}
+  .pwbox input{width:100%;padding:.9em 1em;border:1px solid rgba(245,241,234,.3);background:rgba(245,241,234,.06);color:var(--cream);text-align:center;letter-spacing:.1em}
+  .pwbox input:focus{outline:none;border-color:var(--gold)}
+  .pwbox .btn{margin-top:14px;width:100%}
+  .pwbox.shake{animation:shake .4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+  .pwerr{color:#e6a39b;font-family:var(--util);font-size:.74rem;margin-top:12px;min-height:1.1em}
+  .gatehint{margin-top:28px;font-family:var(--util);font-size:.68rem;color:var(--taupe);max-width:340px;text-align:center;line-height:1.7}
+  .gatehint b{color:var(--gold-bright)}
+
+  /* ===== top bar ===== */
+  .topbar{background:var(--ink);color:var(--cream);padding:16px clamp(16px,4vw,40px);display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:30;border-bottom:1px solid rgba(245,241,234,.12)}
+  .brand{display:flex;flex-direction:column;line-height:1}
+  .brand .name{font-family:var(--wordmark);font-size:1.5rem;letter-spacing:.04em}
+  .brand .sub{font-family:var(--util);font-size:.52rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-top:5px}
+  .topbar .right{display:flex;align-items:center;gap:14px}
+  .topbar .ctx{font-family:var(--util);font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--taupe)}
+  .btn{font-family:var(--util);font-weight:500;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--ink);background:var(--ink);color:var(--cream);padding:.85em 1.5em;transition:background .25s,color .25s}
+  .btn:hover{background:transparent;color:var(--ink)}
+  .btn.gold{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+  .btn.gold:hover{background:transparent;color:var(--gold-deep);border-color:var(--gold-deep)}
+  .btn.gold.on-dark:hover{color:var(--gold);border-color:var(--gold)}
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .btn.ghost:hover{background:var(--ink);color:var(--cream)}
+  .btn.ghost.on-dark{color:var(--cream);border-color:rgba(245,241,234,.5)}
+  .btn.ghost.on-dark:hover{background:var(--cream);color:var(--ink)}
+  .btn.sm{padding:.6em 1em;font-size:.66rem}
+  .btn.danger{border-color:#9a3b33;color:#9a3b33;background:transparent}
+  .btn.danger:hover{background:#9a3b33;color:var(--cream)}
+
+  /* ===== shell ===== */
+  .wrap{max-width:1180px;margin:0 auto;padding:clamp(22px,4vw,40px) clamp(16px,4vw,40px) 80px}
+  .pagehead{margin-bottom:22px}
+  .eyebrow{font-family:var(--util);font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-deep)}
+  .pagehead h1{font-family:var(--disp);font-weight:700;font-size:clamp(1.9rem,4vw,2.7rem);margin:.18em 0 0;line-height:1.02}
+  .pagehead h1 em{font-style:italic;font-weight:500;color:var(--gold-deep)}
+
+  /* ===== summary strip ===== */
+  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 24px}
+  .scard{background:var(--cream-2);border:1px solid var(--line);padding:16px 18px}
+  .scard .n{font-family:var(--disp);font-weight:700;font-size:1.9rem;line-height:1}
+  .scard .l{font-family:var(--util);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px}
+  .scard .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+  /* ===== toolbar ===== */
+  .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:18px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{font-family:var(--util);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;padding:.55em 1em;border:1px solid var(--line);background:transparent;color:var(--ink-soft);transition:all .2s}
+  .chip:hover{border-color:var(--ink-soft)}
+  .chip.on{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+  .search{flex:1;min-width:180px;margin-left:auto}
+  .search input{width:100%;padding:.8em 1em;border:1px solid var(--line);background:var(--cream);color:var(--ink)}
+
+  /* ===== list rows ===== */
+  .rows{display:flex;flex-direction:column;border:1px solid var(--line);background:var(--cream)}
+  .row{display:grid;grid-template-columns:84px 1fr auto;gap:18px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);transition:background .2s}
+  .row:last-child{border-bottom:0}
+  .row:hover{background:var(--cream-2)}
+  .thumb{width:84px;height:62px;background:var(--cream-3);overflow:hidden;position:relative;flex:none}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .thumb .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;color:var(--taupe);font-size:1.4rem}
+  .rmeta .addr{font-family:var(--disp);font-weight:600;font-size:1.2rem;line-height:1.05}
+  .rmeta .city{color:var(--ink-soft);font-size:.95rem}
+  .rmeta .specs{font-family:var(--util);font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin-top:5px}
+  .rmeta .price{font-family:var(--disp);font-weight:600;font-size:1.15rem;margin-top:3px}
+  .rmeta .price .tag{font-family:var(--util);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep);margin-left:.5em}
+  .ractions{display:flex;align-items:center;gap:10px;flex:none}
+  .statussel{font-family:var(--util);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;padding:.6em .7em;border:1px solid var(--line);background:var(--cream)}
+
+  /* ===== badge (matches live site) ===== */
+  .badge{display:inline-block;font-family:var(--util);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;padding:.5em .85em;background:var(--ink);color:var(--cream);white-space:nowrap}
+  .badge.active{background:var(--green);color:var(--green-fg)}
+  .badge.soon{background:var(--taupe);color:var(--ink)}
+  .badge.pending{background:var(--ink);color:var(--gold-bright)}
+  .badge.sold{background:var(--gold-deep);color:var(--cream)}
+
+  .empty{padding:60px 20px;text-align:center;border:1px dashed var(--line);background:var(--cream)}
+  .empty h3{font-family:var(--disp);font-weight:600;font-size:1.4rem;margin:0 0 .4em}
+  .empty p{color:var(--ink-soft);margin:0 0 1.2em}
+
+  /* ===== editor overlay ===== */
+  .scrim{position:fixed;inset:0;background:rgba(26,26,26,.5);z-index:40;opacity:0;pointer-events:none;transition:opacity .3s}
+  .scrim.open{opacity:1;pointer-events:auto}
+  .editor{position:fixed;top:0;right:0;height:100%;width:min(560px,100%);background:var(--cream);z-index:50;transform:translateX(100%);transition:transform .35s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column;box-shadow:var(--paper-shadow)}
+  .editor.open{transform:translateX(0)}
+  .ed-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;background:var(--ink);color:var(--cream);flex:none}
+  .ed-head h2{font-family:var(--disp);font-weight:600;font-size:1.3rem;margin:0}
+  .ed-head .x{background:none;border:0;color:var(--cream);font-size:1.6rem;line-height:1;padding:4px 8px}
+  .ed-body{overflow-y:auto;padding:22px;flex:1}
+
+  /* preview card inside editor */
+  .pv-wrap{margin-bottom:26px}
+  .pv-label{font-family:var(--util);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:9px}
+  .pvcard{border:1px solid var(--line);background:var(--cream)}
+  .pvcard .img{position:relative;aspect-ratio:3/2;background:var(--cream-3);overflow:hidden}
+  .pvcard .img img{width:100%;height:100%;object-fit:cover}
+  .pvcard .img .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;color:var(--taupe);font-size:2rem}
+  .pvcard .badge{position:absolute;top:13px;left:13px}
+  .pvcard .pbody{padding:18px;display:flex;flex-direction:column;gap:5px}
+  .pvcard .pprice{font-family:var(--disp);font-size:1.5rem;font-weight:600;line-height:1}
+  .pvcard .pprice .tag{font-family:var(--util);font-size:.56rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep);margin-left:.5em;vertical-align:middle}
+  .pvcard .paddr{font-family:var(--disp);font-size:1.18rem}
+  .pvcard .pcity{color:var(--ink-soft);font-size:.96rem}
+  .pvcard .pstats{margin-top:8px;padding-top:11px;border-top:1px solid var(--line);font-family:var(--util);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+
+  /* fieldsets */
+  .grp{border:0;padding:0;margin:0 0 22px}
+  .grp > legend{font-family:var(--util);font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-deep);padding:0;margin-bottom:12px;width:100%;border-bottom:1px solid var(--line);padding-bottom:8px}
+  .fld{margin-bottom:13px}
+  .fld label{display:block;font-family:var(--util);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px}
+  .fld input,.fld select,.fld textarea{width:100%;padding:.72em .8em;border:1px solid var(--line);background:#fff;color:var(--ink)}
+  .fld textarea{min-height:74px;resize:vertical;line-height:1.5}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+
+  /* status segmented */
+  .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .seg button{font-family:var(--util);font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;padding:.85em .4em;border:1px solid var(--line);background:var(--cream);color:var(--ink-soft);line-height:1.2}
+  .seg button.on{border-color:var(--ink)}
+  .seg button.on[data-s="active"]{background:var(--green);color:var(--green-fg);border-color:var(--green)}
+  .seg button.on[data-s="soon"]{background:var(--taupe);color:var(--ink);border-color:var(--taupe)}
+  .seg button.on[data-s="pending"]{background:var(--ink);color:var(--gold-bright);border-color:var(--ink)}
+  .seg button.on[data-s="sold"]{background:var(--gold-deep);color:var(--cream);border-color:var(--gold-deep)}
+
+  /* repeatable rows */
+  .rep-item{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}
+  .rep-item input,.rep-item textarea{flex:1}
+  .rep-item .del{flex:none;background:none;border:1px solid var(--line);color:var(--ink-soft);width:38px;height:38px;font-size:1.1rem;line-height:1}
+  .rep-item .del:hover{border-color:#9a3b33;color:#9a3b33}
+  .descblk{border:1px solid var(--line);padding:11px;margin-bottom:10px;background:#fff;position:relative}
+  .descblk .del{position:absolute;top:8px;right:8px;background:none;border:0;color:var(--taupe);font-size:1.2rem;line-height:1;padding:2px 6px}
+  .addmore{font-family:var(--util);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;background:none;border:1px dashed var(--line);color:var(--gold-deep);padding:.7em 1.2em;width:100%}
+  .addmore:hover{border-color:var(--gold-deep)}
+
+  /* gallery uploader */
+  .dropzone{border:1px dashed var(--line);background:var(--cream);padding:22px;text-align:center;transition:border-color .2s,background .2s}
+  .dropzone.over{border-color:var(--gold-deep);background:var(--cream-2)}
+  .dropzone p{margin:.2em 0;font-family:var(--util);font-size:.82rem;color:var(--ink-soft)}
+  .dropzone .hint{font-size:.7rem;color:var(--taupe)}
+  .linkbtn{background:none;border:0;color:var(--gold-deep);font-family:var(--util);font-size:.82rem;text-decoration:underline;padding:0}
+  .gstats{font-family:var(--util);font-size:.72rem;letter-spacing:.03em;color:var(--ink-soft);margin:11px 0 9px;min-height:1em}
+  .gstats b{color:var(--gold-deep)}
+  .ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+  .gitem{position:relative;aspect-ratio:3/2;background:var(--cream-3);overflow:hidden;border:1px solid var(--line);cursor:grab}
+  .gitem.hero{border:2px solid var(--gold-deep)}
+  .gitem img{width:100%;height:100%;object-fit:cover;display:block}
+  .gitem .herostar{position:absolute;top:5px;left:5px;font-family:var(--util);font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;background:var(--gold-deep);color:var(--cream);padding:.3em .5em}
+  .gitem .gctrls{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;background:rgba(26,26,26,.78);opacity:0;transition:opacity .2s}
+  .gitem:hover .gctrls{opacity:1}
+  .gitem .gctrls button{flex:1;background:none;border:0;color:var(--cream);padding:5px 0;font-size:.95rem;line-height:1}
+  .gitem .gctrls button:hover{background:rgba(245,241,234,.16)}
+  .fp-hint{font-family:var(--util);font-size:.72rem;color:var(--taupe);margin:0 0 13px;line-height:1.6}
+  .fp-item{display:flex;align-items:center;gap:11px;border:1px solid var(--line);background:#fff;padding:9px;margin-bottom:9px}
+  .fp-item img{width:84px;height:60px;object-fit:cover;border:1px solid var(--line);flex:none}
+  .fp-meta{flex:1;min-width:0}
+  .fp-label{width:100%;padding:.5em .7em;border:1px solid var(--line);background:var(--cream)}
+  .fp-size{font-family:var(--util);font-size:.64rem;letter-spacing:.03em;color:var(--ink-soft);margin-top:5px}
+  .fp-ctrls{display:flex;flex-direction:column;gap:4px;flex:none}
+  .fp-ctrls button{background:none;border:1px solid var(--line);color:var(--ink-soft);width:30px;height:26px;font-size:.85rem;line-height:1}
+  .fp-ctrls button:hover{border-color:var(--ink-soft)}
+  .fp-ctrls .rm:hover{border-color:#9a3b33;color:#9a3b33}
+  .tour-item{display:flex;align-items:flex-start;gap:11px;border:1px solid var(--line);background:#fff;padding:9px;margin-bottom:9px}
+  .tour-fields{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+  .tour-fields input{width:100%;padding:.55em .7em;border:1px solid var(--line);background:var(--cream)}
+  .tour-fields .tour-url{font-family:var(--util);font-size:.8rem}
+  .tour-ctrls{display:flex;flex-direction:column;gap:4px;flex:none}
+  .tour-ctrls button{background:none;border:1px solid var(--line);color:var(--ink-soft);width:30px;height:26px;font-size:.85rem;line-height:1}
+  .tour-ctrls button:hover{border-color:var(--ink-soft)}
+  .tour-ctrls .rm:hover{border-color:#9a3b33;color:#9a3b33}
+
+  .ed-foot{flex:none;padding:14px 22px;background:var(--cream-2);border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+  .ed-foot .spacer{flex:1}
+
+  /* toast */
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--cream);font-family:var(--util);font-size:.8rem;letter-spacing:.04em;padding:.95em 1.6em;z-index:80;opacity:0;pointer-events:none;transition:all .3s}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast .b{color:var(--gold-bright)}
+
+  .note{font-family:var(--util);font-size:.72rem;letter-spacing:.03em;color:var(--ink-soft);background:var(--cream-2);border-left:3px solid var(--gold);padding:12px 15px;margin-top:26px;line-height:1.7}
+  .note b{color:var(--ink)}
+
+  /* ===== view nav + leads ===== */
+  .viewnav{display:flex;gap:4px;background:rgba(245,241,234,.07);padding:4px;border:1px solid rgba(245,241,234,.14)}
+  .vnav{background:none;border:0;color:var(--cream);font-family:var(--util);font-size:.72rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:.65em 1.1em;display:flex;align-items:center;gap:.55em}
+  .vnav.on{background:var(--cream);color:var(--ink)}
+  .vnav .cnt{font-family:var(--util);font-size:.62rem;background:var(--gold);color:var(--ink);border-radius:10px;padding:.15em .55em;min-width:1.7em;text-align:center;line-height:1.4}
+  .vnav.on .cnt{background:var(--gold-deep);color:var(--cream)}
+  .viewhead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px}
+  .viewhead h1{font-family:var(--disp);font-weight:700;font-size:clamp(1.9rem,4vw,2.7rem);margin:.18em 0 0;line-height:1.02}
+  .viewhead h1 em{font-style:italic;font-weight:500;color:var(--gold-deep)}
+
+  .badge.oh{background:var(--green);color:var(--green-fg)}
+  .badge.ct{background:var(--ink);color:var(--cream)}
+  .badge.vl{background:var(--gold-deep);color:var(--cream)}
+
+  .lead-row{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:15px 18px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .2s}
+  .lead-row:last-child{border-bottom:0}
+  .lead-row:hover{background:var(--cream-2)}
+  .lead-row.is-new{box-shadow:inset 3px 0 0 var(--gold)}
+  .lead-name{font-family:var(--disp);font-weight:600;font-size:1.18rem;display:flex;align-items:center;gap:.5em;line-height:1.1}
+  .newdot{width:8px;height:8px;border-radius:50%;background:var(--gold-deep);display:inline-block;flex:none}
+  .lead-contact{color:var(--ink-soft);font-size:.96rem;margin-top:3px}
+  .lead-snip{font-family:var(--util);font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin-top:7px}
+  .lead-side{display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex:none}
+  .lead-date{font-family:var(--util);font-size:.68rem;letter-spacing:.04em;color:var(--taupe)}
+  .lead-stbtn{font-family:var(--util);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);background:transparent;color:var(--ink-soft);padding:.5em .85em}
+  .lead-stbtn:hover{border-color:var(--ink-soft)}
+  .lead-stbtn.done{background:var(--cream-3);color:var(--ink-soft);cursor:default}
+  .lead-field{padding:11px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:128px 1fr;gap:14px;align-items:baseline}
+  .lead-field .k{font-family:var(--util);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+  .lead-field .v{font-size:1.02rem;color:var(--ink);word-break:break-word;line-height:1.5}
+  .lead-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+  .lead-actions a{text-decoration:none}
+
+  @media(max-width:720px){
+    .summary{grid-template-columns:1fr 1fr}
+    .row{grid-template-columns:64px 1fr;grid-template-areas:"t m" "a a"}
+    .thumb{grid-area:t;width:64px;height:48px}
+    .rmeta{grid-area:m}
+    .ractions{grid-area:a;justify-content:flex-start;flex-wrap:wrap}
+    .three{grid-template-columns:1fr 1fr}
+    .gitem .gctrls{opacity:1}
+    .viewhead{flex-direction:column;align-items:flex-start;gap:14px}
+    .lead-row{grid-template-columns:1fr;gap:12px}
+    .lead-side{flex-direction:row;align-items:center;flex-wrap:wrap;justify-content:flex-start}
+    .viewnav{order:-1}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== login gate ===== -->
+<div class="gate" id="gate">
+  <div class="name">RALPH RICHARDSON</div>
+  <div class="sub">Listings CMS</div>
+  <div class="pwbox" id="pwbox">
+    <label for="email">Admin sign in</label>
+    <input id="email" type="email" autocomplete="username" placeholder="Email" style="margin-bottom:10px">
+    <input id="pw" type="password" autocomplete="current-password" placeholder="Password" onkeydown="if(event.key==='Enter')login()">
+    <button class="btn gold" onclick="login()">Sign in</button>
+    <div class="pwerr" id="pwErr"></div>
+  </div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v1</div>
+</div>
+
+<div class="topbar">
+  <div class="brand"><span class="name">RALPH RICHARDSON</span><span class="sub">Results That Move You</span></div>
+  <div class="right">
+    <nav class="viewnav">
+      <button id="navListings" class="vnav on" onclick="setView('listings')">Listings</button>
+      <button id="navLeads" class="vnav" onclick="setView('leads')">Leads<span class="cnt" id="leadCount">0</span></button>
+    </nav>
+    <button class="btn ghost on-dark sm" onclick="signOut()">Sign out</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- ===== LISTINGS VIEW ===== -->
+  <div id="listingsView">
+    <div class="viewhead">
+      <div><p class="eyebrow">Manage your portfolio</p><h1>Your <em>listings</em>.</h1></div>
+      <button class="btn gold" onclick="openEditor()">+ New listing</button>
+    </div>
+
+    <div class="summary" id="summary"></div>
+
+    <div class="toolbar">
+      <div class="chips" id="chips"></div>
+      <div class="search"><input id="search" type="search" placeholder="Search address or city" aria-label="Search listings" oninput="render()"></div>
+    </div>
+
+    <div id="list"></div>
+
+    <div class="note">
+      Connected to Supabase. Listings here read from and write to your database, and photos upload to your <b>listings</b> Storage bucket (compressed in the browser first, resize to 1600px wide, WebP). Edits, status changes, and deletes take effect immediately.
+    </div>
+  </div>
+
+  <!-- ===== LEADS VIEW ===== -->
+  <div id="leadsView" style="display:none">
+    <div class="viewhead">
+      <div><p class="eyebrow">From your website forms</p><h1>Your <em>leads</em>.</h1></div>
+    </div>
+
+    <div class="summary" id="leadSummary"></div>
+
+    <div class="toolbar">
+      <div class="chips" id="leadChips"></div>
+      <div class="search"><input id="leadSearch" type="search" placeholder="Search name or email" aria-label="Search leads" oninput="renderLeads()"></div>
+    </div>
+
+    <div id="leadList"></div>
+
+    <div class="note">
+      These read live from your Supabase <b>leads</b> table, fed by the open house, contact, and home valuation forms on your site (wired in the next step). A new submission appears here on its own. Tap any lead to see the full submission and mark it contacted.
+    </div>
+  </div>
+</div>
+
+<!-- editor -->
+<div class="scrim" id="scrim" onclick="closeEditor()"></div>
+<aside class="editor" id="editor" aria-label="Listing editor">
+  <div class="ed-head">
+    <h2 id="edTitle">New listing</h2>
+    <button class="x" onclick="closeEditor()" aria-label="Close">&times;</button>
+  </div>
+  <div class="ed-body" id="edBody"></div>
+  <div class="ed-foot">
+    <button class="btn danger sm" id="edDelete" onclick="deleteCurrent()">Delete</button>
+    <span class="spacer"></span>
+    <button class="btn ghost sm" onclick="closeEditor()">Cancel</button>
+    <button class="btn gold sm" onclick="saveListing()">Save listing</button>
+  </div>
+</aside>
+
+<aside class="editor" id="leadDrawer" aria-label="Lead detail">
+  <div class="ed-head">
+    <h2 id="leadTitle">Lead</h2>
+    <button class="x" onclick="closeEditor()" aria-label="Close">&times;</button>
+  </div>
+  <div class="ed-body" id="leadBody"></div>
+  <div class="ed-foot">
+    <button class="btn ghost sm" onclick="closeEditor()">Close</button>
+    <span class="spacer"></span>
+    <button class="btn gold sm" id="leadStatusBtn" onclick="toggleCurrentLeadStatus()">Mark contacted</button>
+  </div>
+</aside>
+
+<input id="fileInput" type="file" accept="image/*" multiple hidden onchange="handleFiles(this.files)">
+<input id="fpInput" type="file" accept="image/*" multiple hidden onchange="handleFloorplans(this.files)">
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= Supabase ================= */
+const SUPABASE_URL = "https://emguqhnftdvhbufcddtz.supabase.co";
+const SUPABASE_KEY = "sb_publishable_emkrL8EVhWO0CAH4R0Wiug_BZtPGv9T";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ---------- auth ---------- */
+async function login(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("pw").value;
+  document.getElementById("pwErr").textContent = "";
+  if(!email || !password){ loginError("Enter your email and password."); return; }
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if(error){ loginError(error.message || "Sign in failed."); return; }
+  enterApp();
+}
+function loginError(msg){
+  document.getElementById("pwErr").textContent = msg;
+  const b = document.getElementById("pwbox");
+  b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake");
+}
+async function enterApp(){
+  document.getElementById("gate").classList.add("hidden");
+  setView("listings");
+  await Promise.all([loadListings(), loadLeads()]);
+}
+async function signOut(){
+  await sb.auth.signOut();
+  document.getElementById("pw").value = "";
+  LISTINGS = []; LEADS = [];
+  render(); updateLeadCount(); closeEditor();
+  document.getElementById("gate").classList.remove("hidden");
+}
+
+/* ---------- row mappers (db snake_case <-> ui camelCase) ---------- */
+function fromRow(r){
+  return {
+    id:r.id, slug:r.slug, status:r.status||"soon", statusLabel:r.status_label||"",
+    title:r.title||"", community:r.community||"", address:r.address||"", city:r.city||"", state:r.state||"CA", zip:r.zip||"",
+    price:r.price, soldPrice:r.sold_price, beds:r.beds, baths:r.baths, sqft:r.sqft,
+    yearBuilt:r.year_built, lotSqft:r.lot_sqft, garage:r.garage||"",
+    openHouse:r.open_house||"", heroImage:r.hero_image||"",
+    gallery:r.gallery||[], floorPlans:r.floor_plans||[], tours:r.tours||[],
+    highlights:r.highlights||[], description:r.description||[],
+    published:r.published!==false, sortOrder:r.sort_order||0, _key:r.slug
+  };
+}
+function toRow(d){
+  return {
+    status:d.status, status_label:d.statusLabel || STATUS[d.status].label,
+    title:d.title||null, community:d.community||null, address:d.address,
+    city:d.city||null, state:d.state||null, zip:d.zip||null,
+    price:d.price, sold_price:d.soldPrice, beds:d.beds, baths:d.baths, sqft:d.sqft,
+    year_built:d.yearBuilt, lot_sqft:d.lotSqft, garage:d.garage||null,
+    open_house:d.openHouse||null, hero_image:d.heroImage||null,
+    gallery:(d.gallery||[]).map(g => ({url:g.url, path:g.path||null, size:g.size||null})),
+    floor_plans:(d.floorPlans||[]).map(f => ({url:f.url, path:f.path||null, label:f.label||""})),
+    tours:(d.tours||[]).map(t => ({url:t.url, label:t.label||""})),
+    highlights:d.highlights||[], description:d.description||[],
+    published:d.published!==false
+  };
+}
+function mapLead(r){
+  return {id:r.id, source:r.source, status:r.status||"new", created:r.created_at,
+    name:r.name||"", email:r.email||"", phone:r.phone||"", details:r.details||{}};
+}
+function slugify(s){ return (s||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""); }
+async function uniqueSlug(base){
+  let s = base || ("listing-"+Date.now());
+  for(let i=0;i<25;i++){
+    const { data } = await sb.from("listings").select("id").eq("slug", s).maybeSingle();
+    if(!data) return s;
+    s = base + "-" + (i+2);
+  }
+  return base + "-" + Date.now();
+}
+
+/* ---------- storage helpers ---------- */
+async function sbUpload(path, blob){
+  return await sb.storage.from("listings").upload(path, blob, { contentType: blob.type || "image/webp", upsert:false });
+}
+function sbPublicUrl(path){
+  return sb.storage.from("listings").getPublicUrl(path).data.publicUrl;
+}
+
+/* ---------- load ---------- */
+async function loadListings(){
+  const { data, error } = await sb.from("listings").select("*")
+    .order("sort_order",{ascending:true}).order("created_at",{ascending:false});
+  if(error){ toast("Could not load listings: "+error.message); return; }
+  LISTINGS = (data||[]).map(fromRow);
+  render();
+}
+async function loadLeads(){
+  const { data, error } = await sb.from("leads").select("*").order("created_at",{ascending:false});
+  if(error){ toast("Could not load leads: "+error.message); return; }
+  LEADS = (data||[]).map(mapLead);
+  updateLeadCount();
+  if(currentView==="leads") renderLeads();
+}
+
+/* ---------- status config (mirrors live site badges) ---------- */
+const STATUS = {
+  soon:    {label:"Coming Soon", cls:"soon"},
+  active:  {label:"For Sale",    cls:"active"},
+  pending: {label:"In Escrow",   cls:"pending"},
+  sold:    {label:"Sold",        cls:"sold"}
+};
+const ORDER = ["soon","active","pending","sold"];
+
+let LISTINGS = [];
+let activeFilter = "all";
+let editingId = null;
+let draft = null;
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+function money(n){ return n || n===0 ? "$" + Number(n).toLocaleString("en-US") : ""; }
+function initial(a){ return (a||"?").trim().charAt(0).toUpperCase(); }
+function kb(n){ return n>=1048576 ? (n/1048576).toFixed(1)+" MB" : Math.round(n/1024)+" KB"; }
+function imgOrPlaceholder(url, addr){
+  if(url){ return `<img src="${url}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="ph" style="display:none">${initial(addr)}</span>`; }
+  return `<span class="ph">${initial(addr)}</span>`;
+}
+function priceLine(l){
+  if(l.status==="sold") return `${money(l.soldPrice||l.price)}<span class="tag">Sold</span>`;
+  if(l.status==="soon" && !l.price) return `Price upon request`;
+  return money(l.price);
+}
+function specs(l){
+  const p = [];
+  if(l.beds) p.push(l.beds+" bd");
+  if(l.baths) p.push(l.baths+" ba");
+  if(l.sqft) p.push(Number(l.sqft).toLocaleString("en-US")+" sqft");
+  return p.join("  \u00b7  ");
+}
+
+/* ---------- summary ---------- */
+function renderSummary(){
+  const counts = {soon:0,active:0,pending:0,sold:0};
+  LISTINGS.forEach(l => counts[l.status]++);
+  const colors = {soon:"var(--taupe)",active:"var(--green)",pending:"var(--gold-bright)",sold:"var(--gold-deep)"};
+  $("#summary").innerHTML = ORDER.map(s =>
+    `<div class="scard"><div class="n">${counts[s]}</div><div class="l"><span class="dot" style="background:${colors[s]}"></span>${STATUS[s].label}</div></div>`
+  ).join("");
+}
+
+/* ---------- chips ---------- */
+function renderChips(){
+  const items = [["all","All ("+LISTINGS.length+")"]].concat(ORDER.map(s => [s, STATUS[s].label]));
+  $("#chips").innerHTML = items.map(([k,lab]) =>
+    `<button class="chip ${activeFilter===k?'on':''}" onclick="setFilter('${k}')">${lab}</button>`
+  ).join("");
+}
+function setFilter(k){ activeFilter = k; render(); }
+
+/* ---------- list ---------- */
+function render(){
+  renderSummary(); renderChips();
+  const q = ($("#search").value||"").toLowerCase().trim();
+  let items = LISTINGS.slice();
+  if(activeFilter!=="all") items = items.filter(l => l.status===activeFilter);
+  if(q) items = items.filter(l => (l.address+" "+l.city).toLowerCase().includes(q));
+  items.sort((a,b) => ORDER.indexOf(a.status)-ORDER.indexOf(b.status));
+
+  if(!items.length){
+    $("#list").innerHTML = `<div class="empty"><h3>No listings here yet</h3><p>Nothing matches this view. Add a listing to get started.</p><button class="btn gold" onclick="openEditor()">+ New listing</button></div>`;
+    return;
+  }
+  $("#list").innerHTML = `<div class="rows">` + items.map(l => `
+    <div class="row">
+      <div class="thumb">${imgOrPlaceholder(l.heroImage,l.address)}</div>
+      <div class="rmeta">
+        <div class="addr">${l.address||"Untitled listing"}</div>
+        <div class="city">${[l.city,l.state].filter(Boolean).join(", ")}</div>
+        <div class="price">${priceLine(l)}</div>
+        <div class="specs">${specs(l)}</div>
+      </div>
+      <div class="ractions">
+        <span class="badge ${STATUS[l.status].cls}">${STATUS[l.status].label}</span>
+        <select class="statussel" aria-label="Change status" onchange="quickStatus('${l.id}', this.value)">
+          ${ORDER.map(s => `<option value="${s}" ${s===l.status?'selected':''}>${STATUS[s].label}</option>`).join("")}
+        </select>
+        <button class="btn ghost sm" onclick="openEditor('${l.id}')">Edit</button>
+      </div>
+    </div>`).join("") + `</div>`;
+}
+
+async function quickStatus(id, s){
+  const l = LISTINGS.find(x => x.id===id);
+  if(!l) return;
+  const prev = {status:l.status, statusLabel:l.statusLabel};
+  l.status = s; l.statusLabel = STATUS[s].label; render();
+  const { error } = await sb.from("listings").update({status:s, status_label:STATUS[s].label}).eq("id", id);
+  if(error){ l.status = prev.status; l.statusLabel = prev.statusLabel; render(); toast("Update failed: "+error.message); return; }
+  toast(`Moved <b>${l.address}</b> to ${STATUS[s].label}`);
+}
+
+/* ---------- editor ---------- */
+function blank(){
+  return {id:null,status:"soon",statusLabel:"Coming Soon",title:"",community:"",address:"",city:"",state:"CA",zip:"",
+    price:null,soldPrice:null,beds:null,baths:null,sqft:null,yearBuilt:null,lotSqft:null,garage:"",
+    openHouse:"",tours:[],heroImage:"",floorPlans:[],gallery:[],highlights:[],description:[]};
+}
+function openEditor(id){
+  if(id){ const l = LISTINGS.find(x => x.id===id); draft = JSON.parse(JSON.stringify(l)); editingId = id; $("#edTitle").textContent = "Edit listing"; $("#edDelete").style.display = ""; }
+  else { draft = blank(); editingId = null; $("#edTitle").textContent = "New listing"; $("#edDelete").style.display = "none"; }
+  if(!draft.gallery) draft.gallery = [];
+  if(!draft.floorPlans) draft.floorPlans = [];
+  if(!draft.tours) draft.tours = [];
+  if(!draft._key) draft._key = "draft-" + Date.now();
+  // surface an existing hero image as the first gallery item so it can be managed
+  if(draft.heroImage && !draft.gallery.some(g => g.url===draft.heroImage)){
+    draft.gallery.unshift({url:draft.heroImage, size:0, origSize:0, existing:true});
+  }
+  buildForm();
+  $("#scrim").classList.add("open"); $("#editor").classList.add("open");
+}
+function closeEditor(){
+  $("#scrim").classList.remove("open");
+  $("#editor").classList.remove("open");
+  const ld = $("#leadDrawer"); if(ld) ld.classList.remove("open");
+}
+
+function buildForm(){
+  const d = draft;
+  $("#edBody").innerHTML = `
+    <div class="pv-wrap">
+      <div class="pv-label">Live card preview</div>
+      <div id="pv"></div>
+    </div>
+
+    <fieldset class="grp">
+      <legend>Status</legend>
+      <div class="seg" id="seg">
+        ${ORDER.map(s => `<button type="button" data-s="${s}" class="${s===d.status?'on':''}" onclick="setStatus('${s}')">${STATUS[s].label}</button>`).join("")}
+      </div>
+      <div class="fld" style="margin-top:12px"><label>Badge text (shown on the card)</label><input id="f_statusLabel" value="${esc(d.statusLabel)}" oninput="up('statusLabel',this.value)"></div>
+      <div class="fld" id="ohWrap" style="display:${d.status==='active'?'block':'none'}"><label>Open house</label><input value="${esc(d.openHouse)}" placeholder="Sunday 12 to 4pm" oninput="up('openHouse',this.value)"></div>
+      <label style="display:flex;align-items:center;gap:.6em;font-family:var(--body);font-size:.95rem;color:var(--ink);cursor:pointer"><input type="checkbox" style="width:auto" ${d.published!==false?'checked':''} onchange="up('published',this.checked)"> Visible on the website</label>
+    </fieldset>
+
+    <fieldset class="grp">
+      <legend>Photo gallery</legend>
+      <div class="dropzone" id="dropzone" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="dzDrop(event)">
+        <p>Drag photos here, or <button type="button" class="linkbtn" onclick="document.getElementById('fileInput').click()">choose photos</button></p>
+        <p class="hint">Resized to 1600px wide and compressed automatically before upload</p>
+      </div>
+      <div class="gstats" id="gstats"></div>
+      <div class="ggrid" id="ggrid"></div>
+    </fieldset>
+
+    <fieldset class="grp">
+      <legend>Address and location</legend>
+      <div class="fld"><label>Street address</label><input value="${esc(d.address)}" oninput="up('address',this.value)"></div>
+      <div class="three">
+        <div class="fld"><label>City</label><input value="${esc(d.city)}" oninput="up('city',this.value)"></div>
+        <div class="fld"><label>State</label><input value="${esc(d.state)}" oninput="up('state',this.value)"></div>
+        <div class="fld"><label>Zip</label><input value="${esc(d.zip)}" oninput="up('zip',this.value)"></div>
+      </div>
+      <div class="fld"><label>Community (optional)</label><input value="${esc(d.community)}" placeholder="Argento at Orangecrest" oninput="up('community',this.value)"></div>
+    </fieldset>
+
+    <fieldset class="grp">
+      <legend>Price and specs</legend>
+      <div class="two">
+        <div class="fld"><label>List price</label><input type="number" value="${d.price??''}" oninput="upNum('price',this.value)"></div>
+        <div class="fld" id="spWrap" style="display:${d.status==='sold'?'block':'none'}"><label>Sold price</label><input type="number" value="${d.soldPrice??''}" oninput="upNum('soldPrice',this.value)"></div>
+      </div>
+      <div class="three">
+        <div class="fld"><label>Beds</label><input type="number" value="${d.beds??''}" oninput="upNum('beds',this.value)"></div>
+        <div class="fld"><label>Baths</label><input type="number" value="${d.baths??''}" oninput="upNum('baths',this.value)"></div>
+        <div class="fld"><label>Sq ft</label><input type="number" value="${d.sqft??''}" oninput="upNum('sqft',this.value)"></div>
+      </div>
+      <div class="three">
+        <div class="fld"><label>Year built</label><input type="number" value="${d.yearBuilt??''}" oninput="upNum('yearBuilt',this.value)"></div>
+        <div class="fld"><label>Lot sq ft</label><input type="number" value="${d.lotSqft??''}" oninput="upNum('lotSqft',this.value)"></div>
+        <div class="fld"><label>Garage</label><input value="${esc(d.garage)}" placeholder="2 car" oninput="up('garage',this.value)"></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="grp">
+      <legend>Headline</legend>
+      <div class="fld"><label>Listing title</label><input value="${esc(d.title)}" placeholder="Single-Story Home with Designer Kitchen" oninput="up('title',this.value)"></div>
+    </fieldset>
+
+    <fieldset class="grp">
+      <legend>Highlights (bullet points)</legend>
+      <div id="hlList"></div>
+      <button type="button" class="addmore" onclick="addHighlight()">+ Add highlight</button>
+    </fieldset>
+
+    <fieldset class="grp">
+      <legend>Description sections</legend>
+      <div id="descList"></div>
+      <button type="button" class="addmore" onclick="addDesc()">+ Add section</button>
+    </fieldset>
+
+    <fieldset class="grp">
+      <legend>Floor plans</legend>
+      <p class="fp-hint">Add one image per story. A single-story home has one, a two-story has two, and so on.</p>
+      <div id="fpList"></div>
+      <button type="button" class="addmore" onclick="document.getElementById('fpInput').click()">+ Add floor plan</button>
+    </fieldset>
+
+    <fieldset class="grp">
+      <legend>3D tours</legend>
+      <p class="fp-hint">One Matterport tour per structure. Add another if the lot has a second home, ADU, or guest house.</p>
+      <div id="tourList"></div>
+      <button type="button" class="addmore" onclick="addTour()">+ Add tour</button>
+    </fieldset>
+  `;
+  renderHighlights(); renderDesc(); renderGallery(); renderFloorplans(); renderTours(); renderPreview();
+}
+
+function esc(s){ return (s==null?"":String(s)).replace(/"/g,'&quot;'); }
+function up(k,v){ draft[k]=v; renderPreview(); }
+function upNum(k,v){ draft[k] = v===""?null:Number(v); renderPreview(); }
+function setStatus(s){
+  draft.status = s; draft.statusLabel = STATUS[s].label;
+  $("#f_statusLabel").value = STATUS[s].label;
+  document.querySelectorAll("#seg button").forEach(b => b.classList.toggle("on", b.dataset.s===s));
+  $("#ohWrap").style.display = s==="active" ? "block" : "none";
+  $("#spWrap").style.display = s==="sold" ? "block" : "none";
+  renderPreview();
+}
+
+function renderHighlights(){
+  $("#hlList").innerHTML = draft.highlights.map((h,i) => `
+    <div class="rep-item">
+      <input value="${esc(h)}" oninput="draft.highlights[${i}]=this.value;renderPreview()">
+      <button type="button" class="del" onclick="draft.highlights.splice(${i},1);renderHighlights();renderPreview()" aria-label="Remove">&minus;</button>
+    </div>`).join("") || `<p style="color:var(--ink-soft);font-family:var(--util);font-size:.78rem">No highlights yet.</p>`;
+}
+function addHighlight(){ draft.highlights.push(""); renderHighlights(); }
+
+function renderDesc(){
+  $("#descList").innerHTML = draft.description.map((d,i) => `
+    <div class="descblk">
+      <button type="button" class="del" onclick="draft.description.splice(${i},1);renderDesc()" aria-label="Remove section">&times;</button>
+      <div class="fld"><label>Heading</label><input value="${esc(d.heading)}" oninput="draft.description[${i}].heading=this.value"></div>
+      <div class="fld" style="margin-bottom:0"><label>Body</label><textarea oninput="draft.description[${i}].body=this.value">${esc(d.body)}</textarea></div>
+    </div>`).join("") || `<p style="color:var(--ink-soft);font-family:var(--util);font-size:.78rem">No description sections yet.</p>`;
+}
+function addDesc(){ draft.description.push({heading:"",body:""}); renderDesc(); }
+
+/* ---------- gallery: client-side compression ---------- */
+function compress(file){
+  return new Promise(resolve => {
+    const src = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const maxW = 1600;
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if(w > maxW){ h = Math.round(h * maxW / w); w = maxW; }
+      const c = document.createElement("canvas");
+      c.width = w; c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, w, h);
+      const finish = blob => resolve({
+        blob: blob || file,
+        size: blob ? blob.size : file.size,
+        origSize: file.size, name: file.name
+      });
+      c.toBlob(b => { if(b){ finish(b); } else { c.toBlob(b2 => finish(b2), "image/jpeg", 0.82); } }, "image/webp", 0.82);
+    };
+    img.onerror = () => resolve({blob:file, size:file.size, origSize:file.size, name:file.name});
+    img.src = src;
+  });
+}
+
+async function handleFiles(files){
+  const arr = [...files].filter(f => f.type.startsWith("image/"));
+  if(!arr.length) return;
+  if(!draft.gallery) draft.gallery = [];
+  const gs = document.getElementById("gstats");
+  if(gs) gs.innerHTML = `Uploading ${arr.length} photo${arr.length>1?'s':''}...`;
+  let added = 0;
+  for(const f of arr){
+    try{
+      const item = await compress(f);
+      const path = `${draft._key}/${crypto.randomUUID()}.webp`;
+      const { error } = await sbUpload(path, item.blob);
+      if(error) throw error;
+      const url = sbPublicUrl(path);
+      draft.gallery.push({url, path, size:item.size, origSize:item.origSize});
+      if(!draft.heroImage){ draft.heroImage = url; }
+      added++;
+      renderGallery(); renderPreview();
+    }catch(e){
+      toast("Upload failed: " + (e.message || e));
+    }
+  }
+  document.getElementById("fileInput").value = "";
+  renderGallery();
+  if(added) toast(`Added ${added} photo${added>1?'s':''}`);
+}
+function dzDrop(e){
+  e.preventDefault();
+  document.getElementById("dropzone").classList.remove("over");
+  if(e.dataTransfer.files && e.dataTransfer.files.length){ handleFiles(e.dataTransfer.files); }
+}
+
+function renderGallery(){
+  const g = draft.gallery || [];
+  const stats = document.getElementById("gstats");
+  if(stats){
+    let line = `${g.length} photo${g.length!==1?'s':''}`;
+    const fresh = g.filter(x => x.origSize > 0);
+    if(fresh.length){
+      const orig = fresh.reduce((s,x)=>s+x.origSize,0);
+      const comp = fresh.reduce((s,x)=>s+x.size,0);
+      const pct = orig ? Math.round((1 - comp/orig)*100) : 0;
+      line += ` &middot; uploaded <b>${kb(comp)}</b> (was ${kb(orig)}, ${pct}% smaller)`;
+    }
+    stats.innerHTML = g.length ? line : "";
+  }
+  const grid = document.getElementById("ggrid");
+  if(!grid) return;
+  grid.innerHTML = g.map((x,i) => `
+    <div class="gitem ${draft.heroImage===x.url?'hero':''}" draggable="true" data-i="${i}"
+         ondragstart="dragStart(${i})" ondragover="event.preventDefault()" ondrop="dropAt(${i})">
+      <img src="${x.url}" alt="">
+      ${draft.heroImage===x.url?'<span class="herostar">Hero</span>':''}
+      <div class="gctrls">
+        <button type="button" title="Move left" onclick="moveImg(${i},-1)">&lsaquo;</button>
+        <button type="button" title="Set as hero" onclick="setHero(${i})">&#9733;</button>
+        <button type="button" title="Remove" onclick="removeImg(${i})">&times;</button>
+        <button type="button" title="Move right" onclick="moveImg(${i},1)">&rsaquo;</button>
+      </div>
+    </div>`).join("");
+}
+function setHero(i){ draft.heroImage = draft.gallery[i].url; renderGallery(); renderPreview(); }
+function removeImg(i){
+  const wasHero = draft.gallery[i].url === draft.heroImage;
+  draft.gallery.splice(i,1);
+  if(wasHero){ draft.heroImage = draft.gallery[0] ? draft.gallery[0].url : ""; }
+  renderGallery(); renderPreview();
+}
+function moveImg(i,d){
+  const j = i+d;
+  if(j<0 || j>=draft.gallery.length) return;
+  const a = draft.gallery;
+  [a[i],a[j]] = [a[j],a[i]];
+  renderGallery();
+}
+let dragI = null;
+function dragStart(i){ dragI = i; }
+function dropAt(i){
+  if(dragI===null || dragI===i) return;
+  const a = draft.gallery;
+  const [m] = a.splice(dragI,1);
+  a.splice(i,0,m);
+  dragI = null;
+  renderGallery();
+}
+
+/* floor plans (one per story) */
+function ordinalFloor(n){
+  const names = ["First","Second","Third","Fourth","Fifth","Sixth"];
+  return (names[n] || (n+1)+"th") + " floor";
+}
+async function handleFloorplans(files){
+  const arr = [...files].filter(f => f.type.startsWith("image/"));
+  if(!arr.length) return;
+  if(!draft.floorPlans) draft.floorPlans = [];
+  let added = 0;
+  for(const f of arr){
+    try{
+      const item = await compress(f);
+      const path = `${draft._key}/floorplan-${crypto.randomUUID()}.webp`;
+      const { error } = await sbUpload(path, item.blob);
+      if(error) throw error;
+      const url = sbPublicUrl(path);
+      draft.floorPlans.push({url, path, size:item.size, origSize:item.origSize, label:ordinalFloor(draft.floorPlans.length)});
+      added++;
+      renderFloorplans();
+    }catch(e){
+      toast("Upload failed: " + (e.message || e));
+    }
+  }
+  document.getElementById("fpInput").value = "";
+  if(added) toast(`Added ${added} floor plan${added>1?'s':''}`);
+}
+function renderFloorplans(){
+  const wrap = document.getElementById("fpList");
+  if(!wrap) return;
+  const fp = draft.floorPlans || [];
+  if(!fp.length){ wrap.innerHTML = `<p style="color:var(--ink-soft);font-family:var(--util);font-size:.78rem">No floor plans yet.</p>`; return; }
+  wrap.innerHTML = fp.map((x,i) => `
+    <div class="fp-item">
+      <img src="${x.url}" alt="">
+      <div class="fp-meta">
+        <input class="fp-label" value="${esc(x.label||'')}" placeholder="First floor" oninput="draft.floorPlans[${i}].label=this.value">
+        <div class="fp-size">${kb(x.size)}${x.origSize>0?` (was ${kb(x.origSize)})`:''}</div>
+      </div>
+      <div class="fp-ctrls">
+        <button type="button" title="Move up" onclick="moveFp(${i},-1)">&uarr;</button>
+        <button type="button" title="Move down" onclick="moveFp(${i},1)">&darr;</button>
+        <button type="button" class="rm" title="Remove" onclick="removeFp(${i})">&times;</button>
+      </div>
+    </div>`).join("");
+}
+function moveFp(i,d){
+  const j = i+d, a = draft.floorPlans;
+  if(j<0 || j>=a.length) return;
+  [a[i],a[j]] = [a[j],a[i]];
+  renderFloorplans();
+}
+function removeFp(i){ draft.floorPlans.splice(i,1); renderFloorplans(); }
+
+/* 3D tours (one per structure on the lot) */
+function ordinalHome(n){
+  if(n===0) return "Main home";
+  const names = ["","Second","Third","Fourth","Fifth","Sixth"];
+  return (names[n] || (n+1)+"th") + " home";
+}
+function renderTours(){
+  const wrap = document.getElementById("tourList");
+  if(!wrap) return;
+  const t = draft.tours || [];
+  if(!t.length){ wrap.innerHTML = `<p style="color:var(--ink-soft);font-family:var(--util);font-size:.78rem">No tours yet.</p>`; return; }
+  wrap.innerHTML = t.map((x,i) => `
+    <div class="tour-item">
+      <div class="tour-fields">
+        <input class="tour-label" value="${esc(x.label||'')}" placeholder="Main home" oninput="draft.tours[${i}].label=this.value">
+        <input class="tour-url" value="${esc(x.url||'')}" placeholder="https://my.matterport.com/show/?m=..." oninput="draft.tours[${i}].url=this.value">
+      </div>
+      <div class="tour-ctrls">
+        <button type="button" title="Move up" onclick="moveTour(${i},-1)">&uarr;</button>
+        <button type="button" title="Move down" onclick="moveTour(${i},1)">&darr;</button>
+        <button type="button" class="rm" title="Remove" onclick="removeTour(${i})">&times;</button>
+      </div>
+    </div>`).join("");
+}
+function addTour(){
+  if(!draft.tours) draft.tours = [];
+  draft.tours.push({url:"", label:ordinalHome(draft.tours.length)});
+  renderTours();
+}
+function moveTour(i,d){
+  const j = i+d, a = draft.tours;
+  if(j<0 || j>=a.length) return;
+  [a[i],a[j]] = [a[j],a[i]];
+  renderTours();
+}
+function removeTour(i){ draft.tours.splice(i,1); renderTours(); }
+
+function renderPreview(){
+  const l = draft;
+  $("#pv").innerHTML = `
+    <div class="pvcard">
+      <div class="img">${imgOrPlaceholder(l.heroImage,l.address)}<span class="badge ${STATUS[l.status].cls}">${esc(l.statusLabel)||STATUS[l.status].label}</span></div>
+      <div class="pbody">
+        <div class="pprice">${priceLine(l)}</div>
+        <div class="paddr">${l.address||"Street address"}</div>
+        <div class="pcity">${[l.city,l.state].filter(Boolean).join(", ")||"City, State"}</div>
+        <div class="pstats">${specs(l)||"Beds  \u00b7  Baths  \u00b7  Sq ft"}</div>
+      </div>
+    </div>`;
+}
+
+/* ---------- save / delete ---------- */
+async function saveListing(){
+  if(!draft.address.trim()){ toast("Add a street address before saving"); return; }
+  const btn = document.querySelector(".ed-foot .btn.gold");
+  if(btn) btn.disabled = true;
+  try{
+    const payload = toRow(draft);
+    if(editingId){
+      const { error } = await sb.from("listings").update(payload).eq("id", editingId);
+      if(error) throw error;
+      toast(`Saved <b>${draft.address}</b>`);
+    } else {
+      payload.slug = await uniqueSlug(slugify(draft.address));
+      const { error } = await sb.from("listings").insert(payload);
+      if(error) throw error;
+      toast(`Added <b>${draft.address}</b>`);
+    }
+    closeEditor();
+    await loadListings();
+  }catch(e){
+    toast("Save failed: " + (e.message || e));
+  }finally{
+    if(btn) btn.disabled = false;
+  }
+}
+async function deleteCurrent(){
+  if(!editingId) return;
+  const l = LISTINGS.find(x => x.id===editingId);
+  if(!confirm(`Delete ${l.address}? This cannot be undone.`)) return;
+  try{
+    const { error } = await sb.from("listings").delete().eq("id", editingId);
+    if(error) throw error;
+    closeEditor();
+    await loadListings();
+    toast("Listing deleted");
+  }catch(e){
+    toast("Delete failed: " + (e.message || e));
+  }
+}
+
+/* ================= LEADS (website form results) ================= */
+const SOURCE = {
+  open_house:{label:"Open House", cls:"oh"},
+  contact:{label:"Contact", cls:"ct"},
+  valuation:{label:"Valuation", cls:"vl"}
+};
+const SORDER = ["open_house","contact","valuation"];
+
+/* sample leads (stand-ins for real form submissions) */
+let LEADS = [];
+let currentView = "listings";
+let currentLead = null;
+let leadFilter = "all";
+
+function dateFmt(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-US",{month:"short",day:"numeric"}) + ", " +
+         d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+}
+function updateLeadCount(){
+  const n = LEADS.filter(l => l.status==="new").length;
+  const el = $("#leadCount");
+  if(el){ el.textContent = n; el.style.display = n ? "" : "none"; }
+}
+function setView(v){
+  currentView = v;
+  $("#listingsView").style.display = v==="listings" ? "block" : "none";
+  $("#leadsView").style.display = v==="leads" ? "block" : "none";
+  $("#navListings").classList.toggle("on", v==="listings");
+  $("#navLeads").classList.toggle("on", v==="leads");
+  closeEditor();
+  if(v==="leads") renderLeads();
+}
+function setLeadFilter(k){ leadFilter = k; renderLeads(); }
+
+function renderLeadSummary(){
+  const counts = {open_house:0, contact:0, valuation:0};
+  LEADS.forEach(l => counts[l.source]++);
+  const colors = {open_house:"var(--green)", contact:"var(--ink)", valuation:"var(--gold-deep)"};
+  let html = `<div class="scard"><div class="n">${LEADS.length}</div><div class="l">Total leads</div></div>`;
+  html += SORDER.map(s => `<div class="scard"><div class="n">${counts[s]}</div><div class="l"><span class="dot" style="background:${colors[s]}"></span>${SOURCE[s].label}</div></div>`).join("");
+  $("#leadSummary").innerHTML = html;
+}
+function renderLeadChips(){
+  const items = [["all","All ("+LEADS.length+")"]].concat(SORDER.map(s => [s, SOURCE[s].label]));
+  $("#leadChips").innerHTML = items.map(([k,lab]) =>
+    `<button class="chip ${leadFilter===k?'on':''}" onclick="setLeadFilter('${k}')">${lab}</button>`
+  ).join("");
+}
+function leadSnippet(l){
+  const d = l.details||{};
+  if(l.source==="open_house") return [d.looking, d.financing].filter(Boolean).join("  \u00b7  ");
+  if(l.source==="valuation")  return [d.address, d.timeframe].filter(Boolean).join("  \u00b7  ");
+  if(l.source==="contact")    return [d.topic, (d.message||"").slice(0,56)].filter(Boolean).join("  \u00b7  ");
+  return "";
+}
+function renderLeads(){
+  renderLeadSummary(); renderLeadChips(); updateLeadCount();
+  const q = ($("#leadSearch").value||"").toLowerCase().trim();
+  let items = LEADS.slice();
+  if(leadFilter!=="all") items = items.filter(l => l.source===leadFilter);
+  if(q) items = items.filter(l => (l.name+" "+l.email).toLowerCase().includes(q));
+  items.sort((a,b) => new Date(b.created) - new Date(a.created));
+  if(!items.length){
+    $("#leadList").innerHTML = `<div class="empty"><h3>No leads here yet</h3><p>Nothing matches this view.</p></div>`;
+    return;
+  }
+  $("#leadList").innerHTML = `<div class="rows">` + items.map(l => `
+    <div class="lead-row ${l.status==='new'?'is-new':''}" onclick="openLead('${l.id}')">
+      <div class="lead-main">
+        <div class="lead-name">${esc(l.name)}${l.status==='new'?'<span class="newdot" title="New"></span>':''}</div>
+        <div class="lead-contact">${esc(l.email)}${l.phone?'  \u00b7  '+esc(l.phone):''}</div>
+        <div class="lead-snip">${esc(leadSnippet(l))}</div>
+      </div>
+      <div class="lead-side">
+        <span class="badge ${SOURCE[l.source].cls}">${SOURCE[l.source].label}</span>
+        <div class="lead-date">${dateFmt(l.created)}</div>
+        <button class="lead-stbtn ${l.status==='contacted'?'done':''}" onclick="event.stopPropagation();toggleLeadStatus('${l.id}')">${l.status==='new'?'Mark contacted':'Contacted'}</button>
+      </div>
+    </div>`).join("") + `</div>`;
+}
+async function toggleLeadStatus(id){
+  const l = LEADS.find(x => x.id===id);
+  if(!l) return;
+  const ns = l.status==="new" ? "contacted" : "new";
+  l.status = ns; renderLeads(); if(currentLead===id) buildLead();
+  const { error } = await sb.from("leads").update({status:ns}).eq("id", id);
+  if(error){
+    l.status = ns==="contacted" ? "new" : "contacted";
+    renderLeads(); if(currentLead===id) buildLead();
+    toast("Update failed: " + error.message); return;
+  }
+  toast(`${l.name} marked ${ns}`);
+}
+
+const LEAD_FIELDS = {
+  open_house:[["agent","Working with an agent"],["looking","Looking to"],["financing","Financing"],["heard","Heard about it"]],
+  contact:[["topic","Topic"],["message","Message"]],
+  valuation:[["timeframe","Timeframe"],["address","Property address"],["beds","Beds"],["baths","Baths"],["sqft","Sq ft"],["message","Notes"]]
+};
+function openLead(id){
+  currentLead = id;
+  buildLead();
+  $("#scrim").classList.add("open");
+  $("#leadDrawer").classList.add("open");
+}
+function buildLead(){
+  const l = LEADS.find(x => x.id===currentLead);
+  if(!l) return;
+  $("#leadTitle").textContent = l.name;
+  const d = l.details||{};
+  const extra = (LEAD_FIELDS[l.source]||[])
+    .filter(([k]) => d[k]!==undefined && d[k]!=="" && d[k]!==null)
+    .map(([k,lab]) => `<div class="lead-field"><div class="k">${lab}</div><div class="v">${esc(String(d[k]))}</div></div>`).join("");
+  const tel = (l.phone||"").replace(/[^0-9+]/g,"");
+  $("#leadBody").innerHTML = `
+    <div class="lead-detail">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+        <span class="badge ${SOURCE[l.source].cls}">${SOURCE[l.source].label}</span>
+        <span style="font-family:var(--util);font-size:.72rem;letter-spacing:.04em;color:var(--taupe)">${l.status==='new'?'New':'Contacted'} \u00b7 ${dateFmt(l.created)}</span>
+      </div>
+      <div class="lead-actions">
+        ${l.phone?`<a class="btn ghost sm" href="tel:${tel}">Call</a>`:''}
+        ${l.email?`<a class="btn ghost sm" href="mailto:${esc(l.email)}">Email</a>`:''}
+      </div>
+      <div class="lead-field"><div class="k">Name</div><div class="v">${esc(l.name)}</div></div>
+      <div class="lead-field"><div class="k">Email</div><div class="v">${esc(l.email||'')}</div></div>
+      <div class="lead-field"><div class="k">Phone</div><div class="v">${esc(l.phone||'')}</div></div>
+      ${extra}
+    </div>`;
+  const btn = $("#leadStatusBtn");
+  if(btn) btn.textContent = l.status==="new" ? "Mark contacted" : "Mark as new";
+}
+function toggleCurrentLeadStatus(){ if(currentLead) toggleLeadStatus(currentLead); }
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(html){
+  const t = $("#toast"); t.innerHTML = html; t.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+document.addEventListener("keydown", e => { if(e.key==="Escape") closeEditor(); });
+
+(async function bootstrap(){
+  render();
+  try{
+    const { data:{ session } } = await sb.auth.getSession();
+    if(session){ await enterApp(); }
+  }catch(e){ /* not signed in: gate stays up */ }
+})();
+</script>
+</body>
+</html>
