@@ -177,7 +177,7 @@
 
   /* ============ THE DIFFERENCE ============ */
   .difference{background:var(--cream);padding:clamp(80px,12vh,140px) 0}
-  .diff-head{max-width:760px;margin:0 auto;padding:0 var(--pad);text-align:center;margin-bottom:clamp(44px,6vh,72px)}
+  .diff-head{max-width:960px;margin:0 auto;padding:0 var(--pad);text-align:center;margin-bottom:clamp(44px,6vh,72px)}
   .diff-head h2{margin-top:.35em}
   .diff-head p{margin:1.1em auto 0;color:var(--ink-soft)}
   .diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,4vw,56px) clamp(32px,5vw,72px);max-width:var(--maxw);margin:0 auto;padding:0 var(--pad)}
@@ -215,6 +215,13 @@
   .about-portrait .cap b{color:var(--gold-bright);font-weight:500}
   .about h2{margin:.35em 0 .6em}
   .about .lede{color:var(--ink)}
+  .pstep{font-family:var(--disp);font-weight:600;font-size:clamp(1.12rem,1.7vw,1.32rem);color:var(--ink);margin:1.55em 0 .3em;line-height:1.2}
+  .brk-desk{display:none}
+  @media (min-width:981px){
+    .section-title.ttwo{font-size:clamp(2.1rem,3.5vw,2.7rem)}
+    .section-title.tone{white-space:nowrap}
+    .brk-desk{display:inline}
+  }
   .about p{color:var(--ink-soft)}
   .signoff{font-family:var(--disp);font-style:italic;font-size:1.5rem;color:var(--gold-deep);margin-top:.4em}
   .creds{display:flex;gap:30px;flex-wrap:wrap;margin-top:1.8rem;padding-top:1.6rem;border-top:1px solid var(--line)}
@@ -427,28 +434,33 @@
 <section class="hero subhero" id="top">
   <div class="hero-bg"><img src="/images/hero-home.jpg" alt=""></div>
   <div class="hero-inner">
-    <p class="eyebrow reveal-load d1">Sell Your Home</p>
-    <h1 class="reveal-load d2">Full-service listing, handled <em>end to end</em>.</h1>
+    <p class="eyebrow reveal-load d1">Property Listing Service</p>
+    <h1 class="reveal-load d2">Top dollar, in the shortest <em>time</em>.</h1>
   </div>
 </section>
 <section class="lead-band">
-  <div class="wrap reveal"><p class="lead-band-copy">From the first walkthrough to the closing table, Ralph and his team manage every detail of your sale, with strategic pricing, standout marketing, and skilled negotiation focused on your best result.</p></div>
+  <div class="wrap reveal"><p class="lead-band-copy">Three things shape how your sale goes: the price, the preparation, and the promotion. Ralph gets all three right, so your home is priced to sell, prepared to impress, and put in front of serious buyers from the day it lists.</p></div>
 </section><section class="about" id="overview">
   <div class="about-grid">
     <div class="about-portrait reveal"><span class="frame" aria-hidden="true"></span><img src="/images/ralph-portrait.jpg" alt=""><span class="cap">Ralph Richardson &middot; <b>Listing Agent</b></span></div>
     <div class="about-text reveal">
-      <p class="eyebrow">The full-service difference</p>
-      <h2 class="section-title">Your home, marketed like the asset it <em>is</em>.</h2>
-      <p class="lede">Most agents simply list a home. Ralph runs a complete, coordinated campaign designed to attract the right buyers and create real competition for your property.</p>
-      <p>Strategy, preparation, marketing, and negotiation are handled in house by Ralph and his team, so nothing is outsourced and nothing slips through the cracks. You stay informed at every step through your private Seller Portal, and Ralph fights for every dollar at the negotiating table.</p>
+      <p class="eyebrow">The difference is the plan</p>
+      <h2 class="section-title ttwo">The sale is won <br class="brk-desk">before the sign goes <em>up</em>.</h2>
+      <p class="lede">Ralph builds your sale around the three things that decide the outcome: the price you set, how the home is prepared, and how it is promoted once it lists. Get those right, and everything else works in your favor.</p>
+      <h3 class="pstep">Price</h3>
+      <p>Price is where it starts. Ralph prices from real, recent sales on streets like yours, so your home lands in front of serious buyers right away, at a number that holds up under scrutiny and appraisal. Priced accurately from day one, it draws strong offers while buyer interest is at its peak.</p>
+      <h3 class="pstep">Preparation</h3>
+      <p>Buyers form an opinion in the first few seconds, at the curb and inside the front door. Before a single photo is taken, Ralph walks your home and points you to the handful of high-return moves that matter most: fresh landscaping and a clean exterior for that first impression, then decluttering, depersonalizing, and light staging inside, so buyers picture their own lives in the space instead of yours.</p>
+      <h3 class="pstep">Promotion</h3>
+      <p>Then comes promotion, which is what creates demand. Ralph markets your home like the asset it is: professional photography and video, a custom property website, a 3D walkthrough, and targeted advertising that reaches qualified buyers across search, social, and the MLS. The more of the right buyers who see your home, the more that competition works in your favor, whatever the season.</p>
     </div>
   </div>
 </section><section class="difference" id="included">
-  <div class="diff-head reveal"><p class="eyebrow">What is included</p><h2 class="section-title">Everything your sale <em>needs</em>.</h2><p>A complete listing service, with every piece working together toward top dollar.</p></div>
+  <div class="diff-head reveal"><p class="eyebrow">What Ralph delivers</p><h2 class="section-title tone">Everything your sale <em>needs</em>.</h2><p>This is the machine behind every sale, with each piece working together toward one goal: top dollar, quickly.</p></div>
   <div class="diff-grid"><div class="diff reveal"><svg class="diff-ic" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M8 7h6.5a2.5 2.5 0 010 5H9a2.5 2.5 0 000 5h7"/></svg><h3>Strategic pricing</h3><p>Data-driven pricing built on current conditions and recent nearby sales, set to attract strong offers quickly.</p></div><div class="diff reveal"><svg class="diff-ic" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5A1.5 1.5 0 014.5 7h2L8 5h8l1.5 2h2A1.5 1.5 0 0121 8.5v9A1.5 1.5 0 0119.5 19h-15A1.5 1.5 0 013 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg><h3>Standout marketing assets</h3><p>Professional photography, video, and 3D tours produced by Ralph's marketing team so your home looks its absolute best.</p></div><div class="diff reveal"><svg class="diff-ic" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.3"/></svg><h3>Targeted advertising</h3><p>Your listing placed in front of qualified buyers across search, social, and the MLS.</p></div><div class="diff reveal"><svg class="diff-ic" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M3 8h18M8 21h8M12 17v4"/></svg><h3>A dedicated property website</h3><p>A custom single-property site with photos, details, and tours, designed to impress serious buyers.</p></div><div class="diff reveal"><svg class="diff-ic" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l3-3 5 4 2-2 3 3M11 13l2 2 2-2 3 3"/><path d="M2 8l4-2 6 1 6-1 4 2"/></svg><h3>Skilled negotiation</h3><p>Ralph negotiates hard to protect your interests and secure the strongest possible terms.</p></div><div class="diff reveal"><svg class="diff-ic" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg><h3>Total transparency</h3><p>Track progress, review offers, and reach your documents anytime in your private Seller Portal.</p></div></div>
 </section><section class="band">
   <div class="wrap band-grid">
-    <div class="reveal"><p class="eyebrow on-dark">Full service, one clear fee</p><h2>Everything, handled for you.</h2><p>Pricing, preparation, marketing, negotiation, and transparency are all part of Ralph's full-service listing. One coordinated team, focused on your result.</p><a class="btn on-dark" href="the-selling-process.html" style="margin-top:1.5rem">See the selling process <span class="arr">&rarr;</span></a></div>
+    <div class="reveal"><p class="eyebrow on-dark">Why sellers choose Ralph</p><h2>One agent, accountable for the <em>result</em>.</h2><p>Pricing, preparation, marketing, and negotiation are handled in house by Ralph and his team, so nothing is outsourced and nothing slips through the cracks. You get one experienced local expert who anticipates problems, negotiates hard, and keeps you informed clearly, from the first walkthrough to the closing table.</p><a class="btn on-dark" href="the-selling-process.html" style="margin-top:1.5rem">See the selling process <span class="arr">&rarr;</span></a></div>
     <div class="reveal band-list"><ul><li>Strategy and pricing built for your market</li><li>Premium marketing assets and advertising</li><li>Skilled negotiation on every offer</li><li>Real-time visibility through the Seller Portal</li></ul></div>
   </div>
 </section><section class="related">
@@ -456,7 +468,7 @@
   <div class="rel-grid reveal"><a class="rel-card" href="buy-before-you-sell.html"><h4>Buy Before You Sell</h4><p>Secure your next home before your current one sells.</p><span class="go">Learn more &rarr;</span></a><a class="rel-card" href="repair-before-you-sell.html"><h4>Repair Before You Sell</h4><p>Smart repairs that raise your value, many paid at closing.</p><span class="go">Learn more &rarr;</span></a><a class="rel-card" href="home-valuation.html"><h4>Home Valuation</h4><p>Find out what your home is worth, two simple ways.</p><span class="go">Learn more &rarr;</span></a></div>
 </section><section class="cta-sec" id="contact">
   <div class="glow" aria-hidden="true"></div>
-  <div class="wrap reveal"><p class="eyebrow">Let's talk</p><h2>Let's get your home <em>sold</em>.</h2><p>Start with a free, no-pressure consultation. Ralph will review your home, the market, and a plan to sell for top dollar.</p>
+  <div class="wrap reveal"><p class="eyebrow">Let's talk</p><h2>Let's get your home <em>sold</em>.</h2><p>Start with a free, no-pressure consultation. Ralph will review your home, walk your local market, and lay out a clear plan to sell for top dollar.</p>
     <div class="cta-actions"><a class="btn on-dark" href="tel:19096454394">Call 909.645.4394 <span class="arr">&rarr;</span></a><a class="btn ghost on-dark" href="contact.html">Schedule online</a></div>
   </div>
 </section>
