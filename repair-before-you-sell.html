@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- repair build: repair-showcase-v1 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
@@ -219,6 +221,8 @@
   .about-portrait .cap b{color:var(--gold-bright);font-weight:500}
   .about h2{margin:.35em 0 .6em}
   .about .lede{color:var(--ink)}
+  .pstep{font-family:var(--disp);font-weight:600;font-size:clamp(1.12rem,1.7vw,1.32rem);color:var(--ink);margin:1.55em 0 .3em;line-height:1.2}
+  .about-text .btn{margin-top:.2em}
   .about p{color:var(--ink-soft)}
   .signoff{font-family:var(--disp);font-style:italic;font-size:1.5rem;color:var(--gold-deep);margin-top:.4em}
   .creds{display:flex;gap:30px;flex-wrap:wrap;margin-top:1.8rem;padding-top:1.6rem;border-top:1px solid var(--line)}
@@ -401,6 +405,25 @@
   .rel-card p{margin:0 0 1.1em;color:var(--ink-soft);font-size:1.02rem;flex:1}
   .rel-card .go{font-family:var(--util);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep);border-bottom:1px solid var(--gold);padding-bottom:3px;align-self:flex-start}
   @media (max-width:760px){.rel-grid{grid-template-columns:1fr}}
+
+  /* Repair program showcase */
+  .rp-show{background:var(--cream-2);padding:clamp(70px,11vh,130px) 0;display:none}
+  .lgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,2.4vw,32px);max-width:var(--maxw);margin:0 auto;padding:0 var(--pad)}
+  .lcard{display:flex;flex-direction:column;background:var(--cream);border:1px solid var(--line);text-decoration:none;color:inherit;transition:transform .45s cubic-bezier(.2,.7,.2,1),box-shadow .45s}
+  .lcard:hover{transform:translateY(-5px);box-shadow:var(--paper-shadow)}
+  .lcard-img{position:relative;aspect-ratio:3/2;background:var(--cream-3);overflow:hidden}
+  .lcard-img img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+  .lcard:hover .lcard-img img{transform:scale(1.04)}
+  .lcard-img .badge{position:absolute;top:14px;left:14px;font-family:var(--util);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;padding:.5em .85em;background:var(--gold-deep);color:var(--cream)}
+  .lcard-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;color:var(--taupe);font-size:2.4rem}
+  .lcard-body{padding:clamp(18px,2vw,26px);display:flex;flex-direction:column;gap:5px;flex:1}
+  .lcard-price{font-family:var(--disp);font-size:clamp(1.4rem,2.2vw,1.8rem);font-weight:600;color:var(--ink);line-height:1}
+  .lcard-price .sold-tag{font-family:var(--util);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep);margin-left:.6em;vertical-align:middle}
+  .lcard-addr{font-family:var(--disp);font-size:1.18rem;color:var(--ink)}
+  .lcard-city{color:var(--ink-soft);font-size:.98rem}
+  .lcard-stats{margin-top:auto;padding-top:13px;border-top:1px solid var(--line);font-family:var(--util);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+  @media (max-width:900px){.lgrid{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.lgrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -430,30 +453,37 @@
 <section class="hero subhero" id="top">
   <div class="hero-bg"><img src="/images/hero-kitchen.jpg" alt=""></div>
   <div class="hero-inner">
-    <p class="eyebrow reveal-load d1">Sell For More</p>
-    <h1 class="reveal-load d2">Repair before you sell. <em>Pay at closing</em>.</h1>
+    <p class="eyebrow reveal-load d1">Repair Before You Sell</p>
+    <h1 class="reveal-load d2">The right repairs bring <em>top dollar</em>.</h1>
   </div>
 </section>
 <section class="lead-band">
-  <div class="wrap reveal"><p class="lead-band-copy">A few smart repairs can make a real difference in your sale price. Ralph helps you prioritize and complete the right fixes, and many can be done with no upfront cost, paid from your proceeds at closing.</p></div>
+  <div class="wrap reveal"><p class="lead-band-copy">In most cases, repairing and refreshing your home before it lists is the surest way to earn top dollar, if you are able to. Do the work yourself with Ralph's recommended repair list, or let his trusted vendors handle it for you and pay at closing.</p></div>
 </section><section class="about" id="overview">
   <div class="about-grid">
     <div class="about-portrait reveal"><span class="frame" aria-hidden="true"></span><img src="/images/repair-hero.jpg" alt=""><span class="cap">Handled and managed for you</span></div>
     <div class="about-text reveal">
-      <p class="eyebrow">Small fixes, big return</p>
+      <p class="eyebrow">Two ways to get it done</p>
       <h2 class="section-title">The right repairs, not <em>every</em> repair.</h2>
-      <p class="lede">You do not need to renovate your whole home. You need the handful of improvements that buyers notice and that move your sale price the most.</p>
-      <p>Ralph walks your home, identifies the highest-return repairs, and builds a clear, budget-aware plan. His vetted vendors handle the work, coordinated and managed for you, and many improvements can be completed with nothing out of pocket and paid at closing. Every repair and estimate is tracked in your Seller Portal, so nothing is hidden.</p>
+      <p class="lede">Move-in-ready homes attract more buyers and stronger offers. You do not need to renovate everything, just the handful of improvements buyers notice most, and there are two ways to get there.</p>
+      <h3 class="pstep">Do it yourself</h3>
+      <p>If you are handy or have your own contractor, Ralph's recommended repair list shows you exactly where to focus: the high-return fixes buyers care about, and the ones you can safely skip.</p>
+      <p><a class="btn gold" href="/toolkit/recommended-repair-checklist.pdf">Get the repair checklist <span class="arr">&rarr;</span></a></p>
+      <h3 class="pstep">Or let Ralph's team handle it</h3>
+      <p>If you would rather not take it on, the Repair Before You Sell program puts Ralph's trusted vendors to work for you. They handle the repairs from start to finish, and in most cases you pay nothing upfront, with the cost settled from your proceeds at closing.</p>
     </div>
   </div>
 </section><section class="difference" id="included">
-  <div class="diff-head reveal"><p class="eyebrow">How it works</p><h2 class="section-title">A simple path to a higher <em>sale price</em>.</h2><p>From walkthrough to closing, the repair process is handled for you.</p></div>
+  <div class="diff-head reveal"><p class="eyebrow">The Repair Before You Sell program</p><h2 class="section-title">A simple path to a higher <em>sale price</em>.</h2><p>For sellers who want it handled, here is how the program works from walkthrough to closing.</p></div>
   <div class="diff-grid"><div class="diff reveal"><svg class="diff-ic" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 1.5-1.5M4 12l1 1 1.5-1.5M4 18l1 1 1.5-1.5"/></svg><h3>Walkthrough and recommendations</h3><p>Ralph identifies the repairs and updates that will actually move your sale price, and the ones to skip.</p></div><div class="diff reveal"><svg class="diff-ic" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg><h3>A prioritized plan</h3><p>A clear, budget-aware repair list focused on the highest-return improvements for your home.</p></div><div class="diff reveal"><svg class="diff-ic" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5a3.5 3.5 0 00-4.6 4.6l-6 6 2 2 6-6a3.5 3.5 0 004.6-4.6l-2 2-1.6-1.6z"/></svg><h3>Trusted vendors, managed</h3><p>Ralph's vetted pros do the work, fully coordinated so you do not have to chase contractors.</p></div><div class="diff reveal"><svg class="diff-ic" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 9h18M16 13h2"/></svg><h3>No upfront cost</h3><p>Many repairs are completed with nothing out of pocket, paid from your proceeds at closing.</p></div><div class="diff reveal"><svg class="diff-ic" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg><h3>Tracked in your portal</h3><p>Follow every repair and vendor estimate in your Seller Portal, with full transparency.</p></div></div>
 </section><section class="band">
   <div class="wrap band-grid">
     <div class="reveal"><p class="eyebrow on-dark">Small fixes, big returns</p><h2>Spend where it counts.</h2><p>The goal is simple: the right improvements, done well, that return more than they cost when your home sells.</p><a class="btn on-dark" href="the-selling-process.html" style="margin-top:1.5rem">See the selling process <span class="arr">&rarr;</span></a></div>
     <div class="reveal band-list"><ul><li>Focused on highest-return repairs only</li><li>Vetted vendors, coordinated for you</li><li>Many repairs paid at closing</li><li>Every estimate tracked in the Seller Portal</li></ul></div>
   </div>
+</section><section class="rp-show" id="rpShow">
+  <div class="sec-head center reveal in"><p class="eyebrow">Proof it works</p><h2 class="section-title">Sold with this <em>program</em>.</h2><p style="max-width:640px;margin:1.1em auto 0;color:var(--ink-soft)">Homes Ralph's sellers repaired first, then sold.</p></div>
+  <div class="lgrid" id="rpGrid" style="margin-top:clamp(34px,5vh,56px)"></div>
 </section><section class="related">
   <div class="sec-head center reveal"><p class="eyebrow">Explore more</p><h2 class="section-title">More ways Ralph <em>helps</em>.</h2></div>
   <div class="rel-grid reveal"><a class="rel-card" href="property-listing-service.html"><h4>Property Listing Service</h4><p>Full-service marketing and skilled negotiation to sell for top dollar.</p><span class="go">Learn more &rarr;</span></a><a class="rel-card" href="buy-before-you-sell.html"><h4>Buy Before You Sell</h4><p>Secure your next home before your current one sells.</p><span class="go">Learn more &rarr;</span></a><a class="rel-card" href="home-valuation.html"><h4>Home Valuation</h4><p>Find out what your home is worth, two simple ways.</p><span class="go">Learn more &rarr;</span></a></div>
@@ -550,6 +580,47 @@
       });
     }
   });
+})();
+</script>
+<script>
+(function(){
+  var SB = window.supabase.createClient("https://emguqhnftdvhbufcddtz.supabase.co","sb_publishable_emkrL8EVhWO0CAH4R0Wiug_BZtPGv9T");
+  function money(n){ return (n||n===0) ? "$"+Number(n).toLocaleString("en-US") : ""; }
+  function initial(a){ return (a||"?").trim().charAt(0).toUpperCase(); }
+  function statsLine(l){
+    var p=[];
+    if(l.beds) p.push(l.beds+' Bd');
+    if(l.baths) p.push(l.baths+' Ba');
+    if(l.sqft) p.push(Number(l.sqft).toLocaleString("en-US")+' Sq Ft');
+    return p.join(' &middot; ');
+  }
+  function priceLine(l){
+    if(l.status==="sold"){ var sp=money(l.sold_price); return '<div class="lcard-price">'+(sp||'Sold')+(sp?' <span class="sold-tag">Sold</span>':'')+'</div>'; }
+    if(l.price) return '<div class="lcard-price">'+money(l.price)+'</div>';
+    return '<div class="lcard-price">Price upon request</div>';
+  }
+  function card(l){
+    var media = l.hero_image
+      ? '<img src="'+l.hero_image+'" alt="'+l.address+'" loading="lazy" onerror="this.style.opacity=0">'
+      : '<span class="lcard-ph">'+initial(l.address)+'</span>';
+    var stats = statsLine(l);
+    return '<a class="lcard" href="/listings/'+l.slug+'">'
+      + '<div class="lcard-img"><span class="badge">Repaired &amp; Sold</span>'+media+'</div>'
+      + '<div class="lcard-body">'+priceLine(l)
+      + '<div class="lcard-addr">'+l.address+'</div>'
+      + '<div class="lcard-city">'+[l.city,l.state].filter(Boolean).join(', ')+'</div>'
+      + (stats ? '<div class="lcard-stats">'+stats+'</div>' : '')
+      + '</div></a>';
+  }
+  (async function(){
+    try{
+      var res = await SB.from("listings").select("*").eq("published", true).eq("repair_program", true)
+        .order("sort_order",{ascending:true}).order("created_at",{ascending:false});
+      if(res.error || !res.data || !res.data.length) return;
+      document.getElementById("rpGrid").innerHTML = res.data.map(card).join("");
+      document.getElementById("rpShow").style.display = "block";
+    }catch(e){ /* leave hidden */ }
+  })();
 })();
 </script>
 </body>

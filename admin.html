@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v5 -->
+<!-- admin.html build: cms-live-v6 -->
 <meta charset="utf-8">
 <link rel="icon" href="/favicon-admin.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-admin-32.png" sizes="32x32" type="image/png">
@@ -243,6 +243,7 @@
   .btn.star{font-size:.98rem;line-height:1;padding:.36em .56em;color:var(--ink-soft)}
   .btn.star.on{color:var(--gold-deep);border-color:var(--gold);background:var(--cream-3)}
   .feat-tag{display:inline-block;margin-left:.6em;font-family:var(--util);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;background:var(--gold);color:var(--ink);padding:.3em .6em;vertical-align:middle}
+  .rp-tag{display:inline-block;margin-left:.6em;font-family:var(--util);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;background:var(--green);color:#fff;padding:.3em .6em;vertical-align:middle}
 
   .lead-row{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:15px 18px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .2s}
   .lead-row:last-child{border-bottom:0}
@@ -291,7 +292,7 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v5</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v6</div>
 </div>
 
 <div class="topbar">
@@ -426,7 +427,7 @@ function fromRow(r){
     openHouse:r.open_house||"", heroImage:r.hero_image||"",
     gallery:r.gallery||[], floorPlans:r.floor_plans||[], tours:r.tours||[],
     highlights:r.highlights||[], description:r.description||[],
-    published:r.published!==false, sortOrder:r.sort_order||0, featured:r.featured===true, _key:r.slug
+    published:r.published!==false, sortOrder:r.sort_order||0, featured:r.featured===true, repairProgram:r.repair_program===true, _key:r.slug
   };
 }
 function toRow(d){
@@ -441,7 +442,8 @@ function toRow(d){
     floor_plans:(d.floorPlans||[]).map(f => ({url:f.url, path:f.path||null, label:f.label||""})),
     tours:(d.tours||[]).map(t => ({url:t.url, label:t.label||""})),
     highlights:d.highlights||[], description:d.description||[],
-    published:d.published!==false
+    published:d.published!==false,
+    repair_program:d.repairProgram===true
   };
 }
 function mapLead(r){
@@ -556,7 +558,7 @@ function render(){
     <div class="row ${l.published===false?'is-hidden':''}">
       <div class="thumb">${imgOrPlaceholder(l.heroImage,l.address)}</div>
       <div class="rmeta">
-        <div class="addr">${l.address||"Untitled listing"}${l.featured?'<span class="feat-tag">Featured</span>':''}${l.published===false?'<span class="hidden-tag">Hidden</span>':''}</div>
+        <div class="addr">${l.address||"Untitled listing"}${l.featured?'<span class="feat-tag">Featured</span>':''}${l.repairProgram?'<span class="rp-tag">Repair Program</span>':''}${l.published===false?'<span class="hidden-tag">Hidden</span>':''}</div>
         <div class="city">${[l.city,l.state].filter(Boolean).join(", ")}</div>
         <div class="price">${priceLine(l)}</div>
         <div class="specs">${specs(l)}</div>
@@ -681,6 +683,7 @@ function buildForm(){
       <div class="fld" style="margin-top:12px"><label>Badge text (shown on the card)</label><input id="f_statusLabel" value="${esc(d.statusLabel)}" oninput="up('statusLabel',this.value)"></div>
       <div class="fld" id="ohWrap" style="display:${d.status==='active'?'block':'none'}"><label>Open house</label><input value="${esc(d.openHouse)}" placeholder="Sunday 12 to 4pm" oninput="up('openHouse',this.value)"></div>
       <label style="display:flex;align-items:center;gap:.6em;font-family:var(--body);font-size:.95rem;color:var(--ink);cursor:pointer"><input type="checkbox" style="width:auto" ${d.published!==false?'checked':''} onchange="up('published',this.checked)"> Visible on the website</label>
+      <label style="display:flex;align-items:center;gap:.6em;font-family:var(--body);font-size:.95rem;color:var(--ink);cursor:pointer;margin-top:.5em"><input type="checkbox" style="width:auto" ${d.repairProgram?'checked':''} onchange="up('repairProgram',this.checked)"> Sold with the Repair Before You Sell program</label>
     </fieldset>
 
     <fieldset class="grp">
