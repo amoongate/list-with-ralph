@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- exclusive-listings build: public-listings-v1 -->
+<!-- exclusive-listings build: public-listings-v2 -->
 <meta charset="UTF-8">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
@@ -455,7 +455,7 @@
   <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
 </header>
 <section class="hero subhero" id="top">
-  <div class="hero-bg"></div>
+  <div class="hero-bg"><img id="listHero" alt="" style="display:none" onerror="this.style.display='none'"></div>
   <div class="hero-inner">
     <p class="eyebrow reveal-load d1">Exclusive Listings</p>
     <h1 class="reveal-load d2">Homes worth <em>moving</em> for.</h1>
@@ -614,6 +614,13 @@
         .order("sort_order",{ascending:true}).order("created_at",{ascending:false});
       if(res.error) throw res.error;
       var rows = res.data || [];
+      var feat = rows.find(function(l){ return l.featured===true && (l.hero_image || (Array.isArray(l.gallery) && l.gallery[0] && l.gallery[0].url)); });
+      if(feat){
+        var h = document.getElementById("listHero");
+        h.src = feat.hero_image || feat.gallery[0].url;
+        h.alt = feat.address || "";
+        h.style.display = "";
+      }
       render("activeGrid", rows.filter(function(l){return l.status!=="sold";}), "No active listings right now. Check back soon.");
       render("soldGrid", rows.filter(function(l){return l.status==="sold";}), "Sold listings will appear here.");
     }catch(e){
