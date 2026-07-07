@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- listing.html build: listing-detail-v1 -->
+<!-- listing.html build: listing-detail-v2 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -453,7 +453,13 @@
   .lightbox{position:fixed;inset:0;background:rgba(20,18,16,.93);display:none;align-items:center;justify-content:center;z-index:200;padding:30px;cursor:zoom-out}
   .lightbox.show{display:flex}
   .lightbox img{max-width:94vw;max-height:90vh;object-fit:contain;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-  .lb-close{position:absolute;top:16px;right:26px;background:none;border:0;color:var(--cream);font-size:2.6rem;line-height:1;cursor:pointer}
+  .lb-close{position:absolute;top:16px;right:26px;background:none;border:0;color:var(--cream);font-size:2.6rem;line-height:1;cursor:pointer;z-index:2}
+  .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(245,241,234,.1);border:1px solid rgba(245,241,234,.35);color:var(--cream);font-size:1.5rem;line-height:1;width:52px;height:52px;cursor:pointer;z-index:2;transition:background .2s}
+  .lb-nav:hover{background:rgba(245,241,234,.22)}
+  .lb-prev{left:22px}
+  .lb-next{right:22px}
+  .lb-count{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);font-family:var(--util);font-size:.72rem;letter-spacing:.18em;color:rgba(245,241,234,.75)}
+  @media (max-width:700px){.lb-nav{width:44px;height:44px}.lb-prev{left:10px}.lb-next{right:10px}}
   @media (max-width:820px){.specs{grid-template-columns:1fr}.spec-aside{position:static}}
 </style>
 </head>
@@ -533,7 +539,13 @@
     <div class="cta-actions"><a class="btn on-dark" href="tel:19096454394">Call 909.645.4394 <span class="arr">&rarr;</span></a><a class="btn ghost on-dark" href="/contact">Schedule online</a></div>
   </div>
 </section>
-<div class="lightbox" id="lightbox"><button class="lb-close" aria-label="Close">&times;</button><img id="lbImg" src="" alt=""></div>
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" aria-label="Close">&times;</button>
+  <button class="lb-nav lb-prev" aria-label="Previous photo">&larr;</button>
+  <img id="lbImg" src="" alt="">
+  <button class="lb-nav lb-next" aria-label="Next photo">&rarr;</button>
+  <div class="lb-count" id="lbCount"></div>
+</div>
 
 <!-- ===== FOOTER ===== -->
 
@@ -627,15 +639,41 @@
 <script>
   (function(){
     var gal = document.getElementById("gallery");
-    var lb = document.getElementById("lightbox"), lbImg = document.getElementById("lbImg");
-    if (gal && lb) {
-      gal.addEventListener("click", function(e){
-        var t = e.target.closest("img"); if (!t) return;
-        lbImg.src = t.src; lb.classList.add("show");
-      });
-      lb.addEventListener("click", function(){ lb.classList.remove("show"); lbImg.src = ""; });
-      document.addEventListener("keydown", function(e){ if (e.key === "Escape") lb.classList.remove("show"); });
+    var lb = document.getElementById("lightbox"), lbImg = document.getElementById("lbImg"), lbCount = document.getElementById("lbCount");
+    if (!gal || !lb) return;
+    var idx = 0;
+    function urls(){ return Array.prototype.map.call(gal.querySelectorAll("img"), function(i){ return i.src; }); }
+    function showAt(i){
+      var u = urls(); if (!u.length) return;
+      idx = (i + u.length) % u.length;
+      lbImg.src = u[idx];
+      lbCount.textContent = (idx+1) + " / " + u.length;
+      lb.classList.add("show");
     }
+    function close(){ lb.classList.remove("show"); lbImg.src = ""; }
+    gal.addEventListener("click", function(e){
+      var t = e.target.closest("img"); if (!t) return;
+      showAt(urls().indexOf(t.src));
+    });
+    lb.addEventListener("click", function(e){
+      if (e.target.closest(".lb-prev")) { showAt(idx-1); return; }
+      if (e.target.closest(".lb-next")) { showAt(idx+1); return; }
+      if (e.target === lbImg) return;
+      close();
+    });
+    document.addEventListener("keydown", function(e){
+      if (!lb.classList.contains("show")) return;
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowLeft") showAt(idx-1);
+      if (e.key === "ArrowRight") showAt(idx+1);
+    });
+    var tx = null;
+    lb.addEventListener("touchstart", function(e){ tx = e.changedTouches[0].clientX; }, {passive:true});
+    lb.addEventListener("touchend", function(e){
+      if (tx === null) return;
+      var dx = e.changedTouches[0].clientX - tx; tx = null;
+      if (Math.abs(dx) > 45) showAt(idx + (dx < 0 ? 1 : -1));
+    }, {passive:true});
   })();
 </script>
 <script>
