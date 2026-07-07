@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- index build: featured-dynamic-v2 -->
+<!-- index build: featured-dynamic-v3 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -494,21 +494,7 @@
 </section>
 
 <!-- ===== FEATURED LISTING ===== -->
-<section class="featured" id="listing" style="display:none">
-  <div class="featured-grid">
-    <div class="featured-img">
-      <span class="featured-tag">Featured Listing</span>
-      <img id="featImg" src="" alt="" style="display:none">
-    </div>
-    <div class="featured-text reveal">
-      <p class="eyebrow" id="featEyebrow"></p>
-      <h3 id="featTitle"></h3>
-      <p class="addr" id="featAddr"></p>
-      <div class="stats" id="featStats"></div>
-      <a class="btn on-dark" id="featLink" href="#">View this home <span class="arr">&rarr;</span></a>
-    </div>
-  </div>
-</section>
+<section class="featured" id="featuredHome2026" style="display:none"></section>
 
 <!-- ===== SERVICES ===== -->
 <section class="services" id="services">
@@ -753,32 +739,34 @@
   (async function(){
     try{
       var res = await SB.from("listings").select("*").eq("featured", true).eq("published", true).limit(1);
-      if(res.error || !res.data || !res.data.length) return; // no featured listing -> section stays hidden
+      if(res.error || !res.data || !res.data.length) return;
       var l = res.data[0];
+      var sec = document.getElementById("featuredHome2026");
+      if(!sec) return;
 
-      var img = document.getElementById("featImg");
       var src = l.hero_image || (Array.isArray(l.gallery) && l.gallery[0] && l.gallery[0].url) || "";
-      if(src){ img.src = src; img.alt = l.address || "Featured listing"; img.style.display = ""; }
-
       var label = l.status_label || STATUS[l.status] || "";
-      document.getElementById("featEyebrow").innerHTML = [esc(label), esc(l.city||"")].filter(Boolean).join(" &nbsp;&middot;&nbsp; ");
-      document.getElementById("featTitle").textContent = l.title || l.address || "Featured listing";
-      document.getElementById("featAddr").textContent = [l.address, [l.city,l.state].filter(Boolean).join(", "), l.zip].filter(Boolean).join(", ");
-
+      var eyebrow = [esc(label), esc(l.city||"")].filter(Boolean).join(" &nbsp;&middot;&nbsp; ");
+      var addr = [l.address, [l.city,l.state].filter(Boolean).join(", "), l.zip].filter(Boolean).join(", ");
       var stats = [];
-      if(l.beds) stats.push([l.beds, "Bedrooms"]);
-      if(l.baths) stats.push([l.baths, "Bathrooms"]);
-      if(l.sqft) stats.push([num(l.sqft), "Square Feet"]);
-      document.getElementById("featStats").innerHTML = stats.map(function(s){
-        return '<div class="stat"><div class="num">'+s[0]+'</div><div class="lab">'+s[1]+'</div></div>';
-      }).join("");
+      if(l.beds) stats.push([l.beds,"Bedrooms"]);
+      if(l.baths) stats.push([l.baths,"Bathrooms"]);
+      if(l.sqft) stats.push([num(l.sqft),"Square Feet"]);
 
-      document.getElementById("featLink").href = "/listings/" + l.slug;
-
-      var sec = document.getElementById("listing");
+      sec.innerHTML =
+        '<div class="featured-grid">'
+        + '<div class="featured-img"><span class="featured-tag">Featured Listing</span>'
+        + (src ? '<img src="'+src+'" alt="'+esc(l.address)+'" onerror="this.style.display=\'none\'">' : '')
+        + '</div>'
+        + '<div class="featured-text reveal in">'
+        + '<p class="eyebrow">'+eyebrow+'</p>'
+        + '<h3>'+esc(l.title || l.address || "Featured listing")+'</h3>'
+        + '<p class="addr">'+esc(addr)+'</p>'
+        + (stats.length ? '<div class="stats">'+stats.map(function(s){return '<div class="stat"><div class="num">'+s[0]+'</div><div class="lab">'+s[1]+'</div></div>';}).join("")+'</div>' : '')
+        + '<a class="btn on-dark" href="/listings/'+esc(l.slug)+'">View this home <span class="arr">&rarr;</span></a>'
+        + '</div></div>';
       sec.style.display = "";
-      sec.querySelectorAll(".reveal").forEach(function(el){ el.classList.add("in"); });
-    }catch(e){ /* on error, leave the section hidden */ }
+    }catch(e){ /* leave hidden */ }
   })();
 })();
 </script>
