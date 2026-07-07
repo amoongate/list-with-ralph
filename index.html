@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- index build: featured-dynamic-v3 -->
+<!-- index build: featured-dynamic-v4 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -206,6 +206,8 @@
   .featured-text .eyebrow{color:var(--gold)}
   .featured-text h3{color:var(--cream);font-size:clamp(1.8rem,3vw,2.6rem);margin:.5em 0 .15em;font-weight:700}
   .featured-text .addr{font-family:var(--util);font-size:.86rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,241,234,.66)}
+  .featured-text .feat-price{font-family:var(--disp);font-weight:600;font-size:clamp(1.6rem,2.6vw,2.2rem);color:var(--gold-bright);margin:.45em 0 0;line-height:1}
+  .featured-text .feat-price .sold-tag{font-family:var(--util);font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(245,241,234,.72);margin-left:.7em;vertical-align:middle}
   .stats{display:flex;gap:clamp(20px,4vw,48px);margin:2rem 0 2.2rem;flex-wrap:wrap}
   .stat .num{font-family:var(--disp);font-size:clamp(1.9rem,3.4vw,2.8rem);font-weight:600;line-height:1;color:var(--cream)}
   .stat .num .price-cur{color:var(--gold)}
@@ -752,6 +754,13 @@
       if(l.beds) stats.push([l.beds,"Bedrooms"]);
       if(l.baths) stats.push([l.baths,"Bathrooms"]);
       if(l.sqft) stats.push([num(l.sqft),"Square Feet"]);
+      function money(n){ return (n||n===0) ? "$"+Number(n).toLocaleString("en-US") : ""; }
+      var priceHtml = "";
+      if(l.status==="sold"){
+        priceHtml = '<div class="feat-price">'+(money(l.sold_price)||"Sold")+(money(l.sold_price)?'<span class="sold-tag">Sold</span>':"")+'</div>';
+      } else if(l.price){
+        priceHtml = '<div class="feat-price">'+money(l.price)+'</div>';
+      }
 
       sec.innerHTML =
         '<div class="featured-grid">'
@@ -762,6 +771,7 @@
         + '<p class="eyebrow">'+eyebrow+'</p>'
         + '<h3>'+esc(l.title || l.address || "Featured listing")+'</h3>'
         + '<p class="addr">'+esc(addr)+'</p>'
+        + priceHtml
         + (stats.length ? '<div class="stats">'+stats.map(function(s){return '<div class="stat"><div class="num">'+s[0]+'</div><div class="lab">'+s[1]+'</div></div>';}).join("")+'</div>' : '')
         + '<a class="btn on-dark" href="/listings/'+esc(l.slug)+'">View this home <span class="arr">&rarr;</span></a>'
         + '</div></div>';
