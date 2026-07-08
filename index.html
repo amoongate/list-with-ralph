@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- index build: featured-dynamic-v4 -->
+<!-- index build: featured-dynamic-v5 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -418,7 +418,7 @@
   <div class="hero-inner">
     <h1 class="reveal-load d2">Results that <em>move you</em>.</h1>
     <div class="hero-actions reveal-load d3">
-      <a class="btn on-dark" href="contact.html">Schedule your free consultation <span class="arr">&rarr;</span></a>
+      <a class="btn on-dark" id="ctaFeatured" href="contact.html">Schedule your free consultation <span class="arr">&rarr;</span></a>
     </div>
   </div>
   <div class="scroll-cue" aria-hidden="true"><span>Scroll</span><span class="bar"></span></div>
@@ -776,6 +776,8 @@
         + '<a class="btn on-dark" href="/listings/'+esc(l.slug)+'">View this home <span class="arr">&rarr;</span></a>'
         + '</div></div>';
       sec.style.display = "";
+      var cta = document.getElementById("ctaFeatured");
+      if(cta){ cta.href = "/listings/" + esc(l.slug); cta.innerHTML = 'Tour our featured listing <span class="arr">&rarr;</span>'; }
     }catch(e){ /* leave hidden */ }
   })();
 })();
