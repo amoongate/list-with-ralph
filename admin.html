@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v6 -->
+<!-- admin.html build: cms-live-v7 -->
 <meta charset="utf-8">
 <link rel="icon" href="/favicon-admin.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-admin-32.png" sizes="32x32" type="image/png">
@@ -243,6 +243,7 @@
   .btn.star{font-size:.98rem;line-height:1;padding:.36em .56em;color:var(--ink-soft)}
   .btn.star.on{color:var(--gold-deep);border-color:var(--gold);background:var(--cream-3)}
   .feat-tag{display:inline-block;margin-left:.6em;font-family:var(--util);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;background:var(--gold);color:var(--ink);padding:.3em .6em;vertical-align:middle}
+  .views{color:var(--gold-deep)}
   .rp-tag{display:inline-block;margin-left:.6em;font-family:var(--util);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;background:var(--green);color:#fff;padding:.3em .6em;vertical-align:middle}
 
   .lead-row{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:15px 18px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .2s}
@@ -292,7 +293,7 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v6</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v7</div>
 </div>
 
 <div class="topbar">
@@ -470,12 +471,23 @@ function sbPublicUrl(path){
 }
 
 /* ---------- load ---------- */
+let VIEWCOUNTS = {};
+async function loadViewCounts(){
+  try{
+    const { data, error } = await sb.rpc("listing_view_counts");
+    if(error || !data) return;
+    VIEWCOUNTS = {};
+    data.forEach(r => { VIEWCOUNTS[r.slug] = {total:Number(r.total)||0, last7:Number(r.last7)||0}; });
+  }catch(e){}
+}
+
 async function loadListings(){
   const { data, error } = await sb.from("listings").select("*")
     .order("sort_order",{ascending:true}).order("created_at",{ascending:false});
   if(error){ toast("Could not load listings: "+error.message); return; }
   LISTINGS = (data||[]).map(fromRow);
   render();
+  loadViewCounts().then(render);
 }
 async function loadLeads(){
   const { data, error } = await sb.from("leads").select("*").order("created_at",{ascending:false});
@@ -561,7 +573,7 @@ function render(){
         <div class="addr">${l.address||"Untitled listing"}${l.featured?'<span class="feat-tag">Featured</span>':''}${l.repairProgram?'<span class="rp-tag">Repair Program</span>':''}${l.published===false?'<span class="hidden-tag">Hidden</span>':''}</div>
         <div class="city">${[l.city,l.state].filter(Boolean).join(", ")}</div>
         <div class="price">${priceLine(l)}</div>
-        <div class="specs">${specs(l)}</div>
+        <div class="specs">${specs(l)}${(VIEWCOUNTS[l._key] ? `<span class="views" title="Page views, all time and last 7 days"> &middot; ${VIEWCOUNTS[l._key].total.toLocaleString("en-US")} views${VIEWCOUNTS[l._key].last7 ? ` (${VIEWCOUNTS[l._key].last7} this week)` : ``}</span>` : ``)}</div>
       </div>
       <div class="ractions">
         ${canReorder ? `<div class="reorder">

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- listing.html build: listing-detail-v2 -->
+<!-- listing.html build: listing-detail-v3 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -790,6 +790,7 @@
       if(res.error) throw res.error;
       if(!res.data){ notFound(); return; }
       render(res.data);
+      try{ SB.from("listing_views").insert({slug: slug}).then(function(){}); }catch(e){}
     }catch(e){ notFound(); }
   })();
 })();
