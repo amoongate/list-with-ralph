@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- open-house build: oh-form-wired-v1 -->
+<!-- open-house build: oh-form-wired-v2 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -475,7 +475,8 @@
       <div class="field"><label for="oa">Working with an agent?</label><select id="oa" name="agent"><option value="">Select one</option><option>No</option><option>Yes</option></select></div>
       <div class="field"><label for="ol">Are you looking to</label><select id="ol" name="looking"><option value="">Select one</option><option>Buy a home</option><option>Sell a home</option><option>Both</option><option>Just browsing</option></select></div>
       <div class="field"><label for="of">Financing</label><select id="of" name="financing"><option value="">Select one</option><option>Pre-approved</option><option>Not yet</option><option>Paying cash</option></select></div>
-      <div class="field full"><label for="oh">How did you hear about this open house? (optional)</label><input id="oh" name="heard" type="text"></div>
+      <div class="field"><label for="oh">How did you hear about this open house? (optional)</label><select id="oh" name="heard"><option value="">Select one</option><option>Yard sign</option><option>Zillow or another listing site</option><option>Social media</option><option>Friend or neighbor</option><option>Driving by</option><option>Other</option></select></div>
+      <div class="field full"><label for="ohelp">What can we help you with? (optional)</label><textarea id="ohelp" name="help" rows="3"></textarea></div>
       <div class="field full" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label for="ohp">Do not fill this in</label><input id="ohp" name="hp" type="text" tabindex="-1" autocomplete="off"></div>
       <div class="full submit"><button class="btn gold" type="submit">Sign in <span class="arr">&rarr;</span></button></div>
     </form>
@@ -609,7 +610,7 @@
         var payload = {
           source: "open_house",
           name: val("name"), email: val("email"), phone: val("phone"),
-          details: { agent: val("agent"), looking: val("looking"), financing: val("financing"), heard: val("heard") }
+          details: { agent: val("agent"), looking: val("looking"), financing: val("financing"), heard: val("heard"), help: val("help") }
         };
         var res = await SB.from("leads").insert(payload);
         if (res.error) throw res.error;

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v8 -->
+<!-- admin.html build: cms-live-v9 -->
 <meta charset="utf-8">
 <link rel="icon" href="/favicon-admin.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-admin-32.png" sizes="32x32" type="image/png">
@@ -266,6 +266,7 @@
   .lead-actions a{text-decoration:none}
   .btn.danger{background:transparent;border:1px solid #b9442f;color:#b9442f}
   .btn.danger.armed{background:#b9442f;border-color:#b9442f;color:#fff}
+  .lead-notes textarea{width:100%;font-family:var(--body);font-size:.98rem;line-height:1.5;padding:.8em .9em;border:1px solid var(--line);background:var(--cream);resize:vertical}
 
   @media(max-width:720px){
     .summary{grid-template-columns:1fr 1fr}
@@ -295,7 +296,7 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v8</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v9</div>
 </div>
 
 <div class="topbar">
@@ -452,7 +453,7 @@ function toRow(d){
 }
 function mapLead(r){
   return {id:r.id, source:r.source, status:r.status||"new", created:r.created_at,
-    name:r.name||"", email:r.email||"", phone:r.phone||"", details:r.details||{}};
+    name:r.name||"", email:r.email||"", phone:r.phone||"", details:r.details||{}, notes:r.notes||""};
 }
 function slugify(s){ return (s||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""); }
 async function uniqueSlug(base){
@@ -1156,7 +1157,7 @@ async function toggleLeadStatus(id){
 }
 
 const LEAD_FIELDS = {
-  open_house:[["agent","Working with an agent"],["looking","Looking to"],["financing","Financing"],["heard","Heard about it"]],
+  open_house:[["agent","Working with an agent"],["looking","Looking to"],["financing","Financing"],["heard","Heard about it"],["help","How we can help"]],
   contact:[["topic","Topic"],["message","Message"]],
   valuation:[["timeframe","Timeframe"],["address","Property address"],["beds","Beds"],["baths","Baths"],["sqft","Sq ft"],["message","Notes"]],
   yard_sign:[["interest","Interested in"],["address","Property"],["message","Message"]]
@@ -1191,11 +1192,31 @@ function buildLead(){
       <div class="lead-field"><div class="k">Email</div><div class="v">${esc(l.email||'')}</div></div>
       <div class="lead-field"><div class="k">Phone</div><div class="v">${esc(l.phone||'')}</div></div>
       ${extra}
+      <div class="lead-notes">
+        <div class="k" style="font-family:var(--util);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:18px 0 6px">Your notes</div>
+        <textarea id="leadNotes" rows="5" placeholder="Notes from your conversation, follow-ups, anything worth remembering.">${esc(l.notes||"")}</textarea>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+          <button class="btn gold sm" onclick="saveLeadNotes()">Save notes</button>
+          <span id="notesSaved" style="font-family:var(--util);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--green);opacity:0;transition:opacity .3s">Saved</span>
+        </div>
+      </div>
     </div>`;
   const btn = $("#leadStatusBtn");
   if(btn) btn.textContent = l.status==="new" ? "Mark contacted" : "Mark as new";
 }
 function toggleCurrentLeadStatus(){ if(currentLead) toggleLeadStatus(currentLead); }
+
+async function saveLeadNotes(){
+  if(!currentLead) return;
+  const l = LEADS.find(x => x.id===currentLead);
+  if(!l) return;
+  const val = ($("#leadNotes").value || "").trim();
+  const { error } = await sb.from("leads").update({notes: val || null}).eq("id", currentLead);
+  if(error){ toast("Could not save notes: "+error.message); return; }
+  l.notes = val;
+  const ok = $("#notesSaved");
+  if(ok){ ok.style.opacity = 1; setTimeout(() => { ok.style.opacity = 0; }, 1800); }
+}
 
 let deleteArmT = null;
 function resetDeleteBtn(){
