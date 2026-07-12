@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v9 -->
+<!-- admin.html build: cms-live-v10 -->
 <meta charset="utf-8">
 <link rel="icon" href="/favicon-admin.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-admin-32.png" sizes="32x32" type="image/png">
@@ -296,7 +296,7 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v9</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v10</div>
 </div>
 
 <div class="topbar">
@@ -453,7 +453,7 @@ function toRow(d){
 }
 function mapLead(r){
   return {id:r.id, source:r.source, status:r.status||"new", created:r.created_at,
-    name:r.name||"", email:r.email||"", phone:r.phone||"", details:r.details||{}, notes:r.notes||""};
+    name:r.name||"", email:r.email||"", phone:r.phone||"", details:r.details||{}, notes:r.notes||"", notesUpdated:r.notes_updated_at||null};
 }
 function slugify(s){ return (s||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""); }
 async function uniqueSlug(base){
@@ -1193,7 +1193,7 @@ function buildLead(){
       <div class="lead-field"><div class="k">Phone</div><div class="v">${esc(l.phone||'')}</div></div>
       ${extra}
       <div class="lead-notes">
-        <div class="k" style="font-family:var(--util);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:18px 0 6px">Your notes</div>
+        <div class="k" style="font-family:var(--util);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:18px 0 6px">Your notes${l.notesUpdated?` <span style="color:var(--taupe);letter-spacing:.08em"> · saved ${dateFmt(l.notesUpdated)}</span>`:''}</div>
         <textarea id="leadNotes" rows="5" placeholder="Notes from your conversation, follow-ups, anything worth remembering.">${esc(l.notes||"")}</textarea>
         <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
           <button class="btn gold sm" onclick="saveLeadNotes()">Save notes</button>
@@ -1211,9 +1211,11 @@ async function saveLeadNotes(){
   const l = LEADS.find(x => x.id===currentLead);
   if(!l) return;
   const val = ($("#leadNotes").value || "").trim();
-  const { error } = await sb.from("leads").update({notes: val || null}).eq("id", currentLead);
+  const stamp = val ? new Date().toISOString() : null;
+  const { error } = await sb.from("leads").update({notes: val || null, notes_updated_at: stamp}).eq("id", currentLead);
   if(error){ toast("Could not save notes: "+error.message); return; }
-  l.notes = val;
+  l.notes = val; l.notesUpdated = stamp;
+  buildLead();
   const ok = $("#notesSaved");
   if(ok){ ok.style.opacity = 1; setTimeout(() => { ok.style.opacity = 0; }, 1800); }
 }
