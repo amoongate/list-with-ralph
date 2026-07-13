@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v10 -->
+<!-- admin.html build: cms-live-v11 -->
 <meta charset="utf-8">
 <link rel="icon" href="/favicon-admin.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-admin-32.png" sizes="32x32" type="image/png">
@@ -296,7 +296,7 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v10</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v11</div>
 </div>
 
 <div class="topbar">
@@ -305,6 +305,7 @@
     <nav class="viewnav">
       <button id="navListings" class="vnav on" onclick="setView('listings')">Listings</button>
       <button id="navLeads" class="vnav" onclick="setView('leads')">Leads<span class="cnt" id="leadCount">0</span></button>
+      <button id="navReviews" class="vnav" onclick="setView('reviews')">Reviews</button>
     </nav>
     <button class="btn ghost on-dark sm" onclick="signOut()">Sign out</button>
   </div>
@@ -351,6 +352,18 @@
       These read live from your Supabase <b>leads</b> table, fed by the open house, contact, and home valuation forms on your site (wired in the next step). A new submission appears here on its own. Tap any lead to see the full submission and mark it contacted.
     </div>
   </div>
+
+  <!-- ===== REVIEWS VIEW ===== -->
+  <div id="reviewsView" style="display:none">
+    <div class="viewhead">
+      <div><p class="eyebrow">Shown on your website</p><h1>Your <em>reviews</em>.</h1></div>
+      <button class="btn gold" onclick="openReview()">+ New review</button>
+    </div>
+    <div id="rvAdminList"></div>
+    <div class="note">
+      Published reviews appear on the /reviews page in this order. Star up to three to feature them on the home page. Keep review text verbatim from Google.
+    </div>
+  </div>
 </div>
 
 <!-- editor -->
@@ -383,6 +396,31 @@
   </div>
 </aside>
 
+<aside class="editor" id="rvDrawer" aria-label="Review editor">
+  <div class="ed-head">
+    <h2 id="rvTitle">New review</h2>
+    <button class="x" onclick="closeReviewDrawer()" aria-label="Close">&times;</button>
+  </div>
+  <div class="ed-body">
+    <div>
+      <div class="fld"><label>Reviewer name</label><input id="rv_name" type="text"></div>
+      <div class="fld"><label>Posted (e.g. 2 years ago)</label><input id="rv_posted" type="text"></div>
+      <div class="fld"><label>Tag</label><select id="rv_tag"><option value="">None</option><option>Listing Service</option><option>Repair Program</option><option>Buying</option></select></div>
+      <div class="fld"><label>Rating</label><select id="rv_rating"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
+      <div class="fld"><label>Short excerpt (shown on the home page when featured)</label><textarea id="rv_excerpt" rows="2"></textarea></div>
+      <div class="fld"><label>Full review (verbatim)</label><textarea id="rv_body" rows="10"></textarea></div>
+      <label style="display:flex;align-items:center;gap:.6em;font-family:var(--body);font-size:.95rem;cursor:pointer"><input id="rv_published" type="checkbox" style="width:auto" checked> Visible on the website</label>
+      <label style="display:flex;align-items:center;gap:.6em;font-family:var(--body);font-size:.95rem;cursor:pointer;margin-top:.4em"><input id="rv_featured" type="checkbox" style="width:auto"> Featured on the home page</label>
+    </div>
+  </div>
+  <div class="ed-foot">
+    <button class="btn danger sm" id="rvDelete" onclick="deleteReview()">Delete</button>
+    <span class="spacer"></span>
+    <button class="btn ghost sm" onclick="closeReviewDrawer()">Cancel</button>
+    <button class="btn gold sm" onclick="saveReview()">Save review</button>
+  </div>
+</aside>
+
 <input id="fileInput" type="file" accept="image/*" multiple hidden onchange="handleFiles(this.files)">
 <input id="fpInput" type="file" accept="image/*" multiple hidden onchange="handleFloorplans(this.files)">
 
@@ -412,7 +450,7 @@ function loginError(msg){
 async function enterApp(){
   document.getElementById("gate").classList.add("hidden");
   setView("listings");
-  await Promise.all([loadListings(), loadLeads()]);
+  await Promise.all([loadListings(), loadLeads(), loadReviews()]);
 }
 async function signOut(){
   await sb.auth.signOut();
@@ -1090,10 +1128,13 @@ function setView(v){
   currentView = v;
   $("#listingsView").style.display = v==="listings" ? "block" : "none";
   $("#leadsView").style.display = v==="leads" ? "block" : "none";
+  $("#reviewsView").style.display = v==="reviews" ? "block" : "none";
   $("#navListings").classList.toggle("on", v==="listings");
   $("#navLeads").classList.toggle("on", v==="leads");
-  closeEditor();
+  $("#navReviews").classList.toggle("on", v==="reviews");
+  closeEditor(); closeReviewDrawer();
   if(v==="leads") renderLeads();
+  if(v==="reviews") renderReviews();
 }
 function setLeadFilter(k){ leadFilter = k; renderLeads(); }
 
@@ -1248,6 +1289,143 @@ async function deleteCurrentLead(){
   closeEditor();
   renderLeads(); renderLeadSummary();
   toast("Lead deleted"+(l && l.name ? `: <b>${l.name}</b>` : "")+". This cannot be undone.");
+}
+
+/* ================= REVIEWS ================= */
+let REVIEWS = [];
+let editingReview = null;
+
+async function loadReviews(){
+  const { data, error } = await sb.from("reviews").select("*")
+    .order("sort_order",{ascending:true}).order("created_at",{ascending:false});
+  if(error){ toast("Could not load reviews: "+error.message); return; }
+  REVIEWS = data || [];
+  if(currentView==="reviews") renderReviews();
+}
+
+function rvStars(n){ return "\u2605".repeat(Math.max(1,Math.min(5,n||5))); }
+
+function renderReviews(){
+  const el = $("#rvAdminList");
+  if(!REVIEWS.length){ el.innerHTML = '<div class="note">No reviews yet. Add your first with + New review.</div>'; return; }
+  el.innerHTML = `<div class="rows">` + REVIEWS.map((r, idx) => `
+    <div class="row ${r.published===false?'is-hidden':''}">
+      <div class="rmeta" style="min-width:0">
+        <div class="addr">${r.name}${r.featured?'<span class="feat-tag">Featured</span>':''}${r.published===false?'<span class="hidden-tag">Hidden</span>':''}</div>
+        <div class="city">${rvStars(r.rating)} &nbsp;${r.tag?r.tag+" \u00b7 ":""}${r.posted||""}</div>
+        <div class="specs" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52ch">${(r.excerpt||r.body||"").slice(0,120)}</div>
+      </div>
+      <div class="ractions">
+        <div class="reorder">
+          <button onclick="moveReview('${r.id}',-1)" ${idx===0?'disabled':''} aria-label="Move up" title="Move up">&uarr;</button>
+          <button onclick="moveReview('${r.id}',1)" ${idx===REVIEWS.length-1?'disabled':''} aria-label="Move down" title="Move down">&darr;</button>
+        </div>
+        <button class="btn ghost sm star ${r.featured?'on':''}" onclick="quickFeatureReview('${r.id}')" title="${r.featured?'Featured on the home page':'Feature on the home page'}">${r.featured?'\u2605':'\u2606'}</button>
+        <button class="btn ghost sm" onclick="quickPublishReview('${r.id}', ${r.published===false})">${r.published===false?'Show':'Hide'}</button>
+        <button class="btn ghost sm" onclick="openReview('${r.id}')">Edit</button>
+      </div>
+    </div>`).join("") + `</div>`;
+}
+
+async function moveReview(id, dir){
+  const i = REVIEWS.findIndex(r => r.id===id), j = i + dir;
+  if(i<0 || j<0 || j>=REVIEWS.length) return;
+  [REVIEWS[i], REVIEWS[j]] = [REVIEWS[j], REVIEWS[i]];
+  const changes = [];
+  REVIEWS.forEach((r, idx) => { if(r.sort_order !== idx){ r.sort_order = idx; changes.push(r); } });
+  renderReviews();
+  try{ await Promise.all(changes.map(r => sb.from("reviews").update({sort_order:r.sort_order}).eq("id", r.id))); }
+  catch(e){ toast("Could not save the new order: "+(e.message||e)); }
+}
+
+async function quickFeatureReview(id){
+  const r = REVIEWS.find(x => x.id===id); if(!r) return;
+  const on = !r.featured;
+  if(on && REVIEWS.filter(x => x.featured).length >= 3){ toast("Three reviews are already featured. Unstar one first."); return; }
+  r.featured = on; renderReviews();
+  const { error } = await sb.from("reviews").update({featured:on}).eq("id", id);
+  if(error){ r.featured = !on; renderReviews(); toast("Update failed: "+error.message); return; }
+  toast(on ? `<b>${r.name}</b> is now featured on the home page` : `<b>${r.name}</b> removed from the home page`);
+}
+
+async function quickPublishReview(id, show){
+  const r = REVIEWS.find(x => x.id===id); if(!r) return;
+  r.published = show; renderReviews();
+  const { error } = await sb.from("reviews").update({published:show}).eq("id", id);
+  if(error){ r.published = !show; renderReviews(); toast("Update failed: "+error.message); return; }
+  toast(show ? `<b>${r.name}</b> is now visible` : `<b>${r.name}</b> is now hidden`);
+}
+
+function openReview(id){
+  editingReview = id || null;
+  const r = id ? REVIEWS.find(x => x.id===id) : null;
+  $("#rvTitle").textContent = r ? "Edit review" : "New review";
+  $("#rv_name").value = r ? r.name : "";
+  $("#rv_posted").value = r ? (r.posted||"") : "";
+  $("#rv_tag").value = r ? (r.tag||"") : "";
+  $("#rv_rating").value = r ? String(r.rating||5) : "5";
+  $("#rv_excerpt").value = r ? (r.excerpt||"") : "";
+  $("#rv_body").value = r ? (r.body||"") : "";
+  $("#rv_published").checked = r ? r.published!==false : true;
+  $("#rv_featured").checked = r ? r.featured===true : false;
+  $("#rvDelete").style.display = r ? "" : "none";
+  $("#rvDelete").classList.remove("armed"); $("#rvDelete").textContent = "Delete";
+  $("#rvDrawer").classList.add("open"); $("#scrim").classList.add("show");
+}
+function closeReviewDrawer(){
+  const d = $("#rvDrawer"); if(!d) return;
+  d.classList.remove("open");
+  if(!$("#editor").classList.contains("open") && !$("#leadDrawer").classList.contains("open")) $("#scrim").classList.remove("show");
+  editingReview = null;
+}
+
+async function saveReview(){
+  const name = $("#rv_name").value.trim(), body = $("#rv_body").value.trim();
+  if(!name || !body){ toast("A reviewer name and the review text are required."); return; }
+  if($("#rv_featured").checked){
+    const others = REVIEWS.filter(x => x.featured && x.id!==editingReview).length;
+    if(others >= 3){ toast("Three reviews are already featured. Unstar one first."); return; }
+  }
+  const payload = {
+    name: name, body: body,
+    excerpt: $("#rv_excerpt").value.trim() || null,
+    tag: $("#rv_tag").value || null,
+    posted: $("#rv_posted").value.trim() || null,
+    rating: parseInt($("#rv_rating").value, 10) || 5,
+    published: $("#rv_published").checked,
+    featured: $("#rv_featured").checked
+  };
+  try{
+    if(editingReview){
+      const { error } = await sb.from("reviews").update(payload).eq("id", editingReview);
+      if(error) throw error;
+      toast(`Updated review from <b>${name}</b>`);
+    } else {
+      payload.sort_order = REVIEWS.length;
+      const { error } = await sb.from("reviews").insert(payload);
+      if(error) throw error;
+      toast(`Added review from <b>${name}</b>`);
+    }
+    closeReviewDrawer();
+    await loadReviews();
+  }catch(e){ toast("Save failed: "+(e.message||e)); }
+}
+
+let rvDelT = null;
+async function deleteReview(){
+  if(!editingReview) return;
+  const b = $("#rvDelete");
+  if(!b.classList.contains("armed")){
+    b.classList.add("armed"); b.textContent = "Tap again to delete";
+    clearTimeout(rvDelT); rvDelT = setTimeout(() => { b.classList.remove("armed"); b.textContent="Delete"; }, 4000);
+    return;
+  }
+  clearTimeout(rvDelT); b.classList.remove("armed"); b.textContent = "Delete";
+  const { error } = await sb.from("reviews").delete().eq("id", editingReview);
+  if(error){ toast("Delete failed: "+error.message); return; }
+  closeReviewDrawer();
+  await loadReviews();
+  toast("Review deleted. This cannot be undone.");
 }
 
 /* ---------- toast ---------- */
