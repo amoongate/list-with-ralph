@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- listing.html build: listing-detail-v12 -->
+<!-- listing.html build: listing-detail-v13 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
@@ -634,7 +634,7 @@
   document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
 
   /* graceful image fallback */
-  document.querySelectorAll('img').forEach(function(img){
+  document.querySelectorAll('img:not(#lbImg)').forEach(function(img){
     img.addEventListener('error', function(){ img.style.opacity='0'; });
   });
 
@@ -667,6 +667,7 @@
     function showAt(i){
       var u = urls(); if (!u.length) return;
       idx = (i + u.length) % u.length;
+      lbImg.style.opacity = "";
       lbImg.src = u[idx];
       lbCount.textContent = (idx+1) + " / " + u.length;
       lb.classList.add("show");
