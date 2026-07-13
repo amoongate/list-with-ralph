@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- listing.html build: listing-detail-v11 -->
+<!-- listing.html build: listing-detail-v12 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
@@ -674,7 +674,8 @@
     function close(){ lb.classList.remove("show"); lbImg.src = ""; }
     gal.addEventListener("click", function(e){
       var t = e.target.closest("img"); if (!t) return;
-      showAt(urls().indexOf(t.src));
+      var i = urls().indexOf(t.src);
+      showAt(i < 0 ? 0 : i);
     });
     lb.addEventListener("click", function(e){
       if (e.target.closest(".lb-prev")) { showAt(idx-1); return; }
