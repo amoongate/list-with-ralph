@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- repair build: repair-showcase-v1 -->
+<!-- repair build: repair-gate-v2 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -424,6 +424,17 @@
   .lcard-stats{margin-top:auto;padding-top:13px;border-top:1px solid var(--line);font-family:var(--util);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
   @media (max-width:900px){.lgrid{grid-template-columns:repeat(2,1fr)}}
   @media (max-width:560px){.lgrid{grid-template-columns:1fr}}
+
+  #ckForm{border:1px solid var(--gold);background:var(--cream);padding:22px 24px;margin:6px 0 10px;position:relative}
+  .ck-lede{font-size:1rem;color:var(--ink-soft);margin-bottom:14px}
+  .ck-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+  .ckf label{display:block;font-family:var(--util);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px}
+  .ckf input,.ckf select{width:100%;font-family:var(--body);font-size:1rem;padding:.65em .75em;border:1px solid var(--line);background:#fff}
+  .ck-actions{display:flex;align-items:center;gap:14px;margin-top:16px;flex-wrap:wrap}
+  .ck-err{font-family:var(--util);font-size:.68rem;letter-spacing:.06em;color:#b9442f}
+  .ck-done{margin-top:14px;font-size:1rem;color:var(--green)}
+  .ck-done a{color:var(--gold-deep)}
+  @media(max-width:640px){.ck-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -469,7 +480,22 @@
       <p class="lede">Move-in-ready homes attract more buyers and stronger offers. You do not need to renovate everything, just the handful of improvements buyers notice most, and there are two ways to get there.</p>
       <h3 class="pstep">Do it yourself</h3>
       <p>If you are handy or have your own contractor, Ralph's recommended repair list shows you exactly where to focus: the high-return fixes buyers care about, and the ones you can safely skip.</p>
-      <p><a class="btn gold" href="/toolkit/repair_checklist.pdf">Get the repair checklist <span class="arr">&rarr;</span></a></p>
+      <p><button class="btn gold" id="ckBtn" onclick="document.getElementById('ckForm').style.display='block';this.style.display='none';document.getElementById('ck_name').focus()">Get the repair checklist <span class="arr">&rarr;</span></button></p>
+      <form id="ckForm" style="display:none" novalidate>
+        <p class="ck-lede">Tell us where to reach you and the checklist opens right away.</p>
+        <div class="ck-grid">
+          <div class="ckf"><label for="ck_name">Name</label><input id="ck_name" name="name" type="text" autocomplete="name" required></div>
+          <div class="ckf"><label for="ck_email">Email</label><input id="ck_email" name="email" type="email" autocomplete="email" required></div>
+          <div class="ckf"><label for="ck_phone">Phone (optional)</label><input id="ck_phone" name="phone" type="tel" autocomplete="tel"></div>
+          <div class="ckf"><label for="ck_when">Thinking of selling? (optional)</label><select id="ck_when"><option value="">Select one</option><option>Within 3 months</option><option>3 to 6 months</option><option>6+ months</option><option>Just curious</option></select></div>
+        </div>
+        <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label for="ck_hp">Do not fill this in</label><input id="ck_hp" type="text" tabindex="-1" autocomplete="off"></div>
+        <div class="ck-actions">
+          <button class="btn gold" id="ckSubmit" type="submit">Send me the checklist <span class="arr">&rarr;</span></button>
+          <span class="ck-err" id="ckErr"></span>
+        </div>
+        <div class="ck-done" id="ckDone" style="display:none">Thank you! Your checklist is opening. If it did not, <a href="/toolkit/repair_checklist.pdf" target="_blank" rel="noopener">open it here</a>.</div>
+      </form>
       <h3 class="pstep">Or let Ralph's team handle it</h3>
       <p>If you would rather not take it on, the Repair Before You Sell program puts Ralph's trusted vendors to work for you. They handle the repairs from start to finish, and in most cases you pay nothing upfront, with the cost settled from your proceeds at closing.</p>
     </div>
@@ -623,6 +649,32 @@
       document.getElementById("rpShow").style.display = "block";
     }catch(e){ /* leave hidden */ }
   })();
+})();
+</script>
+<script>
+(function(){
+  var form = document.getElementById("ckForm");
+  if(!form) return;
+  var SBC = window.supabase.createClient("https://emguqhnftdvhbufcddtz.supabase.co","sb_publishable_emkrL8EVhWO0CAH4R0Wiug_BZtPGv9T");
+  form.addEventListener("submit", async function(e){
+    e.preventDefault();
+    var err = document.getElementById("ckErr");
+    err.textContent = "";
+    if(document.getElementById("ck_hp").value){ return; }
+    var name = document.getElementById("ck_name").value.trim();
+    var email = document.getElementById("ck_email").value.trim();
+    var phone = document.getElementById("ck_phone").value.trim();
+    var when = document.getElementById("ck_when").value;
+    if(!name || !email || email.indexOf("@") < 1){ err.textContent = "Please add your name and a valid email."; return; }
+    var btn = document.getElementById("ckSubmit");
+    btn.disabled = true;
+    try{
+      await SBC.from("leads").insert({ source:"repair_checklist", name:name, email:email, phone:phone||null, details:{ timeline: when || null } });
+    }catch(ex){ console.error("Checklist lead save failed:", ex); }
+    btn.style.display = "none";
+    document.getElementById("ckDone").style.display = "block";
+    window.open("/toolkit/repair_checklist.pdf", "_blank", "noopener");
+  });
 })();
 </script>
 </body>
