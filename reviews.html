@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- reviews build: reviews-page-v1 -->
+<!-- reviews build: reviews-page-v2 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -456,7 +456,7 @@
   .rv-meta{margin-top:16px;padding-top:14px;border-top:1px solid var(--cream-2);display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
   .rv-name{font-family:var(--disp);font-weight:600;font-size:1.05rem}
   .rv-src{font-family:var(--util);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
-  .rv-tag{display:inline-block;font-family:var(--util);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;background:var(--cream-3);color:var(--gold-deep);padding:.35em .7em;margin-bottom:12px}
+  .rv-tag{display:inline-block;margin-right:6px;font-family:var(--util);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;background:var(--cream-3);color:var(--gold-deep);padding:.35em .7em;margin-bottom:12px}
   .rv-cta{text-align:center;margin-top:34px;padding:0 24px}
   .rv-note{font-family:var(--util);font-size:.66rem;letter-spacing:.08em;color:var(--ink-soft);margin-top:14px}
   @media(max-width:820px){.rv-grid{columns:1}}
@@ -481,8 +481,8 @@
     </div>
     <a href="the-selling-process.html">The Selling Process</a>
     <a href="/exclusive-listings">Listings</a>
-    <a href="about.html">About</a>
     <a href="reviews.html" class="current">Reviews</a>
+    <a href="about.html">About</a>
     <a class="btn gold" href="contact.html">Free Consultation</a>
   </nav>
   <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
@@ -517,8 +517,8 @@
       <a href="property-listing-service.html">Sell Your Home</a>
       <a href="the-selling-process.html">The Selling Process</a>
       <a href="/exclusive-listings">Listings</a>
-      <a href="about.html">About Ralph</a>
       <a href="reviews.html">Reviews</a>
+      <a href="about.html">About Ralph</a>
     </div>
     <div class="foot-col">
       <h4>Contact</h4>
@@ -531,6 +531,7 @@
   <div class="foot-util">
     <a href="https://www.directhl.com/todays-rates/">Today's Rates</a>
     <a href="/privacy-policy">Privacy Policy</a>
+    <a href="/tc">Terms &amp; Conditions</a>
   </div>
   <div class="foot-bottom">
     <span class="kw"><b>Ralph Richardson</b> &nbsp;&middot;&nbsp; DRE #02054110 &nbsp;&middot;&nbsp; Keller Williams Realty</span>
@@ -609,7 +610,7 @@
         var long = (r.body||"").length > LIMIT;
         var shown = long ? r.body.slice(0, LIMIT).replace(/\s+\S*$/,"") + "\u2026" : r.body;
         return '<div class="rv-card">'
-          + (r.tag ? '<span class="rv-tag">'+esc(r.tag)+'</span>' : '')
+          + ((r.tags||[]).map(function(t){ return '<span class="rv-tag">'+esc(t)+'</span>'; }).join(" "))
           + '<div class="stars">'+stars(r.rating)+'</div>'
           + '<blockquote id="rvq'+i+'" data-full="'+esc(r.body)+'" data-short="'+esc(shown)+'">'+esc(shown)+'</blockquote>'
           + (long ? '<button class="rv-more" id="rvm'+i+'" onclick="toggleReview('+i+')">Read the full review</button>' : '')
