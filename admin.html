@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v16 -->
+<!-- admin.html build: cms-live-v17 -->
 <meta charset="utf-8">
 <link rel="icon" href="/favicon-admin.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-admin-32.png" sizes="32x32" type="image/png">
@@ -276,6 +276,35 @@
   .stage-sel.s-closed{border-color:var(--green);color:var(--green)}
   .stage-sel.s-lost{color:var(--taupe)}
   .stage-sel.s-appointment,.stage-sel.s-listed{border-color:var(--gold)}
+  .vnav.sec{opacity:.55;font-size:.66rem}
+  .vnav.sec.on{opacity:1}
+  .vnav-div{display:inline-block;width:1px;height:18px;background:var(--line);margin:0 10px;vertical-align:middle}
+  .pipe{display:flex;gap:14px;overflow-x:auto;padding-bottom:14px;-webkit-overflow-scrolling:touch}
+  .pipe-col{flex:0 0 250px;background:var(--cream-2);border:1px solid var(--line);padding:12px}
+  .pipe-head{font-family:var(--util);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .pipe-n{background:var(--cream-3);padding:.2em .6em;font-size:.62rem}
+  .pipe-card{background:#fff;border:1px solid var(--line);padding:12px;margin-bottom:10px;cursor:pointer}
+  .pipe-card:hover{border-color:var(--gold)}
+  .pc-name{font-family:var(--disp);font-weight:600;font-size:1rem;margin-bottom:5px}
+  .pc-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+  .pc-meta .score{margin-left:0}
+  .pc-date{font-family:var(--util);font-size:.6rem;letter-spacing:.08em;color:var(--taupe);margin-bottom:8px}
+  .pc-move{width:100%;font-size:.6rem}
+  .pipe-empty{font-family:var(--util);font-size:.66rem;color:var(--taupe);padding:8px 0}
+  .tpl-group{margin-bottom:26px}
+  .tpl-gh{font-family:var(--disp);font-weight:600;font-size:1.15rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .ana-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px}
+  .ana-card{background:#fff;border:1px solid var(--line);padding:18px 20px}
+  .ana-card.gold{border-color:var(--gold);background:var(--cream)}
+  .an{font-family:var(--disp);font-weight:700;font-size:1.7rem}
+  .al{font-family:var(--util);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-top:4px}
+  .al .up{color:var(--green)} .al .down{color:#b9442f}
+  .ana-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .ana-box{background:#fff;border:1px solid var(--line);padding:18px 20px}
+  .ana-box h3{font-family:var(--disp);font-size:1.05rem;margin-bottom:10px}
+  .ana-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--cream-2);font-size:.95rem}
+  .ana-row:last-child{border-bottom:none}
+  @media(max-width:760px){.ana-cols{grid-template-columns:1fr}}
   .lead-notes textarea{width:100%;font-family:var(--body);font-size:.98rem;line-height:1.5;padding:.8em .9em;border:1px solid var(--line);background:var(--cream);resize:vertical}
 
   @media(max-width:720px){
@@ -306,16 +335,20 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v16</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v17</div>
 </div>
 
 <div class="topbar">
   <div class="brand"><span class="name">RALPH RICHARDSON</span><span class="sub">Results That Move You</span></div>
   <div class="right">
     <nav class="viewnav">
-      <button id="navListings" class="vnav" onclick="setView('listings')">Listings</button>
       <button id="navLeads" class="vnav on" onclick="setView('leads')">Leads<span class="cnt" id="leadCount">0</span></button>
-      <button id="navReviews" class="vnav" onclick="setView('reviews')">Reviews</button>
+      <button id="navPipeline" class="vnav" onclick="setView('pipeline')">Pipeline</button>
+      <button id="navFollowups" class="vnav" onclick="setView('followups')">Follow Ups</button>
+      <button id="navAnalytics" class="vnav" onclick="setView('analytics')">Analytics</button>
+      <span class="vnav-div" aria-hidden="true"></span>
+      <button id="navListings" class="vnav sec" onclick="setView('listings')">Listings</button>
+      <button id="navReviews" class="vnav sec" onclick="setView('reviews')">Reviews</button>
     </nav>
     <button class="btn ghost on-dark sm" onclick="signOut()">Sign out</button>
   </div>
@@ -373,6 +406,25 @@
     <div class="note">
       Published reviews appear on the /reviews page in this order. Star up to three to feature them on the home page. Keep review text verbatim from Google.
     </div>
+  </div>
+
+  <!-- ===== PIPELINE VIEW ===== -->
+  <div id="pipelineView" style="display:none">
+    <div class="viewhead"><div><p class="eyebrow">Every lead, by stage</p><h1>Your <em>pipeline</em>.</h1></div></div>
+    <div class="pipe" id="pipeBoard"></div>
+  </div>
+
+  <!-- ===== FOLLOW UPS VIEW ===== -->
+  <div id="followupsView" style="display:none">
+    <div class="viewhead"><div><p class="eyebrow">Automated email sequences</p><h1>Follow <em>ups</em>.</h1></div></div>
+    <div id="tplList"></div>
+    <div class="note">Each form type has its own sequence. Day 0 sends shortly after the lead arrives; later steps count from the same moment. Sequences only run for leads in New or Contacted, and never for a paused lead.</div>
+  </div>
+
+  <!-- ===== ANALYTICS VIEW ===== -->
+  <div id="analyticsView" style="display:none">
+    <div class="viewhead"><div><p class="eyebrow">How the machine is running</p><h1>Analytics.</h1></div></div>
+    <div id="anaBody"></div>
   </div>
 </div>
 
@@ -435,6 +487,27 @@
   </div>
 </aside>
 
+<aside class="editor" id="tplDrawer" aria-label="Follow-up editor">
+  <div class="ed-head">
+    <h2 id="tplTitle">Edit follow-up</h2>
+    <button class="x" onclick="closeTplDrawer()" aria-label="Close">&times;</button>
+  </div>
+  <div class="ed-body">
+    <div>
+      <div class="fld"><label>Send on day (0 = right away)</label><input id="tpl_day" type="number" min="0" step="1"></div>
+      <div class="fld"><label>Subject</label><input id="tpl_subject" type="text"></div>
+      <div class="fld"><label>Email body ({{first_name}} fills in automatically)</label><textarea id="tpl_body" rows="14"></textarea></div>
+      <label style="display:flex;align-items:center;gap:.6em;font-family:var(--body);font-size:.95rem;cursor:pointer"><input id="tpl_active" type="checkbox" style="width:auto" checked> Active (unchecked steps are skipped)</label>
+    </div>
+  </div>
+  <div class="ed-foot">
+    <button class="btn danger sm" id="tplDelete" onclick="deleteTemplate()">Delete</button>
+    <span class="spacer"></span>
+    <button class="btn ghost sm" onclick="closeTplDrawer()">Cancel</button>
+    <button class="btn gold sm" onclick="saveTemplate()">Save</button>
+  </div>
+</aside>
+
 <input id="fileInput" type="file" accept="image/*" multiple hidden onchange="handleFiles(this.files)">
 <input id="fpInput" type="file" accept="image/*" multiple hidden onchange="handleFloorplans(this.files)">
 
@@ -464,7 +537,7 @@ function loginError(msg){
 async function enterApp(){
   document.getElementById("gate").classList.add("hidden");
   setView("listings");
-  await Promise.all([loadListings(), loadLeads(), loadReviews()]);
+  await Promise.all([loadListings(), loadLeads(), loadReviews(), loadTemplates()]);
 }
 async function signOut(){
   await sb.auth.signOut();
@@ -544,7 +617,8 @@ function scoreTag(l){
 function mapLead(r){
   return {id:r.id, source:r.source, status:r.status||"new", created:r.created_at,
     name:r.name||"", email:r.email||"", phone:r.phone||"", details:r.details||{}, notes:r.notes||"", notesUpdated:r.notes_updated_at||null,
-    stage:r.stage||"new", followupsPaused:r.followups_paused===true};
+    stage:r.stage||"new", followupsPaused:r.followups_paused===true,
+    salePrice:r.sale_price, commission:r.commission};
 }
 function slugify(s){ return (s||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""); }
 async function uniqueSlug(base){
@@ -1180,15 +1254,16 @@ function updateLeadCount(){
 }
 function setView(v){
   currentView = v;
-  $("#listingsView").style.display = v==="listings" ? "block" : "none";
-  $("#leadsView").style.display = v==="leads" ? "block" : "none";
-  $("#reviewsView").style.display = v==="reviews" ? "block" : "none";
-  $("#navListings").classList.toggle("on", v==="listings");
-  $("#navLeads").classList.toggle("on", v==="leads");
-  $("#navReviews").classList.toggle("on", v==="reviews");
-  closeEditor(); closeReviewDrawer();
+  const views = {listings:"listingsView", leads:"leadsView", reviews:"reviewsView", pipeline:"pipelineView", followups:"followupsView", analytics:"analyticsView"};
+  Object.entries(views).forEach(([k, id]) => { $("#"+id).style.display = v===k ? "block" : "none"; });
+  const navs = {listings:"navListings", leads:"navLeads", reviews:"navReviews", pipeline:"navPipeline", followups:"navFollowups", analytics:"navAnalytics"};
+  Object.entries(navs).forEach(([k, id]) => { $("#"+id).classList.toggle("on", v===k); });
+  closeEditor(); closeReviewDrawer(); closeTplDrawer();
   if(v==="leads") renderLeads();
   if(v==="reviews") renderReviews();
+  if(v==="pipeline") renderPipeline();
+  if(v==="followups") renderFollowups();
+  if(v==="analytics") renderAnalytics();
 }
 function setLeadFilter(k){ leadFilter = k; renderLeads(); }
 
@@ -1300,6 +1375,15 @@ function buildLead(){
         </div>
       </div>
       ${extra}
+      ${l.stage==='closed'?`
+      <div class="lead-won">
+        <div class="k" style="font-family:var(--util);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin:18px 0 6px">Closed deal</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 14px">
+          <div class="fld"><label>Sale price</label><input id="won_price" type="number" min="0" step="1000" value="${l.salePrice??''}"></div>
+          <div class="fld"><label>Your commission</label><input id="won_comm" type="number" min="0" step="100" value="${l.commission??''}"></div>
+        </div>
+        <button class="btn gold sm" onclick="saveWonDetails()">Save deal</button>
+      </div>`:''}
       <div class="lead-followups">
         <div class="k" style="font-family:var(--util);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:18px 0 6px">Email follow-ups</div>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
@@ -1330,6 +1414,16 @@ async function setLeadStage(id, stage){
   const { error } = await sb.from("leads").update({stage:stage, status:status}).eq("id", id);
   if(error){ l.stage = prev; renderLeads(); toast("Update failed: "+error.message); return; }
   toast(`<b>${l.name||"Lead"}</b> moved to ${stageLabel(stage)}`);
+}
+async function saveWonDetails(){
+  if(!currentLead) return;
+  const l = LEADS.find(x => x.id===currentLead); if(!l) return;
+  const p = $("#won_price").value === "" ? null : Number($("#won_price").value);
+  const c = $("#won_comm").value === "" ? null : Number($("#won_comm").value);
+  const { error } = await sb.from("leads").update({sale_price:p, commission:c}).eq("id", currentLead);
+  if(error){ toast("Could not save: "+error.message); return; }
+  l.salePrice = p; l.commission = c;
+  toast(`Deal saved${p?": "+money(p):""}${c?" \u00b7 "+money(c)+" commission":""}`);
 }
 async function toggleFollowups(id){
   const l = LEADS.find(x => x.id===id); if(!l) return;
@@ -1542,6 +1636,151 @@ async function deleteReview(){
   closeReviewDrawer();
   await loadReviews();
   toast("Review deleted. This cannot be undone.");
+}
+
+/* ================= PIPELINE / FOLLOW UPS / ANALYTICS ================= */
+let TEMPLATES = [];
+let editingTemplate = null;
+
+async function loadTemplates(){
+  const { data, error } = await sb.from("email_templates").select("*")
+    .order("form_type",{ascending:true}).order("step",{ascending:true});
+  if(error){ toast("Could not load follow-ups: "+error.message); return; }
+  TEMPLATES = data || [];
+  if(currentView==="followups") renderFollowups();
+}
+
+function renderPipeline(){
+  const board = $("#pipeBoard");
+  board.innerHTML = STAGES.map(([key, label]) => {
+    const cards = LEADS.filter(l => l.stage===key)
+      .sort((a,b) => (leadScore(b)-leadScore(a)) || (new Date(b.created)-new Date(a.created)));
+    return `<div class="pipe-col">
+      <div class="pipe-head">${label}<span class="pipe-n">${cards.length}</span></div>
+      ${cards.map(l => `
+        <div class="pipe-card" onclick="openLead('${l.id}')">
+          <div class="pc-name">${esc(l.name||"(no name)")}</div>
+          <div class="pc-meta">${scoreTag(l)}<span class="badge ${SOURCE[l.source]?SOURCE[l.source].cls:''}">${SOURCE[l.source]?SOURCE[l.source].label:l.source}</span></div>
+          <div class="pc-date">${dateFmt(l.created)}${key==='closed'&&l.salePrice?` \u00b7 ${money(l.salePrice)}`:''}</div>
+          <select class="stage-sel pc-move" onclick="event.stopPropagation()" onchange="setLeadStage('${l.id}', this.value)">${STAGES.map(x=>`<option value="${x[0]}" ${l.stage===x[0]?'selected':''}>${x[1]}</option>`).join("")}</select>
+        </div>`).join("") || '<div class="pipe-empty">None</div>'}
+    </div>`;
+  }).join("");
+}
+
+const TPL_LABELS = {open_house:"Open House", valuation:"Home Valuation", contact:"Contact Form", yard_sign:"Yard Sign", repair_checklist:"Repair Checklist"};
+function renderFollowups(){
+  const el = $("#tplList");
+  const groups = {};
+  TEMPLATES.forEach(t => { (groups[t.form_type] = groups[t.form_type] || []).push(t); });
+  el.innerHTML = Object.keys(groups).map(ft => `
+    <div class="tpl-group">
+      <div class="tpl-gh">${TPL_LABELS[ft]||ft}<button class="btn ghost sm" onclick="openTemplate(null,'${ft}')">+ Add step</button></div>
+      <div class="rows">${groups[ft].map(t => `
+        <div class="row ${t.active?'':'is-hidden'}" onclick="openTemplate('${t.id}')">
+          <div class="rmeta" style="min-width:0">
+            <div class="addr">Day ${t.day_offset}: ${esc(t.subject)}${t.active?'':'<span class="hidden-tag">Off</span>'}</div>
+            <div class="specs" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60ch">${esc((t.body||"").split("\n").filter(Boolean)[0]||"")}</div>
+          </div>
+          <div class="ractions"><button class="btn ghost sm" onclick="event.stopPropagation();openTemplate('${t.id}')">Edit</button></div>
+        </div>`).join("")}</div>
+    </div>`).join("");
+}
+
+let tplFormType = null;
+function openTemplate(id, formType){
+  editingTemplate = id || null;
+  const t = id ? TEMPLATES.find(x => x.id===id) : null;
+  tplFormType = t ? t.form_type : formType;
+  $("#tplTitle").textContent = (t ? "Edit" : "New") + " " + (TPL_LABELS[tplFormType]||tplFormType) + " step";
+  $("#tpl_day").value = t ? t.day_offset : "";
+  $("#tpl_subject").value = t ? t.subject : "";
+  $("#tpl_body").value = t ? t.body : "Hi {{first_name}},\n\n";
+  $("#tpl_active").checked = t ? t.active!==false : true;
+  $("#tplDelete").style.display = t ? "" : "none";
+  $("#tplDelete").classList.remove("armed"); $("#tplDelete").textContent = "Delete";
+  $("#tplDrawer").classList.add("open"); $("#scrim").classList.add("show");
+}
+function closeTplDrawer(){
+  const d = $("#tplDrawer"); if(!d) return;
+  d.classList.remove("open");
+  if(!$("#editor").classList.contains("open") && !$("#leadDrawer").classList.contains("open") && !$("#rvDrawer").classList.contains("open")) $("#scrim").classList.remove("show");
+  editingTemplate = null;
+}
+async function saveTemplate(){
+  const day = parseInt($("#tpl_day").value, 10);
+  const subject = $("#tpl_subject").value.trim();
+  const body = $("#tpl_body").value.trim();
+  if(isNaN(day) || day < 0 || !subject || !body){ toast("Day, subject, and body are all required."); return; }
+  const payload = { day_offset: day, subject: subject, body: body, active: $("#tpl_active").checked };
+  try{
+    if(editingTemplate){
+      const { error } = await sb.from("email_templates").update(payload).eq("id", editingTemplate);
+      if(error) throw error;
+    } else {
+      payload.form_type = tplFormType;
+      payload.step = Math.max(0, ...TEMPLATES.filter(t => t.form_type===tplFormType).map(t => t.step)) + 1;
+      const { error } = await sb.from("email_templates").insert(payload);
+      if(error) throw error;
+    }
+    closeTplDrawer();
+    await loadTemplates();
+    renderFollowups();
+    toast("Follow-up saved");
+  }catch(e){ toast("Save failed: "+(e.message||e)); }
+}
+let tplDelT = null;
+async function deleteTemplate(){
+  if(!editingTemplate) return;
+  const b = $("#tplDelete");
+  if(!b.classList.contains("armed")){
+    b.classList.add("armed"); b.textContent = "Tap again to delete";
+    clearTimeout(tplDelT); tplDelT = setTimeout(() => { b.classList.remove("armed"); b.textContent="Delete"; }, 4000);
+    return;
+  }
+  clearTimeout(tplDelT); b.classList.remove("armed"); b.textContent = "Delete";
+  const { error } = await sb.from("email_templates").delete().eq("id", editingTemplate);
+  if(error){ toast("Delete failed: "+error.message); return; }
+  closeTplDrawer();
+  await loadTemplates();
+  renderFollowups();
+  toast("Follow-up step deleted.");
+}
+
+function renderAnalytics(){
+  const now = new Date();
+  const d30 = new Date(now - 30*864e5), d60 = new Date(now - 60*864e5);
+  const last30 = LEADS.filter(l => new Date(l.created) >= d30).length;
+  const prior30 = LEADS.filter(l => { const c = new Date(l.created); return c >= d60 && c < d30; }).length;
+  const hot = LEADS.filter(l => leadScore(l) >= 80 && !["closed","lost"].includes(l.stage)).length;
+  const appts = LEADS.filter(l => l.stage==="appointment" || l.stage==="listed").length;
+  const closed = LEADS.filter(l => l.stage==="closed");
+  const vol = closed.reduce((s,l) => s + (Number(l.salePrice)||0), 0);
+  const comm = closed.reduce((s,l) => s + (Number(l.commission)||0), 0);
+  const bySource = {};
+  LEADS.forEach(l => {
+    const k = SOURCE[l.source] ? SOURCE[l.source].label : l.source;
+    bySource[k] = bySource[k] || {n:0, won:0};
+    bySource[k].n++;
+    if(l.stage==="closed") bySource[k].won++;
+  });
+  const byStage = {};
+  STAGES.forEach(([k, lab]) => { byStage[lab] = LEADS.filter(l => l.stage===k).length; });
+  const trend = prior30 ? Math.round((last30-prior30)/prior30*100) : null;
+
+  $("#anaBody").innerHTML = `
+    <div class="ana-cards">
+      <div class="ana-card"><div class="an">${last30}</div><div class="al">Leads, last 30 days${trend===null?'':` <span class="${trend>=0?'up':'down'}">${trend>=0?'+':''}${trend}%</span>`}</div></div>
+      <div class="ana-card"><div class="an">${hot}</div><div class="al">Hot leads right now</div></div>
+      <div class="ana-card"><div class="an">${appts}</div><div class="al">Appointments and listings</div></div>
+      <div class="ana-card"><div class="an">${closed.length}</div><div class="al">Deals closed</div></div>
+      <div class="ana-card"><div class="an">${money(vol)||"$0"}</div><div class="al">Closed volume</div></div>
+      <div class="ana-card gold"><div class="an">${money(comm)||"$0"}</div><div class="al">Commission earned</div></div>
+    </div>
+    <div class="ana-cols">
+      <div class="ana-box"><h3>Leads by source</h3>${Object.entries(bySource).sort((a,b)=>b[1].n-a[1].n).map(([k,v])=>`<div class="ana-row"><span>${k}</span><span>${v.n}${v.won?` \u00b7 ${v.won} won`:''}</span></div>`).join("")||'<div class="ana-row"><span>No leads yet</span></div>'}</div>
+      <div class="ana-box"><h3>Pipeline right now</h3>${Object.entries(byStage).map(([k,v])=>`<div class="ana-row"><span>${k}</span><span>${v}</span></div>`).join("")}</div>
+    </div>`;
 }
 
 /* ---------- toast ---------- */
