@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v15 -->
+<!-- admin.html build: cms-live-v16 -->
 <meta charset="utf-8">
 <link rel="icon" href="/favicon-admin.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-admin-32.png" sizes="32x32" type="image/png">
@@ -267,6 +267,15 @@
   .lead-actions a{text-decoration:none}
   .btn.danger{background:transparent;border:1px solid #b9442f;color:#b9442f}
   .btn.danger.armed{background:#b9442f;border-color:#b9442f;color:#fff}
+  .score{display:inline-block;font-family:var(--util);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;padding:.3em .6em;margin-left:.55em;vertical-align:middle}
+  .score.hot{background:#7a2f1d;color:#fff}
+  .score.warm{background:var(--gold);color:var(--ink)}
+  .score.cool{background:var(--cream-3);color:var(--ink-soft)}
+  .score.cold{background:var(--cream-2);color:var(--taupe)}
+  .stage-sel{font-family:var(--util);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;padding:.45em .6em;border:1px solid var(--line);background:var(--cream);color:var(--ink);cursor:pointer;max-width:150px}
+  .stage-sel.s-closed{border-color:var(--green);color:var(--green)}
+  .stage-sel.s-lost{color:var(--taupe)}
+  .stage-sel.s-appointment,.stage-sel.s-listed{border-color:var(--gold)}
   .lead-notes textarea{width:100%;font-family:var(--body);font-size:.98rem;line-height:1.5;padding:.8em .9em;border:1px solid var(--line);background:var(--cream);resize:vertical}
 
   @media(max-width:720px){
@@ -297,7 +306,7 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v15</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v16</div>
 </div>
 
 <div class="topbar">
@@ -393,7 +402,7 @@
     <button class="btn ghost sm" onclick="closeEditor()">Close</button>
     <button class="btn danger sm" id="leadDeleteBtn" onclick="deleteCurrentLead()">Delete lead</button>
     <span class="spacer"></span>
-    <button class="btn gold sm" id="leadStatusBtn" onclick="toggleCurrentLeadStatus()">Mark contacted</button>
+    <select class="stage-sel" id="leadStageSel" onchange="if(currentLead) setLeadStage(currentLead, this.value)"></select>
   </div>
 </aside>
 
@@ -494,9 +503,48 @@ function toRow(d){
     repair_program:d.repairProgram===true
   };
 }
+const STAGES = [
+  ["new","New"],["contacted","Contacted"],["appointment","Appointment Set"],
+  ["listed","Listed"],["closed","Closed"],["lost","Lost"]
+];
+function stageLabel(k){ const f=STAGES.find(s=>s[0]===k); return f?f[1]:k; }
+
+function leadScore(l){
+  const d = l.details || {};
+  let s;
+  if(l.source==="open_house"){
+    s = 60;
+    if((d.looking||"").toLowerCase().includes("sell")) s += 10;
+    if(l.phone) s += 5;
+    if(d.help) s += 4;
+    s = Math.min(s, 79);
+  } else if(l.source==="valuation"){
+    s = 70;
+    if(l.phone) s += 10;
+  } else if(l.source==="repair_checklist"){
+    const t = d.timeline||"";
+    s = t==="Within 3 months" ? 85 : t==="3 to 6 months" ? 70 : t==="6+ months" ? 55 : t==="Just curious" ? 40 : 50;
+    if(l.phone) s += 5;
+  } else if(l.source==="contact"){
+    s = 55;
+    if(l.phone) s += 10;
+  } else {
+    s = 50;
+    if(l.phone) s += 10;
+  }
+  return Math.max(0, Math.min(100, s));
+}
+function scoreBand(s){ return s>=80?"hot":s>=60?"warm":s>=40?"cool":"cold"; }
+function scoreTag(l){
+  const s = leadScore(l), b = scoreBand(s);
+  const lab = b.charAt(0).toUpperCase()+b.slice(1);
+  return `<span class="score ${b}" title="Lead score ${s} of 100">${lab} ${s}</span>`;
+}
+
 function mapLead(r){
   return {id:r.id, source:r.source, status:r.status||"new", created:r.created_at,
-    name:r.name||"", email:r.email||"", phone:r.phone||"", details:r.details||{}, notes:r.notes||"", notesUpdated:r.notes_updated_at||null};
+    name:r.name||"", email:r.email||"", phone:r.phone||"", details:r.details||{}, notes:r.notes||"", notesUpdated:r.notes_updated_at||null,
+    stage:r.stage||"new", followupsPaused:r.followups_paused===true};
 }
 function slugify(s){ return (s||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""); }
 async function uniqueSlug(base){
@@ -1170,22 +1218,22 @@ function renderLeads(){
   let items = LEADS.slice();
   if(leadFilter!=="all") items = items.filter(l => l.source===leadFilter);
   if(q) items = items.filter(l => (l.name+" "+l.email).toLowerCase().includes(q));
-  items.sort((a,b) => new Date(b.created) - new Date(a.created));
+  items.sort((a,b) => (leadScore(b) - leadScore(a)) || (new Date(b.created) - new Date(a.created)));
   if(!items.length){
     $("#leadList").innerHTML = `<div class="empty"><h3>No leads here yet</h3><p>Nothing matches this view.</p></div>`;
     return;
   }
   $("#leadList").innerHTML = `<div class="rows">` + items.map(l => `
-    <div class="lead-row ${l.status==='new'?'is-new':''}" onclick="openLead('${l.id}')">
+    <div class="lead-row ${l.stage==='new'?'is-new':''}" onclick="openLead('${l.id}')">
       <div class="lead-main">
-        <div class="lead-name">${esc(l.name)}${l.status==='new'?'<span class="newdot" title="New"></span>':''}</div>
+        <div class="lead-name">${esc(l.name)}${scoreTag(l)}${l.stage==='new'?'<span class="newdot" title="New"></span>':''}</div>
         <div class="lead-contact">${esc(l.email)}${l.phone?'  \u00b7  '+esc(l.phone):''}</div>
         <div class="lead-snip">${esc(leadSnippet(l))}</div>
       </div>
       <div class="lead-side">
         <span class="badge ${SOURCE[l.source].cls}">${SOURCE[l.source].label}</span>
         <div class="lead-date">${dateFmt(l.created)}</div>
-        <button class="lead-stbtn ${l.status==='contacted'?'done':''}" onclick="event.stopPropagation();toggleLeadStatus('${l.id}')">${l.status==='new'?'Mark contacted':'Contacted'}</button>
+        <select class="stage-sel s-${l.stage}" onclick="event.stopPropagation()" onchange="setLeadStage('${l.id}', this.value)">${STAGES.map(x=>`<option value="${x[0]}" ${l.stage===x[0]?'selected':''}>${x[1]}</option>`).join("")}</select>
       </div>
     </div>`).join("") + `</div>`;
 }
@@ -1252,6 +1300,14 @@ function buildLead(){
         </div>
       </div>
       ${extra}
+      <div class="lead-followups">
+        <div class="k" style="font-family:var(--util);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:18px 0 6px">Email follow-ups</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <span style="font-size:.95rem;color:${l.followupsPaused?'var(--ink-soft)':'var(--green)'}">${l.followupsPaused?'Paused':(l.stage==='new'||l.stage==='contacted')?'Active':'Idle (runs only while a lead is New or Contacted)'}</span>
+          <button class="btn ghost sm" onclick="toggleFollowups('${l.id}')">${l.followupsPaused?'Resume':'Pause'}</button>
+        </div>
+        ${l.email?'':'<div style="font-family:var(--util);font-size:.66rem;color:#b9442f;margin-top:6px">This lead has no email address, so nothing will send.</div>'}
+      </div>
       <div class="lead-notes">
         <div class="k" style="font-family:var(--util);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:18px 0 6px">Your notes${l.notesUpdated?` <span style="color:var(--taupe);letter-spacing:.08em"> · saved ${dateFmt(l.notesUpdated)}</span>`:''}</div>
         <textarea id="leadNotes" rows="5" placeholder="Notes from your conversation, follow-ups, anything worth remembering.">${esc(l.notes||"")}</textarea>
@@ -1262,8 +1318,29 @@ function buildLead(){
       </div>
     </div>`;
   const btn = $("#leadStatusBtn");
-  if(btn) btn.textContent = l.status==="new" ? "Mark contacted" : "Mark as new";
+  const ssel = $("#leadStageSel");
+  if(ssel) ssel.innerHTML = STAGES.map(x=>`<option value="${x[0]}" ${l.stage===x[0]?'selected':''}>${x[1]}</option>`).join("");
 }
+async function setLeadStage(id, stage){
+  const l = LEADS.find(x => x.id===id); if(!l) return;
+  const prev = l.stage;
+  l.stage = stage;
+  const status = (stage==="new") ? "new" : "contacted";
+  renderLeads(); if(currentLead===id) buildLead();
+  const { error } = await sb.from("leads").update({stage:stage, status:status}).eq("id", id);
+  if(error){ l.stage = prev; renderLeads(); toast("Update failed: "+error.message); return; }
+  toast(`<b>${l.name||"Lead"}</b> moved to ${stageLabel(stage)}`);
+}
+async function toggleFollowups(id){
+  const l = LEADS.find(x => x.id===id); if(!l) return;
+  const on = !l.followupsPaused;
+  l.followupsPaused = on;
+  if(currentLead===id) buildLead();
+  const { error } = await sb.from("leads").update({followups_paused:on}).eq("id", id);
+  if(error){ l.followupsPaused = !on; if(currentLead===id) buildLead(); toast("Update failed: "+error.message); return; }
+  toast(on ? "Follow-ups paused for this lead" : "Follow-ups resumed");
+}
+
 function toggleCurrentLeadStatus(){ if(currentLead) toggleLeadStatus(currentLead); }
 
 function editLeadContact(){
