@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v17 -->
+<!-- admin.html build: cms-live-v18 -->
 <meta charset="utf-8">
 <link rel="icon" href="/favicon-admin.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-admin-32.png" sizes="32x32" type="image/png">
@@ -283,6 +283,7 @@
   .pipe-col{flex:0 0 250px;background:var(--cream-2);border:1px solid var(--line);padding:12px}
   .pipe-head{font-family:var(--util);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
   .pipe-n{background:var(--cream-3);padding:.2em .6em;font-size:.62rem}
+  .pipe-val{font-family:var(--util);font-size:.62rem;letter-spacing:.08em;color:var(--gold-deep);margin:-4px 0 10px}
   .pipe-card{background:#fff;border:1px solid var(--line);padding:12px;margin-bottom:10px;cursor:pointer}
   .pipe-card:hover{border-color:var(--gold)}
   .pc-name{font-family:var(--disp);font-weight:600;font-size:1rem;margin-bottom:5px}
@@ -335,7 +336,7 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v17</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v18</div>
 </div>
 
 <div class="topbar">
@@ -1375,15 +1376,14 @@ function buildLead(){
         </div>
       </div>
       ${extra}
-      ${l.stage==='closed'?`
       <div class="lead-won">
-        <div class="k" style="font-family:var(--util);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin:18px 0 6px">Closed deal</div>
+        <div class="k" style="font-family:var(--util);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:${l.stage==='closed'?'var(--green)':'var(--ink-soft)'};margin:18px 0 6px">${l.stage==='closed'?'Closed deal':'Deal value'}</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 14px">
-          <div class="fld"><label>Sale price</label><input id="won_price" type="number" min="0" step="1000" value="${l.salePrice??''}"></div>
+          <div class="fld"><label>Home price${l.stage==='closed'?'':' (estimate is fine)'}</label><input id="won_price" type="number" min="0" step="1000" value="${l.salePrice??''}"></div>
           <div class="fld"><label>Your commission</label><input id="won_comm" type="number" min="0" step="100" value="${l.commission??''}"></div>
         </div>
-        <button class="btn gold sm" onclick="saveWonDetails()">Save deal</button>
-      </div>`:''}
+        <button class="btn gold sm" onclick="saveWonDetails()">Save deal value</button>
+      </div>
       <div class="lead-followups">
         <div class="k" style="font-family:var(--util);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:18px 0 6px">Email follow-ups</div>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
@@ -1655,13 +1655,16 @@ function renderPipeline(){
   board.innerHTML = STAGES.map(([key, label]) => {
     const cards = LEADS.filter(l => l.stage===key)
       .sort((a,b) => (leadScore(b)-leadScore(a)) || (new Date(b.created)-new Date(a.created)));
+    const stVol = cards.reduce((s,l) => s + (Number(l.salePrice)||0), 0);
+    const stComm = cards.reduce((s,l) => s + (Number(l.commission)||0), 0);
     return `<div class="pipe-col">
       <div class="pipe-head">${label}<span class="pipe-n">${cards.length}</span></div>
+      ${stVol?`<div class="pipe-val">${money(stVol)}${stComm?` \u00b7 ${money(stComm)} comm`:''}</div>`:''}
       ${cards.map(l => `
         <div class="pipe-card" onclick="openLead('${l.id}')">
           <div class="pc-name">${esc(l.name||"(no name)")}</div>
           <div class="pc-meta">${scoreTag(l)}<span class="badge ${SOURCE[l.source]?SOURCE[l.source].cls:''}">${SOURCE[l.source]?SOURCE[l.source].label:l.source}</span></div>
-          <div class="pc-date">${dateFmt(l.created)}${key==='closed'&&l.salePrice?` \u00b7 ${money(l.salePrice)}`:''}</div>
+          <div class="pc-date">${dateFmt(l.created)}${l.salePrice?` \u00b7 ${money(l.salePrice)}`:''}</div>
           <select class="stage-sel pc-move" onclick="event.stopPropagation()" onchange="setLeadStage('${l.id}', this.value)">${STAGES.map(x=>`<option value="${x[0]}" ${l.stage===x[0]?'selected':''}>${x[1]}</option>`).join("")}</select>
         </div>`).join("") || '<div class="pipe-empty">None</div>'}
     </div>`;
@@ -1773,6 +1776,7 @@ function renderAnalytics(){
       <div class="ana-card"><div class="an">${last30}</div><div class="al">Leads, last 30 days${trend===null?'':` <span class="${trend>=0?'up':'down'}">${trend>=0?'+':''}${trend}%</span>`}</div></div>
       <div class="ana-card"><div class="an">${hot}</div><div class="al">Hot leads right now</div></div>
       <div class="ana-card"><div class="an">${appts}</div><div class="al">Appointments and listings</div></div>
+      <div class="ana-card"><div class="an">${money(LEADS.filter(l=>!["closed","lost"].includes(l.stage)).reduce((s,l)=>s+(Number(l.salePrice)||0),0))||"$0"}</div><div class="al">Pipeline value (open deals)</div></div>
       <div class="ana-card"><div class="an">${closed.length}</div><div class="al">Deals closed</div></div>
       <div class="ana-card"><div class="an">${money(vol)||"$0"}</div><div class="al">Closed volume</div></div>
       <div class="ana-card gold"><div class="an">${money(comm)||"$0"}</div><div class="al">Commission earned</div></div>
