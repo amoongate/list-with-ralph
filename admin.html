@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v18 -->
+<!-- admin.html build: cms-live-v19 -->
 <meta charset="utf-8">
 <link rel="icon" href="/favicon-admin.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-admin-32.png" sizes="32x32" type="image/png">
@@ -336,7 +336,7 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v18</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v19</div>
 </div>
 
 <div class="topbar">
@@ -395,6 +395,10 @@
     <div class="note">
       These read live from your Supabase <b>leads</b> table, fed by the open house, contact, and home valuation forms on your site (wired in the next step). A new submission appears here on its own. Tap any lead to see the full submission and mark it contacted.
     </div>
+  <div class="blocked-panel" id="blockedPanel" style="display:none">
+    <div class="tpl-gh" style="margin-top:26px">Blocked senders</div>
+    <div id="blockedList"></div>
+  </div>
   </div>
 
   <!-- ===== REVIEWS VIEW ===== -->
@@ -454,6 +458,7 @@
   <div class="ed-foot">
     <button class="btn ghost sm" onclick="closeEditor()">Close</button>
     <button class="btn danger sm" id="leadDeleteBtn" onclick="deleteCurrentLead()">Delete lead</button>
+    <button class="btn danger sm" id="leadBlockBtn" onclick="blockCurrentSender()">Block sender</button>
     <span class="spacer"></span>
     <select class="stage-sel" id="leadStageSel" onchange="if(currentLead) setLeadStage(currentLead, this.value)"></select>
   </div>
@@ -538,7 +543,7 @@ function loginError(msg){
 async function enterApp(){
   document.getElementById("gate").classList.add("hidden");
   setView("listings");
-  await Promise.all([loadListings(), loadLeads(), loadReviews(), loadTemplates()]);
+  await Promise.all([loadListings(), loadLeads(), loadReviews(), loadTemplates(), loadBlocked()]);
 }
 async function signOut(){
   await sb.auth.signOut();
@@ -1337,6 +1342,8 @@ const LEAD_FIELDS = {
 function openLead(id){
   currentLead = id;
   resetDeleteBtn();
+  const bb = $("#leadBlockBtn");
+  if(bb){ bb.classList.remove("armed"); bb.textContent = "Block sender"; clearTimeout(blockArmT); }
   buildLead();
   $("#scrim").classList.add("open");
   $("#leadDrawer").classList.add("open");
@@ -1415,6 +1422,48 @@ async function setLeadStage(id, stage){
   if(error){ l.stage = prev; renderLeads(); toast("Update failed: "+error.message); return; }
   toast(`<b>${l.name||"Lead"}</b> moved to ${stageLabel(stage)}`);
 }
+let BLOCKED = [];
+async function loadBlocked(){
+  const { data, error } = await sb.from("blocked_contacts").select("*").order("created_at",{ascending:false});
+  if(error) return;
+  BLOCKED = data || [];
+  renderBlocked();
+}
+function renderBlocked(){
+  const panel = $("#blockedPanel"); if(!panel) return;
+  if(!BLOCKED.length){ panel.style.display = "none"; return; }
+  panel.style.display = "block";
+  $("#blockedList").innerHTML = `<div class="rows">` + BLOCKED.map(b => `
+    <div class="row is-hidden">
+      <div class="rmeta"><div class="addr">${esc(b.email||"")}${b.email&&b.phone?" \u00b7 ":""}${esc(b.phone||"")}</div>
+      <div class="specs">${esc(b.note||"")} \u00b7 blocked ${dateFmt(b.created_at)}</div></div>
+      <div class="ractions"><button class="btn ghost sm" onclick="unblockSender('${b.id}')">Unblock</button></div>
+    </div>`).join("") + `</div>`;
+}
+let blockArmT = null;
+async function blockCurrentSender(){
+  if(!currentLead) return;
+  const l = LEADS.find(x => x.id===currentLead); if(!l) return;
+  if(!l.email && !l.phone){ toast("This lead has no email or phone to block."); return; }
+  const b = $("#leadBlockBtn");
+  if(!b.classList.contains("armed")){
+    b.classList.add("armed"); b.textContent = "Tap again to block";
+    clearTimeout(blockArmT); blockArmT = setTimeout(() => { b.classList.remove("armed"); b.textContent = "Block sender"; }, 4000);
+    return;
+  }
+  clearTimeout(blockArmT); b.classList.remove("armed"); b.textContent = "Block sender";
+  const { error } = await sb.from("blocked_contacts").insert({email: l.email||null, phone: l.phone||null, note: "Blocked from lead: "+(l.name||"unnamed")});
+  if(error){ toast("Could not block: "+error.message); return; }
+  await loadBlocked();
+  toast(`<b>${esc(l.email||l.phone)}</b> is now blocked. Their future submissions will be silently discarded. You can still delete this lead.`);
+}
+async function unblockSender(id){
+  const { error } = await sb.from("blocked_contacts").delete().eq("id", id);
+  if(error){ toast("Could not unblock: "+error.message); return; }
+  await loadBlocked();
+  toast("Sender unblocked.");
+}
+
 async function saveWonDetails(){
   if(!currentLead) return;
   const l = LEADS.find(x => x.id===currentLead); if(!l) return;
