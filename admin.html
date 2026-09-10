@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v14 -->
+<!-- admin.html build: cms-live-v15 -->
 <meta charset="utf-8">
 <link rel="icon" href="/favicon-admin.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-admin-32.png" sizes="32x32" type="image/png">
@@ -297,15 +297,15 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v14</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v15</div>
 </div>
 
 <div class="topbar">
   <div class="brand"><span class="name">RALPH RICHARDSON</span><span class="sub">Results That Move You</span></div>
   <div class="right">
     <nav class="viewnav">
-      <button id="navListings" class="vnav on" onclick="setView('listings')">Listings</button>
-      <button id="navLeads" class="vnav" onclick="setView('leads')">Leads<span class="cnt" id="leadCount">0</span></button>
+      <button id="navListings" class="vnav" onclick="setView('listings')">Listings</button>
+      <button id="navLeads" class="vnav on" onclick="setView('leads')">Leads<span class="cnt" id="leadCount">0</span></button>
       <button id="navReviews" class="vnav" onclick="setView('reviews')">Reviews</button>
     </nav>
     <button class="btn ghost on-dark sm" onclick="signOut()">Sign out</button>
@@ -314,7 +314,7 @@
 
 <div class="wrap">
   <!-- ===== LISTINGS VIEW ===== -->
-  <div id="listingsView">
+  <div id="listingsView" style="display:none">
     <div class="viewhead">
       <div><p class="eyebrow">Manage your portfolio</p><h1>Your <em>listings</em>.</h1></div>
       <button class="btn gold" onclick="openEditor()">+ New listing</button>
@@ -335,7 +335,7 @@
   </div>
 
   <!-- ===== LEADS VIEW ===== -->
-  <div id="leadsView" style="display:none">
+  <div id="leadsView">
     <div class="viewhead">
       <div><p class="eyebrow">From your website forms</p><h1>Your <em>leads</em>.</h1></div>
     </div>
@@ -1116,7 +1116,7 @@ const SORDER = ["open_house","contact","valuation","yard_sign","repair_checklist
 
 /* sample leads (stand-ins for real form submissions) */
 let LEADS = [];
-let currentView = "listings";
+let currentView = "leads";
 let currentLead = null;
 let leadFilter = "all";
 
