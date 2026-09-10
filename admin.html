@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v19 -->
+<!-- admin.html build: cms-live-v20 -->
 <meta charset="utf-8">
 <link rel="icon" href="/favicon-admin.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-admin-32.png" sizes="32x32" type="image/png">
@@ -281,9 +281,9 @@
   .vnav-div{display:inline-block;width:1px;height:18px;background:var(--line);margin:0 10px;vertical-align:middle}
   .pipe{display:flex;gap:14px;overflow-x:auto;padding-bottom:14px;-webkit-overflow-scrolling:touch}
   .pipe-col{flex:0 0 250px;background:var(--cream-2);border:1px solid var(--line);padding:12px}
-  .pipe-head{font-family:var(--util);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-  .pipe-n{background:var(--cream-3);padding:.2em .6em;font-size:.62rem}
-  .pipe-val{font-family:var(--util);font-size:.62rem;letter-spacing:.08em;color:var(--gold-deep);margin:-4px 0 10px}
+  .pipe-head{font-family:var(--disp);font-weight:700;font-size:1.05rem;color:var(--ink);display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .pipe-n{font-family:var(--util);background:var(--cream-3);padding:.25em .7em;font-size:.72rem}
+  .pipe-val{font-family:var(--disp);font-weight:600;font-size:.98rem;color:var(--gold-deep);margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
   .pipe-card{background:#fff;border:1px solid var(--line);padding:12px;margin-bottom:10px;cursor:pointer}
   .pipe-card:hover{border-color:var(--gold)}
   .pc-name{font-family:var(--disp);font-weight:600;font-size:1rem;margin-bottom:5px}
@@ -336,7 +336,7 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v19</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v20</div>
 </div>
 
 <div class="topbar">
@@ -542,7 +542,7 @@ function loginError(msg){
 }
 async function enterApp(){
   document.getElementById("gate").classList.add("hidden");
-  setView("listings");
+  setView("leads");
   await Promise.all([loadListings(), loadLeads(), loadReviews(), loadTemplates(), loadBlocked()]);
 }
 async function signOut(){
@@ -1826,6 +1826,7 @@ function renderAnalytics(){
       <div class="ana-card"><div class="an">${hot}</div><div class="al">Hot leads right now</div></div>
       <div class="ana-card"><div class="an">${appts}</div><div class="al">Appointments and listings</div></div>
       <div class="ana-card"><div class="an">${money(LEADS.filter(l=>!["closed","lost"].includes(l.stage)).reduce((s,l)=>s+(Number(l.salePrice)||0),0))||"$0"}</div><div class="al">Pipeline value (open deals)</div></div>
+      <div class="ana-card"><div class="an">${money(LEADS.filter(l=>!["closed","lost"].includes(l.stage)).reduce((s,l)=>s+(Number(l.commission)||0),0))||"$0"}</div><div class="al">Projected commission (not yet earned)</div></div>
       <div class="ana-card"><div class="an">${closed.length}</div><div class="al">Deals closed</div></div>
       <div class="ana-card"><div class="an">${money(vol)||"$0"}</div><div class="al">Closed volume</div></div>
       <div class="ana-card gold"><div class="an">${money(comm)||"$0"}</div><div class="al">Commission earned</div></div>
