@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v20 -->
+<!-- admin.html build: cms-live-v21 -->
 <meta charset="utf-8">
 <link rel="icon" href="/favicon-admin.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-admin-32.png" sizes="32x32" type="image/png">
@@ -237,6 +237,12 @@
   .badge.vl{background:var(--gold-deep);color:var(--cream)}
   .badge.ys{background:var(--taupe);color:var(--ink)}
   .badge.rc{background:#6b4f2a;color:var(--cream)}
+  .badge.rf{background:var(--green);color:var(--cream)}
+  .badge.ig{background:#8a4b6b;color:var(--cream)}
+  .badge.fb{background:#3b5171;color:var(--cream)}
+  .badge.zl{background:#2d5f8a;color:var(--cream)}
+  .badge.pc{background:var(--gold-deep);color:var(--cream)}
+  .badge.ot{background:var(--taupe);color:var(--ink)}
   .reorder{display:flex;gap:4px;margin-right:4px}
   .reorder button{font-family:var(--util);font-size:.85rem;line-height:1;padding:.4em .62em;border:1px solid var(--line);background:var(--cream);color:var(--ink);cursor:pointer;transition:background .15s,border-color .15s}
   .reorder button:hover:not(:disabled){background:var(--cream-3);border-color:var(--gold)}
@@ -336,7 +342,7 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v20</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v21</div>
 </div>
 
 <div class="topbar">
@@ -380,7 +386,8 @@
   <!-- ===== LEADS VIEW ===== -->
   <div id="leadsView">
     <div class="viewhead">
-      <div><p class="eyebrow">From your website forms</p><h1>Your <em>leads</em>.</h1></div>
+      <div><p class="eyebrow">Every channel, one inbox</p><h1>Your <em>leads</em>.</h1></div>
+      <button class="btn gold" onclick="openAddLead()">+ Add lead</button>
     </div>
 
     <div class="summary" id="leadSummary"></div>
@@ -514,6 +521,36 @@
   </div>
 </aside>
 
+<aside class="editor" id="addDrawer" aria-label="Add lead">
+  <div class="ed-head">
+    <h2>Add a lead</h2>
+    <button class="x" onclick="closeAddLeadDrawer()" aria-label="Close">&times;</button>
+  </div>
+  <div class="ed-body">
+    <div>
+      <div class="fld"><label>Where did this lead come from?</label><select id="al_source">
+        <option value="referral">Referral</option>
+        <option value="instagram">Instagram</option>
+        <option value="facebook">Facebook</option>
+        <option value="zillow">Zillow</option>
+        <option value="phone_call">Phone Call</option>
+        <option value="open_house">Open House</option>
+        <option value="other">Other</option>
+      </select></div>
+      <div class="fld"><label>Name</label><input id="al_name" type="text"></div>
+      <div class="fld"><label>Email</label><input id="al_email" type="email"></div>
+      <div class="fld"><label>Phone</label><input id="al_phone" type="tel"></div>
+      <div class="fld"><label>Notes (what you know so far)</label><textarea id="al_notes" rows="4"></textarea></div>
+      <div class="note" style="margin-top:4px">New leads start in the New stage with follow-up emails active. Open the lead afterward to set a stage, pause follow-ups, or add a deal value.</div>
+    </div>
+  </div>
+  <div class="ed-foot">
+    <span class="spacer"></span>
+    <button class="btn ghost sm" onclick="closeAddLeadDrawer()">Cancel</button>
+    <button class="btn gold sm" onclick="saveNewLead()">Add lead</button>
+  </div>
+</aside>
+
 <input id="fileInput" type="file" accept="image/*" multiple hidden onchange="handleFiles(this.files)">
 <input id="fpInput" type="file" accept="image/*" multiple hidden onchange="handleFloorplans(this.files)">
 
@@ -606,6 +643,10 @@ function leadScore(l){
     if(l.phone) s += 5;
   } else if(l.source==="contact"){
     s = 55;
+    if(l.phone) s += 10;
+  } else if(["referral","zillow","phone_call","instagram","facebook"].includes(l.source)){
+    const base = {referral:70, zillow:65, phone_call:60, instagram:55, facebook:55};
+    s = base[l.source];
     if(l.phone) s += 10;
   } else {
     s = 50;
@@ -1238,9 +1279,15 @@ const SOURCE = {
   contact:{label:"Contact", cls:"ct"},
   valuation:{label:"Valuation", cls:"vl"},
   yard_sign:{label:"Yard Sign", cls:"ys"},
-  repair_checklist:{label:"Repair Checklist", cls:"rc"}
+  repair_checklist:{label:"Repair Checklist", cls:"rc"},
+  referral:{label:"Referral", cls:"rf"},
+  instagram:{label:"Instagram", cls:"ig"},
+  facebook:{label:"Facebook", cls:"fb"},
+  zillow:{label:"Zillow", cls:"zl"},
+  phone_call:{label:"Phone Call", cls:"pc"},
+  other:{label:"Other", cls:"ot"}
 };
-const SORDER = ["open_house","contact","valuation","yard_sign","repair_checklist"];
+const SORDER = ["open_house","contact","valuation","yard_sign","repair_checklist","referral","instagram","facebook","zillow","phone_call","other"];
 
 /* sample leads (stand-ins for real form submissions) */
 let LEADS = [];
@@ -1264,7 +1311,7 @@ function setView(v){
   Object.entries(views).forEach(([k, id]) => { $("#"+id).style.display = v===k ? "block" : "none"; });
   const navs = {listings:"navListings", leads:"navLeads", reviews:"navReviews", pipeline:"navPipeline", followups:"navFollowups", analytics:"navAnalytics"};
   Object.entries(navs).forEach(([k, id]) => { $("#"+id).classList.toggle("on", v===k); });
-  closeEditor(); closeReviewDrawer(); closeTplDrawer();
+  closeEditor(); closeReviewDrawer(); closeTplDrawer(); closeAddLeadDrawer();
   if(v==="leads") renderLeads();
   if(v==="reviews") renderReviews();
   if(v==="pipeline") renderPipeline();
@@ -1280,7 +1327,8 @@ function renderLeadSummary(){
   $("#leadSummary").innerHTML = SORDER.map(s => `<div class="scard"><div class="n">${counts[s]}</div><div class="l"><span class="dot" style="background:${colors[s]}"></span>${SOURCE[s].label}</div></div>`).join("");
 }
 function renderLeadChips(){
-  const items = [["all","All ("+LEADS.length+")"]].concat(SORDER.map(s => [s, SOURCE[s].label]));
+  const items = [["all","All ("+LEADS.length+")"]].concat(
+    SORDER.filter(s => LEADS.some(l => l.source===s)).map(s => [s, SOURCE[s].label]));
   $("#leadChips").innerHTML = items.map(([k,lab]) =>
     `<button class="chip ${leadFilter===k?'on':''}" onclick="setLeadFilter('${k}')">${lab}</button>`
   ).join("");
@@ -1422,6 +1470,40 @@ async function setLeadStage(id, stage){
   if(error){ l.stage = prev; renderLeads(); toast("Update failed: "+error.message); return; }
   toast(`<b>${l.name||"Lead"}</b> moved to ${stageLabel(stage)}`);
 }
+function openAddLead(){
+  $("#al_source").value = "referral";
+  $("#al_name").value = ""; $("#al_email").value = ""; $("#al_phone").value = ""; $("#al_notes").value = "";
+  $("#addDrawer").classList.add("open"); $("#scrim").classList.add("show");
+  $("#al_name").focus();
+}
+function closeAddLeadDrawer(){
+  const d = $("#addDrawer"); if(!d) return;
+  d.classList.remove("open");
+  if(!$("#editor").classList.contains("open") && !$("#leadDrawer").classList.contains("open") && !$("#rvDrawer").classList.contains("open") && !$("#tplDrawer").classList.contains("open")) $("#scrim").classList.remove("show");
+}
+async function saveNewLead(){
+  const name = $("#al_name").value.trim();
+  const email = $("#al_email").value.trim();
+  const phone = $("#al_phone").value.trim();
+  const notes = $("#al_notes").value.trim();
+  if(!name){ toast("The lead needs at least a name."); return; }
+  const payload = {
+    source: $("#al_source").value,
+    name: name,
+    email: email || null,
+    phone: phone || null,
+    details: {},
+    notes: notes || null,
+    notes_updated_at: notes ? new Date().toISOString() : null
+  };
+  const { error } = await sb.from("leads").insert(payload);
+  if(error){ toast("Could not add the lead: "+error.message); return; }
+  closeAddLeadDrawer();
+  await loadLeads();
+  renderLeads(); renderLeadSummary();
+  toast(`<b>${esc(name)}</b> added to your leads`);
+}
+
 let BLOCKED = [];
 async function loadBlocked(){
   const { data, error } = await sb.from("blocked_contacts").select("*").order("created_at",{ascending:false});
