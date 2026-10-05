@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<!-- Seller Netsheet Comparison Prototype  v1.1  -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- netsheet build: netsheet-gate-v1 -->
+<meta name="robots" content="noindex, nofollow">
+<style>html{visibility:hidden}</style>
+<title>Seller Netsheet Comparison | List With Ralph</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1A1A1A;
+  --ink-2:#44403A;
+  --ink-3:#7D766B;
+  --line:#D9CFBE;
+  --line-soft:#E9E3D8;
+  --paper:#ECE8E1;
+  --card:#FFFFFF;
+  --band:#F6F2EB;
+  --gold:#9A7A33;
+  --gold-2:#C9A961;
+  --gold-soft:#F4ECDA;
+  --red:#A9482F;
+  --credit:#2F6B4F;
+  --credit-soft:#E6F0EA;
+  --r:5px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:"Archivo",system-ui,sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* ---------- shell ---------- */
+.wrap{max-width:1720px;margin:0 auto;padding:26px 22px 60px}
+.masthead{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:20px}
+.masthead h1{font-size:32px;line-height:1.05;font-weight:700;letter-spacing:-.02em;margin:0 0 5px}
+.masthead p{margin:0;color:var(--ink-2);max-width:60ch;font-size:14px}
+.contact{text-align:right;font-size:12px;color:var(--ink-2);white-space:nowrap}
+.contact strong{display:block;color:var(--ink);font-size:13px}
+
+/* ---------- toolbar ---------- */
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.toolbar.second{padding-top:10px;border-top:1px solid var(--line)}
+.toolbar.third{margin-bottom:16px;padding-top:9px;border-top:1px dashed var(--line)}
+.prep{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+.prep input{border:1px solid var(--line);border-radius:var(--r);background:#fff;padding:7px 10px;font-size:13.5px;min-width:200px;outline:none}
+.prep input.wide{min-width:280px}
+.prep select{border:1px solid var(--line);border-radius:var(--r);background:#fff;padding:7px 8px;font-size:13px;max-width:240px;outline:none;cursor:pointer}
+.prep input:focus,.prep select:focus{border-color:var(--gold)}
+.savestate{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3)}
+.btn{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:border-color .12s,background .12s}
+.btn:hover{border-color:var(--ink-3)}
+.btn-primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn-primary:hover{background:#333}
+.btn-gold{background:var(--gold-2);color:var(--ink);border-color:var(--gold-2)}
+.btn-gold:hover{background:#D4B777}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.spacer{flex:1}
+.count{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3)}
+
+/* ---------- ledger table ---------- */
+.scroller{overflow-x:auto;padding-bottom:8px}
+/* each netsheet is its own column card, separated by a gap */
+table.ledger{border-collapse:separate;border-spacing:12px 0;width:calc(100% + 24px);min-width:min-content;margin:0 -12px}
+.ledger > * > tr > *{background:var(--card);border-left:1px solid var(--line);border-right:1px solid var(--line)}
+.ledger thead th{border-top:1px solid var(--line);border-radius:var(--r) var(--r) 0 0}
+.ledger tr.last > *{border-bottom:1px solid var(--line);border-radius:0 0 var(--r) var(--r)}
+.ledger th,.ledger td{padding:0;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+.ledger .lab{position:sticky;left:0;z-index:2;background:var(--card);box-shadow:-12px 0 0 var(--paper),12px 0 0 var(--paper);width:250px;min-width:250px;max-width:250px;
+  padding:6px 12px 6px 14px;text-align:left;font-weight:500;font-size:13px;color:var(--ink-2);border-right:1px solid var(--line)}
+.ledger td.cell{min-width:200px;padding:5px 10px}
+
+/* sheet header */
+.ledger thead th{vertical-align:top;background:var(--card);border-bottom:1px solid var(--line)}
+.ledger thead th.lab{vertical-align:bottom;padding-bottom:14px;font-size:12px;color:var(--ink-3);font-weight:400;line-height:1.4}
+.ledger .shead{position:relative;padding:0 12px 12px;text-align:left;min-width:200px;overflow:hidden}
+.shead .cap{height:4px;margin:0 -12px 10px;border-radius:var(--r) var(--r) 0 0;background:transparent}
+.shead.is-high .cap{background:var(--gold-2)}
+.ledger .shead.is-high{background:#FFFCF5;border-color:var(--gold-2)}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px}
+.slot{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+.hi-tag{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;background:var(--gold-soft);color:var(--gold);padding:3px 6px;border-radius:2px;font-weight:600}
+.hacts{display:flex;align-items:center;gap:4px}
+.mini{background:none;border:1px solid var(--line);border-radius:3px;padding:3px 7px;font-size:11px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.mini:hover{border-color:var(--ink-3);color:var(--ink)}
+.mini:disabled{opacity:.35;cursor:not-allowed}
+.kill{background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:17px;line-height:1;padding:2px 5px;border-radius:3px}
+.kill:hover{color:var(--red);background:#F7EEEC}
+.kill:disabled{opacity:.25;cursor:not-allowed}
+.sname{width:100%;border:none;border-bottom:1px dashed var(--line);background:none;padding:2px 0 5px;font-size:15.5px;font-weight:600;letter-spacing:-.01em;outline:none}
+.sname:focus{border-bottom-color:var(--gold)}
+.sname::placeholder{color:var(--ink-3);font-weight:400;font-size:14px}
+.sdate{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11.5px;color:var(--ink-3);font-weight:400}
+.sdate input{border:none;border-bottom:1px dashed var(--line);background:none;font-family:"IBM Plex Mono",monospace;font-size:12px;padding:2px 0;color:var(--ink-2);outline:none}
+.sdate input:focus{border-bottom-color:var(--gold)}
+.net{font-family:"IBM Plex Mono",monospace;font-size:27px;font-weight:600;letter-spacing:-.03em;line-height:1;margin-top:14px;white-space:nowrap}
+.netlab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-top:5px;font-weight:500}
+.delta{font-family:"IBM Plex Mono",monospace;font-size:12px;margin-top:8px;font-weight:500;min-height:1.2em}
+.delta.down{color:var(--red)}
+.delta.base{color:var(--gold)}
+.delta.up{color:var(--credit)}
+.basebtn{margin-top:9px;background:none;border:1px dashed var(--line);border-radius:3px;padding:4px 9px;font-size:11.5px;font-weight:600;color:var(--gold);cursor:pointer}
+.basebtn:hover{border-style:solid;border-color:var(--gold)}
+.ledger .shead.is-high .basebtn{color:var(--ink-3)}
+.hintbtn{background:none;border:none;padding:0;font:inherit;color:var(--gold);text-decoration:underline;cursor:pointer}
+.fact{display:flex;align-items:center;gap:2px;margin-top:4px;font-size:11px;color:var(--ink-3);font-weight:400}
+.fact input{width:78px;border:none;border-bottom:1px dashed var(--line);background:none;padding:1px 0;font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink);outline:none}
+.fact input:focus{border-bottom-color:var(--gold)}
+
+/* section band */
+tr.band th{background:var(--band);padding:8px 14px 6px;text-align:left;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:var(--ink-2);border-bottom:1px solid var(--line)}
+tr.band th.lab{background:var(--band)}
+tr.band td{background:var(--band);border-bottom:1px solid var(--line)}
+
+/* amount control */
+.control{display:flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#fff}
+.control:focus-within{border-color:var(--gold)}
+.control .cur{display:flex;align-items:center;padding-left:8px;font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-3)}
+.control input{flex:1;min-width:0;width:60px;border:none;background:none;padding:6px 8px 6px 4px;text-align:right;font-family:"IBM Plex Mono",monospace;font-size:13.5px;font-weight:500;outline:none}
+.control input[readonly]{background:#F7F5F1;color:var(--ink-2)}
+.cell.credit .control{border-color:#BFD6C8}
+.cell.credit .control input{color:var(--credit)}
+.unit{display:flex;flex:none;border-left:1px solid var(--line)}
+.unit button{background:#F5F3EF;border:none;padding:0 8px;font-size:11px;font-weight:600;color:var(--ink-3);cursor:pointer}
+.unit button + button{border-left:1px solid var(--line)}
+.unit button.on{background:var(--ink);color:#fff}
+.unit button.on.c{background:var(--credit)}
+.hint{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-3);text-align:right;margin-top:3px}
+
+/* row label extras */
+.lab .sub{display:block;font-size:11px;color:var(--ink-3);font-weight:400;margin-top:1px}
+.lab .side{display:inline-block;margin-left:6px;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--credit);background:var(--credit-soft);padding:1px 5px;border-radius:2px;vertical-align:1px}
+.clab{display:flex;align-items:center;gap:4px}
+.clab input{flex:1;min-width:0;border:none;border-bottom:1px dashed var(--line);background:none;padding:3px 0;font-size:13px;font-weight:500;color:var(--ink);outline:none}
+.clab input:focus{border-bottom-color:var(--gold)}
+.clab input::placeholder{color:var(--ink-3);font-weight:400;font-style:italic}
+.clab .kill{font-size:15px}
+tr.addrow th.lab{padding-top:4px;padding-bottom:6px}
+.addline{background:none;border:none;padding:3px 0;font-size:12px;font-weight:600;color:var(--gold);cursor:pointer}
+.addline:hover{text-decoration:underline}
+
+/* totals */
+tr.tot th.lab,tr.tot td{background:#FBFAF7}
+tr.tot td.cell{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:13.5px;font-weight:500;padding:8px 20px 8px 10px}
+tr.tot.credit td.cell{color:var(--credit)}
+tr.nettot th.lab,tr.nettot td{background:var(--ink);color:#fff;border-bottom:none}
+tr.nettot th.lab{font-weight:700;font-size:14px;color:#fff}
+tr.nettot td.cell{font-size:17px;font-weight:600}
+tr.nettot td.cell.is-high{background:#2C2A25;color:var(--gold-2)}
+tr.derived th.lab,tr.derived td{background:#FBFAF7}
+tr.derived td.cell{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-2);padding:7px 20px 7px 10px}
+
+/* summary + key differences */
+.summary{margin-top:22px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:16px 18px}
+.summary h2{margin:0 0 10px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.sline{font-size:16px;line-height:1.55;max-width:88ch}
+.sline b{font-family:"IBM Plex Mono",monospace;font-weight:600}
+.sline .tip{font-size:13px;color:var(--ink-3)}
+/* ranked comparison, shared by screen and PDF */
+.cmp{margin-top:12px;max-width:880px}
+.cmp-row{display:grid;grid-template-columns:1fr auto;column-gap:18px;row-gap:3px;padding:10px 0;border-top:1px solid var(--line-soft)}
+.cmp-row.is-ref{border-top:none}
+.cmp-name{font-weight:600;font-size:15px}
+.cmp-tag{display:inline-block;margin-left:6px;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;background:var(--gold-soft);color:var(--gold);padding:2px 6px;border-radius:2px;font-weight:600;vertical-align:2px}
+.cmp-net{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:16px;text-align:right}
+.cmp-diff{grid-column:1 / -1;font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:500}
+.cmp-diff.up{color:var(--credit)} .cmp-diff.down{color:var(--red)} .cmp-diff.base{color:var(--gold)}
+.cmp-why{grid-column:1 / -1;list-style:none;margin:4px 0 0;padding:0;max-width:560px}
+.cmp-why li{display:flex;justify-content:space-between;gap:16px;font-size:13px;color:var(--ink-2);padding:2px 0 2px 14px;position:relative}
+.cmp-why li:before{content:"";position:absolute;left:2px;top:.62em;width:4px;height:4px;border-radius:50%;background:var(--gold-2)}
+.cmp-why em{font-style:normal;font-family:"IBM Plex Mono",monospace;font-size:12.5px;white-space:nowrap}
+.cmp-why em.up{color:var(--credit)} .cmp-why em.down{color:var(--red)}
+.cmp-why li.when{color:var(--ink-3)}
+.keydiff{margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.keydiff label{display:block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);font-weight:600;margin-bottom:6px}
+.keydiff textarea{width:100%;max-width:880px;min-height:84px;resize:vertical;border:1px solid var(--line);border-radius:var(--r);padding:9px 10px;font-size:13.5px;line-height:1.5;background:#fff;outline:none}
+.keydiff textarea:focus{border-color:var(--gold)}
+.keydiff textarea::placeholder{color:var(--ink-3);font-size:12.5px}
+.note{margin-top:14px;padding-top:12px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--ink-3);max-width:92ch}
+footer.foot{margin-top:26px;font-size:11px;color:var(--ink-3);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+@media (max-width:760px){
+  .ledger .lab{width:150px;min-width:150px;max-width:150px;font-size:12px;padding-left:10px}
+  .ledger td.cell,.shead{min-width:180px}
+  .net{font-size:22px}
+  .contact{text-align:left}
+}
+
+/* ---------- summary sheet (print / PDF) ---------- */
+#printsheet{display:none;color:var(--ink)}
+.exitbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;padding:9px 12px;background:var(--ink);color:#fff;border-radius:var(--r);font-size:12.5px}
+.exitbar button{background:#fff;color:var(--ink);border:none;border-radius:3px;padding:6px 12px;font-weight:600;cursor:pointer;font-size:12.5px}
+body.preview{background:#fff}
+body.preview .wrap > *:not(#printsheet){display:none}
+body.preview #printsheet{display:block;width:7.6in;max-width:100%;margin:0 auto}
+
+#printsheet{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ps-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;border-bottom:2px solid var(--ink);padding-bottom:7px;margin-bottom:8px}
+.ps-head h2{margin:0;font-size:18pt;line-height:1.05;letter-spacing:-.025em;font-weight:700}
+.ps-prep{font-size:9pt;color:var(--ink-2);margin-top:4pt;line-height:1.45}
+.ps-contact{text-align:right;font-size:8pt;line-height:1.55;color:var(--ink-2);white-space:nowrap}
+.ps-contact strong{color:var(--ink);font-size:9pt;display:block}
+.ps-lead{font-size:9pt;line-height:1.45;margin-bottom:6px;max-width:110ch}
+.ps-lead b{font-family:"IBM Plex Mono",monospace;font-weight:600}
+
+.ps-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.ps-table th,.ps-table td{padding:1.3pt 5pt;line-height:1.25;text-align:right;vertical-align:middle;font-family:"IBM Plex Mono",monospace;font-size:8.2pt;font-weight:400;border-bottom:.5pt solid var(--line-soft)}
+.ps-table th.rl{text-align:left;font-family:"Archivo",sans-serif;font-size:8pt;font-weight:500;color:var(--ink-2);width:25%}
+.ps-table thead th{border-bottom:1pt solid var(--ink);padding-bottom:6pt;vertical-align:top}
+.ps-table thead th.rl{vertical-align:bottom}
+tr.ps-group{page-break-after:avoid}
+.ps-slot{display:block;font-size:6.8pt;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-family:"Archivo",sans-serif}
+.ps-name{display:block;font-family:"Archivo",sans-serif;font-size:10.5pt;font-weight:700;letter-spacing:-.015em;line-height:1.2;margin-top:2pt;word-break:break-word}
+.ps-date{display:block;font-family:"Archivo",sans-serif;font-size:7.5pt;color:var(--ink-3);margin-top:2pt}
+tr.ps-group th{text-align:left;background:var(--band);border-bottom:none;padding-top:3.5pt;padding-bottom:2pt;font-family:"Archivo",sans-serif;font-size:7pt;letter-spacing:.15em;text-transform:uppercase;font-weight:600;color:var(--ink-2)}
+td.ps-cr{color:var(--credit)}
+.ps-pct{color:var(--ink-3);font-size:7.5pt}
+.ps-zero{color:#B5AEA2}
+tr.ps-sum th,tr.ps-sum td{border-bottom:.5pt solid var(--line)}
+tr.ps-sum.first th,tr.ps-sum.first td{border-top:1pt solid var(--ink)}
+tr.ps-total th,tr.ps-total td{border-top:1pt solid var(--ink);border-bottom:1pt solid var(--ink);padding-top:5pt;padding-bottom:5pt}
+tr.ps-total td{font-size:var(--ps-net,13pt);white-space:nowrap;font-weight:600;letter-spacing:-.03em}
+tr.ps-total th.rl{font-size:9.5pt;font-weight:700;color:var(--ink)}
+td.ps-high{background:var(--gold-soft)}
+tr.ps-delta td{font-size:8.3pt;color:var(--red);border-bottom:none;padding-top:4pt}
+tr.ps-delta td.zero{color:var(--gold)}
+tr.ps-delta td.plus{color:var(--credit)}
+.ps-reftag{display:inline-block;margin-left:3pt;background:var(--gold-soft);color:var(--gold);padding:0 3pt;border-radius:1.5pt;font-weight:600;letter-spacing:.08em}
+.ps-cmp{margin-top:7pt;page-break-inside:avoid}
+.ps-cmp h3{margin:0 0 2pt;font-size:7.5pt;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-2);font-weight:600}
+.ps-cmp .cmp{margin-top:0;max-width:none}
+.ps-cmp .cmp-row{grid-template-columns:2.6in 1.05in 1fr;column-gap:10pt;padding:3pt 0;border-top:.5pt solid var(--line);row-gap:0;align-items:baseline}
+.ps-cmp .cmp-row.is-ref{border-top:1pt solid var(--ink)}
+.ps-cmp .cmp-net{text-align:right}
+.ps-cmp .cmp-diff{grid-column:auto;text-align:right}
+.ps-cmp .cmp-why{grid-column:1 / -1;display:block;margin-top:0;line-height:1.35}
+.ps-cmp .cmp-why li{position:static}
+.ps-cmp .cmp-why li{display:inline;padding:0 0 0 0;color:var(--ink-2)}
+.ps-cmp .cmp-why li:before{display:none}
+.ps-cmp .cmp-why li + li:before{content:"; ";display:inline;position:static;width:auto;height:auto;background:none}
+.ps-cmp .cmp-why em{margin-left:3pt}
+.ps-cmp .cmp-why em:before{content:"("} .ps-cmp .cmp-why em:after{content:")"}
+.ps-cmp .cmp-name{font-size:8.8pt}
+.ps-cmp .cmp-tag{font-size:6.2pt;padding:1pt 3pt;margin-left:3pt}
+.ps-cmp .cmp-net{font-size:9pt}
+.ps-cmp .cmp-diff{font-size:8pt}
+.ps-cmp .cmp-why{margin-top:2pt;max-width:none}
+.ps-cmp .cmp-why li{font-size:7.8pt}
+.ps-cmp .cmp-why em{font-size:7.4pt}
+tr.ps-delta th.rl,tr.ps-pctrow th.rl{color:var(--ink-3);font-size:8pt}
+tr.ps-pctrow td{font-size:7.6pt;color:var(--ink-3)}
+.ps-key{margin-top:8pt;border:.75pt solid var(--line);border-left:3pt solid var(--gold-2);padding:5pt 9pt;page-break-inside:avoid}
+.ps-key h3{margin:0 0 4pt;font-size:7.5pt;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-2);font-weight:600}
+.ps-key div{font-size:9pt;line-height:1.5}
+.ps-legend{color:var(--ink-2)}
+.ps-legend span{color:var(--credit);font-family:"IBM Plex Mono",monospace}
+.ps-note{margin-top:8pt;padding-top:7pt;border-top:.5pt solid var(--line);font-size:7pt;line-height:1.55;color:var(--ink-3)}
+.ps-sign{margin-top:8pt;font-size:7.5pt;color:var(--ink-3);display:flex;justify-content:space-between;gap:12px}
+
+@media print{
+  body{background:#fff}
+  .wrap{max-width:none;padding:0;margin:0}
+  .wrap > *:not(#printsheet){display:none!important}
+  #printsheet{display:block!important}
+  .noprint{display:none!important}
+  .ps-table tr{page-break-inside:avoid}
+  thead{display:table-header-group}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async function(){
+  function deny(){ location.replace("/admin"); }
+  try{
+    var SB = window.supabase.createClient("https://emguqhnftdvhbufcddtz.supabase.co","sb_publishable_emkrL8EVhWO0CAH4R0Wiug_BZtPGv9T");
+    var r = await SB.auth.getSession();
+    if(r && r.data && r.data.session){ document.documentElement.style.visibility = "visible"; }
+    else { deny(); }
+  }catch(e){ deny(); }
+})();
+</script>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <h1>Seller netsheet comparison</h1>
+      <p>Put up to five netsheets side by side. Change any debit or credit and every net to seller updates at once.</p>
+    </div>
+    <div class="contact">
+      <strong>Ralph Richardson</strong>
+      Keller Williams Corona &nbsp;|&nbsp; DRE #02054110<br>
+      909.645.4394 &nbsp;|&nbsp; ListWithRalph.com
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button class="btn btn-primary" id="add">Add a sheet</button>
+    <button class="btn" id="reset">Start over</button>
+    <button class="btn btn-gold" id="print">Preview PDF sheet</button>
+    <div class="spacer"></div>
+    <div class="count" id="count"></div>
+  </div>
+
+  <div class="toolbar second">
+    <label class="prep">Prepared for <input type="text" id="preparedFor" placeholder="Seller name" autocomplete="off"></label>
+    <label class="prep">Property <input type="text" id="property" class="wide" placeholder="Property address" autocomplete="off"></label>
+    <label class="prep">Saved <select id="libSelect"></select></label>
+    <button class="btn" id="saveBtn">Save</button>
+    <button class="btn" id="saveAsBtn">Save as new</button>
+    <button class="btn" id="delBtn">Delete</button>
+    <div class="spacer"></div>
+    <span class="savestate" id="savestate"></span>
+  </div>
+
+  <div class="toolbar third">
+    <span class="savestate" id="fileLabel"></span>
+    <div class="spacer"></div>
+    <button class="btn" id="connectBtn">Connect netsheets.json</button>
+    <button class="btn" id="createBtn">Create a data file</button>
+    <button class="btn" id="dlBtn">Download netsheets.json</button>
+    <button class="btn" id="importBtn">Import a copy</button>
+    <input type="file" id="openFile" accept=".json,application/json" style="display:none">
+  </div>
+
+  <div class="scroller">
+    <table class="ledger" id="ledger"></table>
+  </div>
+
+  <section class="summary">
+    <h2>What this means</h2>
+    <div class="sline" id="sline"></div>
+    <div class="cmp" id="cmp"></div>
+    <div class="keydiff">
+      <label for="keyNotes">Key differences</label>
+      <textarea id="keyNotes" rows="3" placeholder="What separates these sheets? Price, seller credit, repairs, closing date, loan type. This prints on the PDF."></textarea>
+    </div>
+    <div class="note">Estimates only. Figures are modeled on an escrow estimated closing statement and will change with the final title and escrow fees, actual loan payoff demands, and the exact closing date. Commissions and county transfer tax can be set as a percent or rate, or typed as a dollar amount. Confirm every figure with escrow before relying on it.</div>
+  </section>
+
+  <footer class="foot">
+    <div>Prepared by Ralph Richardson, Keller Williams Corona</div>
+    <div>Prototype v1.1</div>
+  </footer>
+
+  <!-- ===== summary sheet: hidden on screen, printed to PDF ===== -->
+  <section id="printsheet">
+    <div class="exitbar noprint">
+      <span>Preview of the printed sheet. This is what saves to PDF.</span>
+      <span>
+        <button id="psPrint">Print or save PDF</button>
+        <button id="psExit" style="margin-left:8px">Back to editing</button>
+      </span>
+    </div>
+
+    <header class="ps-head">
+      <div>
+        <h2>Seller netsheet comparison</h2>
+        <div class="ps-prep" id="psPrep"></div>
+      </div>
+      <div class="ps-contact">
+        <strong>Ralph Richardson</strong>
+        Keller Williams Corona &nbsp;|&nbsp; DRE #02054110<br>
+        909.645.4394 &nbsp;|&nbsp; ListWithRalph.com<br>
+        <span id="psDate"></span>
+      </div>
+    </header>
+
+    <div class="ps-lead" id="psLead"></div>
+    <table class="ps-table" id="psTable"></table>
+
+    <div class="ps-cmp" id="psCmp"><h3 id="psCmpTitle">How the sheets compare</h3><div class="cmp" id="psCmpBody"></div></div>
+
+    <div class="ps-key" id="psKey"><h3>Key differences</h3><div id="psKeyBody"></div></div>
+
+    <div class="ps-note"><span class="ps-legend">Amounts marked <span>+</span> are credits to the seller. All other amounts are costs or payoffs paid from the seller's proceeds. Lines that are zero on every sheet are left off.</span> This is an estimated netsheet and all figures are subject to change. Title and escrow fees are estimates, loan and lien payoffs are subject to the lender's payoff demand, and prorations are estimated from each sheet's closing date using 30 day months. Property taxes paid outside of closing are not shown. Your final figures will appear on the closing statement prepared by escrow.</div>
+
+    <div class="ps-sign">
+      <span>Ralph Richardson &nbsp;|&nbsp; Keller Williams Corona &nbsp;|&nbsp; DRE #02054110</span>
+      <span>List With Ralph &nbsp;|&nbsp; Results That Move You</span>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   Seller Netsheet Comparison Prototype v1.1
+   Line items modeled on a Pro Group Escrow estimated
+   seller's closing statement.
+   ============================================================ */
+
+var MAX = 5;
+var SLOTS = ["Sheet A","Sheet B","Sheet C","Sheet D","Sheet E"];
+
+var SECTIONS = [
+  {id:"sale",   title:"Sale"},
+  {id:"pro",    title:"Prorations and adjustments"},
+  {id:"com",    title:"Commissions"},
+  {id:"title",  title:"Title charges"},
+  {id:"escrow", title:"Escrow charges"},
+  {id:"loan",   title:"Loan and lien payoffs"},
+  {id:"add",    title:"Additional disbursements"}
+];
+
+/* side: c = credit to seller, d = debit (cost). flip: can be switched per sheet */
+var ROWS = [
+  {id:"price",     sec:"sale",   label:"Sale price",                         sub:"Total consideration", side:"c", kind:"price", short:"Price"},
+  {id:"taxPro",    sec:"pro",    label:"Property tax proration",             side:"d", flip:true, kind:"prorate"},
+  {id:"hoaPro",    sec:"pro",    label:"HOA dues proration",                 side:"c", flip:true, kind:"prorate"},
+  {id:"listCom",   sec:"com",    label:"Listing broker",                     side:"d", kind:"pct", short:"Listing commission"},
+  {id:"sellCom",   sec:"com",    label:"Selling broker",                     sub:"Buyer's agent", side:"d", kind:"pct", short:"Buyer's agent commission"},
+  {id:"owners",    sec:"title",  label:"Owner's title policy",               side:"d"},
+  {id:"xfer",      sec:"title",  label:"County transfer tax",                sub:"Auto is $1.10 per $1,000", side:"d", kind:"xfer", short:"Transfer tax"},
+  {id:"subEsc",    sec:"title",  label:"Sub-escrow fee",                     side:"d"},
+  {id:"titleWire", sec:"title",  label:"Wire and overnight",                 side:"d"},
+  {id:"record",    sec:"title",  label:"Recording fee",                      side:"d"},
+  {id:"escFee",    sec:"escrow", label:"Escrow settlement fee",              side:"d"},
+  {id:"escProc",   sec:"escrow", label:"Storage and wire processing", side:"d"},
+  {id:"deed",      sec:"escrow", label:"Grant deed",                         side:"d"},
+  {id:"demand",    sec:"escrow", label:"Demand fee",                         side:"d"},
+  {id:"loan1",     sec:"loan",   label:"1st loan payoff",                    sub:"Estimate only", side:"d"},
+  {id:"loan2",     sec:"loan",   label:"2nd loan or HELOC payoff",           side:"d"},
+  {id:"solar",     sec:"loan",   label:"Solar payoff",                       side:"d"},
+  {id:"notary",    sec:"add",    label:"Signing and notary",                 side:"d"},
+  {id:"nhd",       sec:"add",    label:"Natural hazard disclosure",          side:"d"},
+  {id:"warranty",  sec:"add",    label:"Home warranty",                      side:"d"},
+  {id:"messenger", sec:"add",    label:"Messenger fee",                      side:"d"},
+  {id:"repairs",   sec:"add",    label:"Repairs or septic",                  side:"d"},
+  {id:"credit",    sec:"add",    label:"Seller credit to buyer",             side:"d", short:"Seller credit"},
+  {id:"hoaDocs",   sec:"add",    label:"HOA document fees",                  sub:"Management company", side:"d"},
+  {id:"hoaDues",   sec:"add",    label:"HOA dues owed",                      side:"d"}
+];
+
+/* the estimated closing statement this tool is modeled on */
+var EXAMPLE = {
+  price:799900, taxPro:2051.67, hoaPro:133.33,
+  listCom:23997, sellCom:15998,
+  owners:2262, xfer:880, subEsc:80, titleWire:45, record:15,
+  escFee:2695, escProc:150, deed:75, demand:95,
+  loan1:34600, loan2:0, solar:22000,
+  notary:175, nhd:100, warranty:995, messenger:45, repairs:7515, credit:16000, hoaDocs:1500, hoaDues:200
+};
+
+function exampleSheet(){
+  var v = {};
+  Object.keys(EXAMPLE).forEach(function(k){ v[k] = EXAMPLE[k]; });
+  return {
+    name:"", close:"2026-09-11",
+    v:v,
+    pct:{listCom:3, sellCom:2},
+    mode:{listCom:"pct", sellCom:"pct", xfer:"auto", taxPro:"auto", hoaPro:"auto"},
+    side:{},
+    base:false
+  };
+}
+
+/* a fresh sheet: typical fees, no payoffs, prorations or credits */
+function blankSheet(price){
+  var s = exampleSheet();
+  ["taxPro","hoaPro","loan1","loan2","solar","repairs","credit","hoaDocs","hoaDues"].forEach(function(k){ s.v[k] = 0; });
+  s.v.price = price || 0;
+  s.close = "";
+  custom.forEach(function(r){ s.v[r.id] = 0; });
+  return s;
+}
+
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+
+var custom = [];               /* custom lines shared across sheets: {id, sec, label, side} */
+var facts = {taxSemi:5201.42, hoaMonthly:200};   /* property facts that drive the automatic prorations */
+var sheets = [];
+var refs = [];                 /* per sheet ui references */
+
+function initialState(){
+  custom = [];
+  facts = {taxSemi:5201.42, hoaMonthly:200};
+  var a = exampleSheet();
+  var b = exampleSheet();
+  b.v.price = 810000; b.v.credit = 0;
+  sheets = [a, b];
+}
+initialState();
+
+/* ---------- helpers ---------- */
+function num(v){
+  if(typeof v === "number") return isFinite(v) ? v : 0;
+  var n = parseFloat(String(v).replace(/[^0-9.\-]/g,""));
+  return isFinite(n) ? n : 0;
+}
+function r2(n){ return Math.round(n*100)/100; }
+function f2(n){ return r2(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function usd(n){ return (n < 0 ? "-$" : "$") + f2(Math.abs(n)); }
+function usd0(n){ return (n < 0 ? "-$" : "$") + Math.round(Math.abs(n)).toLocaleString("en-US"); }
+function pctTxt(n){ return (Math.round(n*1000)/1000) + "%"; }
+function esc(s){
+  return String(s).replace(/[&<>"]/g, function(m){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m]; });
+}
+function el(tag, cls, html){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html != null) e.innerHTML = html;
+  return e;
+}
+function uid(p){ return (p||"x") + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+function allRows(){
+  var out = [];
+  SECTIONS.forEach(function(sec){ out = out.concat(rowsIn(sec.id)); });
+  return out;
+}
+function rowsIn(secId){
+  var std = ROWS.filter(function(r){ return r.sec === secId; });
+  var cus = custom.filter(function(r){ return r.sec === secId; }).map(function(r){
+    return {id:r.id, sec:r.sec, label:r.label, side:r.side || "d", flip:true, custom:true};
+  });
+  return std.concat(cus);
+}
+
+/* ---------- math ---------- */
+/* escrow style 30 day months */
+function days360(m1,d1,m2,d2){ return (m2-m1)*30 + (Math.min(d2,30) - Math.min(d1,30)); }
+function prorateInfo(s, row){
+  var p = (s.close || "").split("-");
+  if(p.length !== 3) return {amt:0, days:0, nodate:true};
+  var m = +p[1], d = Math.min(+p[2], 30);
+  var credit = sideOf(s,row) === "c";
+  if(row.id === "taxPro"){
+    /* tax halves run 7/1 to 12/31 and 1/1 to 6/30; seller owes from the start of the half through closing day */
+    var owed = Math.max(0, Math.min(180, days360(m >= 7 ? 7 : 1, 1, m, d) + 1));
+    var td = credit ? 180 - owed : owed;
+    return {amt:r2(num(facts.taxSemi) * td / 180), days:td};
+  }
+  /* HOA dues paid through the end of the month; buyer owns from closing day */
+  var cr = 30 - d + 1;
+  var hd = credit ? cr : 30 - cr;
+  return {amt:r2(num(facts.hoaMonthly) * hd / 30), days:hd};
+}
+function amount(s, row){
+  var price = Math.max(0, num(s.v.price));
+  if(row.kind === "prorate" && s.mode[row.id] !== "amt") return prorateInfo(s,row).amt;
+  if(row.kind === "pct" && s.mode[row.id] !== "amt") return r2(price * num(s.pct[row.id]) / 100);
+  if(row.kind === "xfer" && s.mode.xfer !== "amt") return r2(Math.ceil(price / 500) * 0.55);
+  return r2(num(s.v[row.id]));
+}
+function sideOf(s, row){
+  if(row.flip && s.side && s.side[row.id]) return s.side[row.id];
+  return row.side;
+}
+function calc(s){
+  var credits = 0, debits = 0, payoffs = 0, lines = {};
+  allRows().forEach(function(row){
+    var a = amount(s, row), sd = sideOf(s, row);
+    lines[row.id] = {amt:a, side:sd};
+    if(sd === "c") credits += a;
+    else { debits += a; if(row.sec === "loan") payoffs += a; }
+  });
+  var price = Math.max(0, num(s.v.price));
+  credits = r2(credits); debits = r2(debits); payoffs = r2(payoffs);
+  var selling = r2(debits - payoffs);
+  return {price:price, credits:credits, debits:debits, payoffs:payoffs, selling:selling,
+          sellingPct: price > 0 ? selling/price*100 : 0,
+          net:r2(credits - debits), lines:lines};
+}
+
+/* ---------- ledger construction ---------- */
+function amountControl(s, row, idx){
+  var td = el("td","cell");
+  var ctl = el("div","control");
+  ctl.appendChild(el("span","cur","$"));
+  var input = document.createElement("input");
+  input.type = "text"; input.inputMode = "decimal"; input.autocomplete = "off";
+  input.setAttribute("aria-label", row.label + ", " + SLOTS[idx]);
+  ctl.appendChild(input);
+
+  var units = null;
+  if(row.kind === "pct") units = [["pct","%"],["amt","$"]];
+  if(row.kind === "xfer") units = [["auto","Auto"],["amt","Set"]];
+  if(row.flip) units = [["d","Cost"],["c","Credit"]];
+  var ub = null;
+  if(units){
+    ub = el("div","unit");
+    units.forEach(function(u){
+      var b = el("button", u[0] === "c" ? "c" : null, u[1]);
+      b.type = "button"; b.dataset.u = u[0];
+      ub.appendChild(b);
+    });
+    ctl.appendChild(ub);
+  }
+  td.appendChild(ctl);
+  var hint = null;
+  if(row.kind === "pct" || row.kind === "xfer" || row.kind === "prorate"){ hint = el("div","hint",""); td.appendChild(hint); }
+  if(row.kind === "prorate"){
+    hint.addEventListener("click", function(e){
+      var b = e.target.closest && e.target.closest("button");
+      if(!b) return;
+      s.mode[row.id] = b.dataset.m;
+      if(b.dataset.m === "amt") s.v[row.id] = amount(s,row);
+      paint(); recalc();
+    });
+  }
+
+  function isPctMode(){ return row.kind === "pct" && s.mode[row.id] !== "amt"; }
+
+  input.addEventListener("input", function(){
+    if(isPctMode()) s.pct[row.id] = num(input.value);
+    else if(row.kind === "prorate"){ s.mode[row.id] = "amt"; s.v[row.id] = num(input.value); }
+    else if(row.kind === "xfer" && s.mode.xfer !== "amt") return;
+    else s.v[row.id] = num(input.value);
+    recalc();
+  });
+  input.addEventListener("focus", function(){
+    if(input.readOnly) return;
+    var raw = isPctMode() ? num(s.pct[row.id]) : (row.kind === "prorate" ? amount(s,row) : num(s.v[row.id]));
+    input.value = raw ? String(raw) : "";
+    input.select();
+    selectOnUp = true;
+  });
+  var selectOnUp = false;
+  input.addEventListener("mouseup", function(e){
+    if(selectOnUp){ e.preventDefault(); input.select(); selectOnUp = false; }
+  });
+  input.addEventListener("blur", function(){ paint(); });
+
+  if(ub){
+    ub.querySelectorAll("button").forEach(function(b){
+      b.onclick = function(){
+        var u = b.dataset.u;
+        if(row.flip){ s.side[row.id] = u; }
+        else if(row.kind === "pct"){
+          var cur = amount(s,row);
+          s.mode[row.id] = u;
+          if(u === "amt") s.v[row.id] = cur;
+          else { var p = num(s.v.price); s.pct[row.id] = p > 0 ? Math.round(cur/p*100000)/1000 : 0; }
+        } else if(row.kind === "xfer"){
+          var cx = amount(s,row);
+          s.mode.xfer = u;
+          if(u === "amt") s.v.xfer = cx;
+        }
+        paint(); recalc();
+      };
+    });
+  }
+
+  function paint(){
+    var a = amount(s,row);
+    var auto = row.kind === "xfer" && s.mode.xfer !== "amt";
+    input.readOnly = auto;
+    ctl.querySelector(".cur").textContent = isPctMode() ? "%" : "$";
+    if(document.activeElement !== input){
+      input.value = isPctMode() ? (Math.round(num(s.pct[row.id])*1000)/1000) : f2(a);
+    }
+    if(ub){
+      ub.querySelectorAll("button").forEach(function(b){
+        var on;
+        if(row.flip) on = b.dataset.u === sideOf(s,row);
+        else if(row.kind === "pct") on = b.dataset.u === (s.mode[row.id] === "amt" ? "amt" : "pct");
+        else on = b.dataset.u === (s.mode.xfer === "amt" ? "amt" : "auto");
+        b.classList.toggle("on", on);
+      });
+    }
+    td.classList.toggle("credit", sideOf(s,row) === "c" && row.kind !== "price");
+    if(hint){
+      var price = num(s.v.price);
+      if(row.kind === "pct") hint.textContent = isPctMode() ? "= " + usd(a) : (price > 0 ? pctTxt(a/price*100) + " of price" : "");
+      else if(row.kind === "prorate"){
+        if(s.mode[row.id] === "amt") hint.innerHTML = "Typed in &nbsp;<button type='button' class='hintbtn' data-m='auto'>Use closing date</button>";
+        else {
+          var pi = prorateInfo(s,row);
+          hint.innerHTML = (pi.nodate ? "Add a closing date" : "Auto, " + pi.days + " day" + (pi.days === 1 ? "" : "s")) +
+            " &nbsp;<button type='button' class='hintbtn' data-m='amt'>Type it</button>";
+        }
+      }
+      else hint.textContent = auto ? "" : (price > 0 ? "$" + (Math.round(a/price*1000*100)/100).toFixed(2) + " per $1,000" : "");
+    }
+  }
+  paint();
+  return {td:td, paint:paint};
+}
+
+function sheetHeader(s, idx){
+  var th = el("th","shead");
+  th.appendChild(el("div","cap"));
+  var row = el("div","hrow");
+  row.appendChild(el("span","slot", SLOTS[idx]));
+  var acts = el("div","hacts");
+  var hiTag = el("span","hi-tag",""); hiTag.style.display = "none";
+  var dup = el("button","mini","Duplicate"); dup.type = "button";
+  dup.title = "Copy this sheet into a new column";
+  dup.disabled = sheets.length >= MAX;
+  dup.onclick = function(){ duplicateSheet(idx); };
+  var kill = el("button","kill","\u00D7"); kill.type = "button";
+  kill.title = "Remove this sheet"; kill.disabled = sheets.length <= 1;
+  kill.onclick = function(){ removeSheet(idx); };
+  acts.appendChild(hiTag); acts.appendChild(dup); acts.appendChild(kill);
+  row.appendChild(acts);
+  th.appendChild(row);
+
+  var name = el("input","sname");
+  name.type = "text"; name.autocomplete = "off";
+  name.placeholder = "Name this sheet, e.g. Offer 1";
+  name.value = s.name || "";
+  name.oninput = function(){ s.name = name.value; recalc(); };
+  th.appendChild(name);
+
+  var dwrap = el("label","sdate","Closing");
+  var date = document.createElement("input");
+  date.type = "date"; date.value = s.close || "";
+  date.onchange = function(){ s.close = date.value; recalc(); };
+  dwrap.appendChild(date);
+  th.appendChild(dwrap);
+
+  var net = el("div","net","$0.00");
+  th.appendChild(net);
+  th.appendChild(el("div","netlab","Estimated net to seller"));
+  var delta = el("div","delta","");
+  th.appendChild(delta);
+  var baseBtn = el("button","basebtn",""); baseBtn.type = "button";
+  baseBtn.onclick = function(){ setBaseline(idx); };
+  th.appendChild(baseBtn);
+  return {th:th, net:net, delta:delta, hiTag:hiTag, baseBtn:baseBtn};
+}
+
+function labelCell(row){
+  var th = el("th","lab");
+  if(row.custom){
+    var wrap = el("div","clab");
+    var inp = document.createElement("input");
+    inp.type = "text"; inp.autocomplete = "off";
+    inp.placeholder = "Describe this line";
+    inp.value = row.label || "";
+    inp.oninput = function(){
+      var c = custom.filter(function(x){ return x.id === row.id; })[0];
+      if(c){ c.label = inp.value; recalc(); }
+    };
+    var kill = el("button","kill","\u00D7"); kill.type = "button"; kill.title = "Remove this line from every sheet";
+    kill.onclick = function(){ removeLine(row.id); };
+    wrap.appendChild(inp); wrap.appendChild(kill);
+    th.appendChild(wrap);
+  } else {
+    th.innerHTML = esc(row.label) + (row.kind === "price" ? "<span class='side'>Credit</span>" : "") +
+                   (row.sub ? "<span class='sub'>" + esc(row.sub) + "</span>" : "");
+    if(row.kind === "prorate"){
+      var key = row.id === "taxPro" ? "taxSemi" : "hoaMonthly";
+      var fl = el("label","fact", row.id === "taxPro" ? "Tax per 6 months $" : "HOA dues per month $");
+      var fi = document.createElement("input");
+      fi.type = "text"; fi.inputMode = "decimal"; fi.autocomplete = "off";
+      fi.value = f2(num(facts[key]));
+      fi.oninput = function(){ facts[key] = num(fi.value); recalc(); };
+      fi.onfocus = function(){ fi.value = num(facts[key]) ? String(num(facts[key])) : ""; fi.select(); };
+      fi.onblur = function(){ fi.value = f2(num(facts[key])); };
+      fl.appendChild(fi);
+      th.appendChild(fl);
+    }
+  }
+  return th;
+}
+
+function renderLedger(){
+  var t = document.getElementById("ledger");
+  t.innerHTML = "";
+  refs = sheets.map(function(){ return {cells:{}, tot:{}}; });
+
+  /* header */
+  var thead = document.createElement("thead");
+  var hr = document.createElement("tr");
+  var corner = el("th","lab","Every amount is editable. Click a figure, type, and the net updates.");
+  hr.appendChild(corner);
+  sheets.forEach(function(s,i){
+    var h = sheetHeader(s,i);
+    refs[i].head = h;
+    hr.appendChild(h.th);
+  });
+  thead.appendChild(hr);
+  t.appendChild(thead);
+
+  var tb = document.createElement("tbody");
+  SECTIONS.forEach(function(sec){
+    if(sec.id !== "sale"){
+      var band = el("tr","band");
+      band.appendChild(el("th","lab", esc(sec.title)));
+      sheets.forEach(function(){ band.appendChild(el("td")); });
+      tb.appendChild(band);
+    }
+    rowsIn(sec.id).forEach(function(row){
+      var tr = document.createElement("tr");
+      tr.appendChild(labelCell(row));
+      sheets.forEach(function(s,i){
+        var c = amountControl(s,row,i);
+        refs[i].cells[row.id] = c;
+        tr.appendChild(c.td);
+      });
+      tb.appendChild(tr);
+    });
+    if(sec.id !== "sale"){
+      var ar = el("tr","addrow");
+      var ath = el("th","lab");
+      var ab = el("button","addline","+ Add a line"); ab.type = "button";
+      ab.onclick = function(){ addLine(sec.id); };
+      ath.appendChild(ab);
+      ar.appendChild(ath);
+      sheets.forEach(function(){ ar.appendChild(el("td")); });
+      tb.appendChild(ar);
+    }
+  });
+
+  /* totals */
+  function totRow(key, label, cls){
+    var tr = el("tr", cls);
+    tr.appendChild(el("th","lab",label));
+    sheets.forEach(function(s,i){
+      var td = el("td","cell","");
+      refs[i].tot[key] = td;
+      tr.appendChild(td);
+    });
+    tb.appendChild(tr);
+  }
+  totRow("credits","Total credits","tot credit");
+  totRow("debits","Total debits","tot");
+  totRow("net","Estimated net to seller","nettot");
+  totRow("selling","Selling costs<span class='sub' style='color:var(--ink-3)'>Debits before loan payoffs</span>","derived");
+  totRow("sellingPct","Selling costs as a share of price","derived last");
+  t.appendChild(tb);
+
+  document.getElementById("add").disabled = sheets.length >= MAX;
+  document.getElementById("count").textContent = sheets.length + " of " + MAX + " sheets";
+  recalc();
+}
+
+/* ---------- recalc ---------- */
+function nameOf(i){ return (sheets[i].name || "").trim() || SLOTS[i]; }
+
+function recalc(){
+  var res = sheets.map(calc);
+  var nets = res.map(function(r){ return r.net; });
+  var max = Math.max.apply(null, nets);
+  var min = Math.min.apply(null, nets);
+  var hiIdx = nets.indexOf(max);
+  var multi = sheets.length > 1;
+  var bIdx = baseIdx();
+  var refIdx = bIdx >= 0 ? bIdx : hiIdx;
+  var allSame = (max - min) < 0.005;
+
+  res.forEach(function(r,i){
+    var rf = refs[i];
+    if(!rf || !rf.head) return;
+    Object.keys(rf.cells).forEach(function(k){ rf.cells[k].paint(); });
+    rf.head.net.textContent = usd(r.net);
+    var isHi = bIdx >= 0 ? (multi && i === bIdx) : (multi && !allSame && (max - r.net) < 0.005);
+    rf.head.th.classList.toggle("is-high", isHi);
+    rf.head.hiTag.textContent = bIdx >= 0 ? "Baseline" : "Highest net";
+    rf.head.hiTag.style.display = isHi ? "" : "none";
+    rf.head.baseBtn.style.display = multi ? "" : "none";
+    rf.head.baseBtn.textContent = i === bIdx ? "Clear baseline" : "Compare to this";
+    var diff = r2(r.net - res[refIdx].net);
+    var word = bIdx >= 0 ? " vs baseline" : " vs highest";
+    if(!multi){ rf.head.delta.textContent = ""; }
+    else if(i === bIdx){ rf.head.delta.textContent = "Every sheet is compared to this one"; rf.head.delta.className = "delta base"; }
+    else if(Math.abs(diff) < 0.005){
+      rf.head.delta.textContent = bIdx >= 0 ? "Same net as the baseline" : (allSame ? "Same net as the others" : "Highest net of the group");
+      rf.head.delta.className = "delta base";
+    } else {
+      rf.head.delta.textContent = (diff > 0 ? "+" : "-") + usd(Math.abs(diff)) + word;
+      rf.head.delta.className = "delta " + (diff > 0 ? "up" : "down");
+    }
+    rf.tot.credits.textContent = usd(r.credits);
+    rf.tot.debits.textContent = usd(r.debits);
+    rf.tot.net.textContent = usd(r.net);
+    rf.tot.net.classList.toggle("is-high", isHi);
+    rf.tot.selling.textContent = usd(r.selling);
+    rf.tot.sellingPct.textContent = r.price > 0 ? (Math.round(r.sellingPct*100)/100).toFixed(2) + "%" : "";
+  });
+
+  /* summary */
+  var s = document.getElementById("sline");
+  var cmpHTML = "";
+  if(!multi){
+    var r0 = res[0];
+    s.innerHTML = "Estimated net to seller is <b>" + usd(r0.net) + "</b> on a sale price of <b>" + usd0(r0.price) +
+      "</b>, after <b>" + usd(r0.selling) + "</b> in selling costs" +
+      (r0.payoffs > 0 ? " and <b>" + usd(r0.payoffs) + "</b> in loan and lien payoffs." : ".");
+  } else {
+    s.innerHTML = bIdx >= 0
+      ? "Every sheet is compared to <b>" + esc(nameOf(bIdx)) + "</b>, which nets <b>" + usd(res[bIdx].net) + "</b>."
+      : "Every sheet is compared to <b>" + esc(nameOf(hiIdx)) + "</b>, the highest net at <b>" + usd(max) + "</b>." +
+        " <span class='tip'>Click Compare to this on any sheet to measure against it instead.</span>";
+    cmpHTML = compareHTML(res, refIdx, bIdx >= 0);
+  }
+  document.getElementById("cmp").innerHTML = cmpHTML;
+
+  buildSheet(res, refIdx, bIdx >= 0, s.innerHTML.replace(/ ?<span class='tip'>.*?<\/span>/, ""), cmpHTML);
+  autosave();
+}
+
+/* ---------- baseline and comparison ---------- */
+function baseIdx(){
+  for(var i = 0; i < sheets.length; i++) if(sheets[i].base) return i;
+  return -1;
+}
+function setBaseline(i){
+  var was = !!sheets[i].base;
+  sheets.forEach(function(s){ s.base = false; });
+  sheets[i].base = !was;
+  recalc();
+}
+function daysBetween(a, b){
+  var pa = a.split("-"), pb = b.split("-");
+  return Math.round((Date.UTC(+pb[0],+pb[1]-1,+pb[2]) - Date.UTC(+pa[0],+pa[1]-1,+pa[2])) / 86400000);
+}
+function rowName(r){ return r.custom ? ((r.label || "").trim() || "Other line") : (r.short || r.label); }
+
+/* the line items that move this sheet's net away from the reference, biggest first */
+function drivers(res, i, ref){
+  var list = [];
+  allRows().forEach(function(r){
+    var a = res[i].lines[r.id], b = res[ref].lines[r.id];
+    var ea = a.side === "c" ? a.amt : -a.amt;
+    var eb = b.side === "c" ? b.amt : -b.amt;
+    var impact = r2(ea - eb);
+    if(Math.abs(impact) < 0.5) return;
+    var txt;
+    if(a.side !== b.side) txt = rowName(r) + " is a " + (a.side === "c" ? "credit" : "cost") + " here";
+    else {
+      var d = r2(a.amt - b.amt);
+      txt = rowName(r) + (a.side === "c" && r.kind !== "price" ? " credit" : "") + " is " + usd(Math.abs(d)) + (d > 0 ? " higher" : " lower");
+    }
+    list.push({txt:txt, impact:impact, name:(r.kind === "prorate" ? "prorations" : rowName(r))});
+  });
+  list.sort(function(x,y){ return Math.abs(y.impact) - Math.abs(x.impact); });
+  var top = list.slice(0,3), rest = list.slice(3);
+  var out = top.map(function(x){ return {txt:x.txt, impact:x.impact}; });
+  if(rest.length){
+    var sum = r2(rest.reduce(function(t,x){ return t + x.impact; }, 0));
+    var names = [];
+    rest.forEach(function(x){ var nm = x.name.replace(/^./, function(c){ return c.toLowerCase(); }); if(names.indexOf(nm) < 0) names.push(nm); });
+    var nm = names.length > 3 ? names.slice(0,2).join(", ") + " and " + (names.length - 2) + " more" : names.join(", ").replace(/, ([^,]*)$/, " and $1");
+    if(Math.abs(sum) >= 0.5) out.push({txt:"Smaller items: " + nm, impact:sum});
+  }
+  return out;
+}
+function compareHTML(res, ref, isBase){
+  var order = sheets.map(function(s,i){ return i; }).filter(function(i){ return i !== ref; });
+  order.sort(function(a,b){ return res[b].net - res[a].net; });
+  order.unshift(ref);
+  var refWord = isBase ? "the baseline" : "the highest net";
+  return order.map(function(i){
+    var s = sheets[i], r = res[i];
+    var d = r2(r.net - res[ref].net);
+    var head = "<div class='cmp-name'>" + esc(nameOf(i)) + (i === ref ? " <span class='cmp-tag'>" + (isBase ? "Baseline" : "Highest net") + "</span>" : "") + "</div>" +
+               "<div class='cmp-net'>" + usd(r.net) + "</div>";
+    var diffTxt, why = "";
+    if(i === ref) diffTxt = "";
+    else if(Math.abs(d) < 0.005) diffTxt = "<div class='cmp-diff base'>Same as " + refWord + "</div>";
+    else diffTxt = "<div class='cmp-diff " + (d > 0 ? "up" : "down") + "'>" + usd(Math.abs(d)) + (d > 0 ? " more" : " less") + " than " + refWord + "</div>";
+    if(i !== ref){
+      var parts = drivers(res, i, ref).map(function(x){
+        return "<li><span>" + esc(x.txt) + "</span><em class='" + (x.impact > 0 ? "up" : "down") + "'>" + (x.impact > 0 ? "+" : "-") + usd(Math.abs(x.impact)) + "</em></li>";
+      });
+      var rc = sheets[ref].close;
+      if(s.close && rc && s.close !== rc){
+        var dd = daysBetween(rc, s.close);
+        parts.push("<li class='when'><span>Closes " + Math.abs(dd) + " day" + (Math.abs(dd) === 1 ? "" : "s") + (dd > 0 ? " later" : " sooner") + "</span></li>");
+      }
+      if(parts.length) why = "<ul class='cmp-why'>" + parts.join("") + "</ul>";
+    } else {
+      diffTxt = "<div class='cmp-diff base'>" + (s.close ? "Closing " + fmtDate(s.close) : (isBase ? "Baseline" : "Highest net")) + "</div>";
+    }
+    return "<div class='cmp-row" + (i === ref ? " is-ref" : "") + "'>" + head + diffTxt + why + "</div>";
+  }).join("");
+}
+
+/* ---------- actions ---------- */
+function addLine(secId){
+  var r = {id:uid("L"), sec:secId, label:"", side: secId === "pro" ? "d" : "d"};
+  custom.push(r);
+  sheets.forEach(function(s){ s.v[r.id] = 0; });
+  renderLedger();
+  var inputs = document.querySelectorAll(".clab input");
+  var last = null;
+  inputs.forEach(function(inp){ if(!inp.value) last = inp; });
+  if(last) last.focus();
+}
+function removeLine(id){
+  var used = sheets.some(function(s){ return num(s.v[id]) !== 0; });
+  if(used && !confirm("Remove this line from every sheet?")) return;
+  custom = custom.filter(function(r){ return r.id !== id; });
+  sheets.forEach(function(s){ delete s.v[id]; if(s.side) delete s.side[id]; });
+  renderLedger();
+}
+function duplicateSheet(i){
+  if(sheets.length >= MAX) return;
+  var c = clone(sheets[i]);
+  c.name = (sheets[i].name || "").trim() ? sheets[i].name.trim() + " copy" : "";
+  c.base = false;
+  sheets.splice(i+1, 0, c);
+  renderLedger();
+}
+function removeSheet(i){
+  if(sheets.length <= 1) return;
+  sheets.splice(i,1);
+  renderLedger();
+}
+document.getElementById("add").onclick = function(){
+  if(sheets.length >= MAX) return;
+  sheets.push(blankSheet(num(sheets[0] ? sheets[0].v.price : 0)));
+  renderLedger();
+  var sc = document.querySelector(".scroller");
+  sc.scrollLeft = sc.scrollWidth;
+};
+document.getElementById("reset").onclick = function(){
+  if(!confirm("Clear every sheet and start over? Save the comparison first if you want to keep it.")) return;
+  initialState();
+  document.getElementById("preparedFor").value = "";
+  document.getElementById("property").value = "";
+  document.getElementById("keyNotes").value = "";
+  activeId = null;
+  refreshLib();
+  renderLedger();
+  flash("Cleared. Saved comparisons were not touched.");
+};
+
+/* ---------- summary sheet ---------- */
+var pageStyle = document.createElement("style");
+document.head.appendChild(pageStyle);
+
+function fmtDate(iso){
+  if(!iso) return "";
+  var p = iso.split("-");
+  if(p.length !== 3) return iso;
+  return new Date(+p[0], +p[1]-1, +p[2]).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+}
+
+function buildSheet(res, ref, isBase, leadHTML, cmpHTML){
+  var n = sheets.length;
+  var multi = n > 1;
+  pageStyle.textContent = "@page{size:letter portrait;margin:0.4in 0.45in}";
+  document.getElementById("psTable").style.setProperty("--ps-net", n >= 5 ? "9.6pt" : n === 4 ? "11pt" : "13pt");
+
+  document.getElementById("psDate").textContent = new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+  document.getElementById("psLead").innerHTML = cmpHTML ? "" : leadHTML;
+  document.getElementById("psLead").style.display = cmpHTML ? "none" : "";
+  document.getElementById("psCmpTitle").textContent = isBase ? "How each sheet compares to " + nameOf(ref) : "How each sheet compares to the highest net";
+  var prep = document.getElementById("preparedFor").value.trim();
+  var prop = document.getElementById("property").value.trim();
+  var ph = [];
+  if(prep) ph.push("Prepared for " + esc(prep));
+  if(prop) ph.push(esc(prop));
+  document.getElementById("psPrep").innerHTML = ph.join("<br>");
+  document.getElementById("psPrep").style.display = ph.length ? "" : "none";
+
+  var colW = Math.floor(75 / n);
+  var html = "<colgroup><col style='width:25%'>";
+  for(var c = 0; c < n; c++) html += "<col style='width:" + colW + "%'>";
+  html += "</colgroup><thead><tr><th class='rl'></th>";
+  sheets.forEach(function(s,i){
+    html += "<th" + (multi && i === ref ? " class='ps-refcol'" : "") + "><span class='ps-slot'>" + SLOTS[i] + (multi && i === ref ? " <span class='ps-reftag'>" + (isBase ? "Baseline" : "Highest net") + "</span>" : "") + "</span><span class='ps-name'>" + esc(nameOf(i)) + "</span>" +
+            (s.close ? "<span class='ps-date'>Closing " + fmtDate(s.close) + "</span>" : "") + "</th>";
+  });
+  html += "</tr></thead><tbody>";
+
+  function row(label, vals, cls, cellCls){
+    var h = "<tr" + (cls ? " class='" + cls + "'" : "") + "><th class='rl'>" + label + "</th>";
+    vals.forEach(function(v,i){ h += "<td" + (cellCls ? " class='" + cellCls(i) + "'" : "") + ">" + v + "</td>"; });
+    return h + "</tr>";
+  }
+
+  SECTIONS.forEach(function(sec){
+    var rows = rowsIn(sec.id).filter(function(r){
+      return res.some(function(x){ return x.lines[r.id] && x.lines[r.id].amt >= 0.005; });
+    });
+    if(!rows.length) return;
+    if(sec.id !== "sale") html += "<tr class='ps-group'><th colspan='" + (n+1) + "'>" + esc(sec.title) + "</th></tr>";
+    rows.forEach(function(r){
+      var label = esc(r.custom ? (r.label || "Other") : r.label);
+      html += row(label, res.map(function(x,i){
+        var ln = x.lines[r.id];
+        if(ln.amt < 0.005) return "<span class='ps-zero'>0.00</span>";
+        var t = (ln.side === "c" && r.kind !== "price" ? "+ " : "") + f2(ln.amt);
+        if(r.kind === "pct" && x.price > 0) t = "<span class='ps-pct'>" + pctTxt(ln.amt/x.price*100) + "</span>&nbsp; " + t;
+        return t;
+      }), "", function(i){ var ln = res[i].lines[r.id]; return (ln.side === "c" && r.kind !== "price") ? "ps-cr" : ""; });
+    });
+  });
+
+  html += row("Total credits", res.map(function(x){ return f2(x.credits); }), "ps-sum first");
+  html += row("Total debits", res.map(function(x){ return f2(x.debits); }), "ps-sum");
+  html += row("Estimated net to seller", res.map(function(x){ return usd(x.net); }), "ps-total", function(i){
+    return (multi && i === ref) ? "ps-high" : "";
+  });
+  if(multi){
+    html += row("Compared to " + (isBase ? esc(nameOf(ref)) : "the highest net"), res.map(function(x,i){
+      if(i === ref) return isBase ? "Baseline" : "Highest";
+      var d = r2(x.net - res[ref].net);
+      return Math.abs(d) < 0.005 ? "Same" : (d > 0 ? "+" : "-") + usd(Math.abs(d));
+    }), "ps-delta", function(i){
+      var d = r2(res[i].net - res[ref].net);
+      return (i === ref || Math.abs(d) < 0.005) ? "zero" : (d > 0 ? "plus" : "");
+    });
+  }
+  html += row("Selling costs, before payoffs", res.map(function(x){ return usd(x.selling); }), "ps-pctrow");
+  html += row("Selling costs as a share of price", res.map(function(x){
+    return x.price > 0 ? (Math.round(x.sellingPct*100)/100).toFixed(2) + "%" : "";
+  }), "ps-pctrow");
+
+  html += "</tbody>";
+  document.getElementById("psTable").innerHTML = html;
+
+  document.getElementById("psCmp").style.display = cmpHTML ? "" : "none";
+  document.getElementById("psCmpBody").innerHTML = cmpHTML || "";
+
+  var notes = document.getElementById("keyNotes").value.trim();
+  document.getElementById("psKey").style.display = notes ? "" : "none";
+  document.getElementById("psKeyBody").innerHTML = esc(notes).replace(/\n/g,"<br>");
+}
+
+/* ---------- data file + saved comparisons ---------- */
+var LIB_NAME = "netsheets.json";
+var LIB_FORMAT = "netsheet-comparison-library";
+var STORE    = "lwrNetsheetComparison";
+var FSA = (typeof window.showOpenFilePicker === "function" && typeof window.showSaveFilePicker === "function");
+
+var library    = {format:LIB_FORMAT, version:1, updatedAt:"", comparisons:[]};
+var activeId   = null;
+var fileHandle = null;
+var pendingHandle = null;
+var writeTimer = null;
+var storageOK  = true;
+
+function idb(cb){
+  try{
+    var r = indexedDB.open("netsheetComparison", 1);
+    r.onupgradeneeded = function(){ r.result.createObjectStore("kv"); };
+    r.onsuccess = function(){ cb(r.result); };
+    r.onerror   = function(){ cb(null); };
+  }catch(err){ cb(null); }
+}
+function idbSet(k,v){ idb(function(db){ if(!db) return;
+  try{ db.transaction("kv","readwrite").objectStore("kv").put(v,k); }catch(err){} }); }
+function idbGet(k,cb){ idb(function(db){ if(!db) return cb(null);
+  try{ var q = db.transaction("kv").objectStore("kv").get(k);
+       q.onsuccess = function(){ cb(q.result || null); };
+       q.onerror   = function(){ cb(null); };
+  }catch(err){ cb(null); } }); }
+
+function idleStatus(){
+  if(fileHandle)    return "Saving to " + fileHandle.name;
+  if(pendingHandle) return "Click Reconnect to resume saving to " + pendingHandle.name;
+  return storageOK ? "This browser only, no data file connected" : "Nothing is being saved, connect a data file";
+}
+function flash(msg, sticky){
+  var e = document.getElementById("savestate");
+  if(!e) return;
+  e.textContent = msg;
+  clearTimeout(flash.t);
+  if(!sticky) flash.t = setTimeout(function(){ e.textContent = idleStatus(); }, 2800);
+}
+function setFileLabel(){
+  var lab = document.getElementById("fileLabel");
+  var btn = document.getElementById("connectBtn");
+  if(fileHandle){ lab.textContent = "Data file: " + fileHandle.name; btn.textContent = "Use a different file"; }
+  else if(pendingHandle){ lab.textContent = "Data file: " + pendingHandle.name + " (needs a click)"; btn.textContent = "Reconnect " + pendingHandle.name; }
+  else { lab.textContent = "No data file connected"; btn.textContent = "Connect " + LIB_NAME; }
+  document.getElementById("savestate").textContent = idleStatus();
+}
+
+function snapshot(){
+  return {
+    preparedFor: document.getElementById("preparedFor").value,
+    property: document.getElementById("property").value,
+    notes: document.getElementById("keyNotes").value,
+    custom: clone(custom),
+    facts: clone(facts),
+    sheets: clone(sheets)
+  };
+}
+function cleanSheet(x){
+  var base = exampleSheet();
+  base.name = ""; base.close = "";
+  if(!x || typeof x !== "object") return base;
+  if(typeof x.name === "string") base.name = x.name;
+  if(typeof x.close === "string") base.close = x.close;
+  if(x.v && typeof x.v === "object") Object.keys(x.v).forEach(function(k){ base.v[k] = num(x.v[k]); });
+  if(x.pct && typeof x.pct === "object") Object.keys(x.pct).forEach(function(k){ base.pct[k] = num(x.pct[k]); });
+  if(x.mode && typeof x.mode === "object") Object.keys(x.mode).forEach(function(k){ base.mode[k] = String(x.mode[k]); });
+  if(x.side && typeof x.side === "object") Object.keys(x.side).forEach(function(k){ base.side[k] = x.side[k] === "c" ? "c" : "d"; });
+  base.base = !!x.base;
+  return base;
+}
+function applySnapshot(data){
+  if(!data || !Array.isArray(data.sheets) || !data.sheets.length) throw new Error("bad data");
+  custom = Array.isArray(data.custom) ? data.custom.filter(function(r){
+    return r && r.id && SECTIONS.some(function(s){ return s.id === r.sec; });
+  }).map(function(r){ return {id:String(r.id), sec:r.sec, label:String(r.label||""), side:r.side === "c" ? "c" : "d"}; }) : [];
+  sheets = data.sheets.slice(0, MAX).map(cleanSheet);
+  var seen = false;
+  sheets.forEach(function(s){ if(s.base){ if(seen) s.base = false; seen = true; } });
+  facts = {taxSemi:5201.42, hoaMonthly:200};
+  if(data.facts && typeof data.facts === "object"){
+    if(data.facts.taxSemi !== undefined) facts.taxSemi = num(data.facts.taxSemi);
+    if(data.facts.hoaMonthly !== undefined) facts.hoaMonthly = num(data.facts.hoaMonthly);
+  }
+  sheets.forEach(function(s){ custom.forEach(function(r){ if(s.v[r.id] === undefined) s.v[r.id] = 0; }); });
+  document.getElementById("preparedFor").value = data.preparedFor || "";
+  document.getElementById("property").value = data.property || "";
+  document.getElementById("keyNotes").value = data.notes || "";
+  renderLedger();
+}
+
+function libraryText(){
+  library.updatedAt = new Date().toISOString();
+  library.format = LIB_FORMAT;
+  library.version = 1;
+  return JSON.stringify(library, null, 2);
+}
+function writeNow(){
+  if(!fileHandle) return;
+  fileHandle.queryPermission({mode:"readwrite"}).then(function(perm){
+    if(perm !== "granted"){ pendingHandle = fileHandle; fileHandle = null; setFileLabel(); return; }
+    return fileHandle.createWritable().then(function(w){
+      return w.write(libraryText()).then(function(){ return w.close(); });
+    }).then(function(){ flash("Saved to " + fileHandle.name); });
+  }).catch(function(){
+    flash("Could not write to the data file, check it is not open elsewhere", true);
+  });
+}
+function queueWrite(){
+  if(!fileHandle) return;
+  clearTimeout(writeTimer);
+  writeTimer = setTimeout(writeNow, 700);
+}
+function adoptLibrary(d){
+  if(!d || !Array.isArray(d.comparisons)) return false;
+  if(d.format && d.format !== LIB_FORMAT) return false;
+  library = {format:LIB_FORMAT, version:1, updatedAt:d.updatedAt || "", comparisons:d.comparisons};
+  refreshLib();
+  return true;
+}
+function connectFile(create){
+  var types = [{description:"Netsheet data", accept:{"application/json":[".json"]}}];
+  var pick = create
+    ? window.showSaveFilePicker({suggestedName:LIB_NAME, types:types})
+    : window.showOpenFilePicker({types:types, multiple:false}).then(function(a){ return a[0]; });
+  pick.then(function(h){
+    return h.requestPermission({mode:"readwrite"}).then(function(perm){
+      if(perm !== "granted"){ flash("Write permission was not granted", true); return; }
+      if(create){
+        fileHandle = h; pendingHandle = null; idbSet("handle", h); setFileLabel(); writeNow(); return;
+      }
+      return h.getFile().then(function(f){ return f.text(); }).then(function(t){
+        var d = null;
+        try{ d = JSON.parse(t); }catch(err){}
+        if(d && d.format && d.format !== LIB_FORMAT){
+          flash(h.name + " belongs to a different tool. Pick or create netsheets.json.", true);
+          return;
+        }
+        fileHandle = h; pendingHandle = null; idbSet("handle", h); setFileLabel();
+        if(adoptLibrary(d)) flash("Connected to " + h.name + ", " + library.comparisons.length + " saved comparisons");
+        else { flash("Connected to " + h.name + ", starting a new library"); writeNow(); }
+      });
+    });
+  }).catch(function(){});
+}
+function reconnect(){
+  if(!pendingHandle) return;
+  pendingHandle.requestPermission({mode:"readwrite"}).then(function(perm){
+    if(perm !== "granted"){ flash("Permission was not granted", true); return; }
+    fileHandle = pendingHandle; pendingHandle = null;
+    setFileLabel();
+    return fileHandle.getFile().then(function(f){ return f.text(); }).then(function(t){
+      var d = null; try{ d = JSON.parse(t); }catch(err){}
+      if(adoptLibrary(d)) flash("Reconnected, " + library.comparisons.length + " saved comparisons");
+    });
+  }).catch(function(){});
+}
+
+function refreshLib(){
+  var sel = document.getElementById("libSelect");
+  var keep = activeId;
+  sel.innerHTML = "<option value=''>Working copy, not saved</option>";
+  library.comparisons.slice().sort(function(a,b){
+    return (b.savedAt||"").localeCompare(a.savedAt||"");
+  }).forEach(function(c){
+    var o = document.createElement("option");
+    o.value = c.id;
+    o.textContent = c.name + (c.savedAt ? "  \u00b7  " + new Date(c.savedAt).toLocaleDateString("en-US") : "");
+    sel.appendChild(o);
+  });
+  sel.value = keep && library.comparisons.some(function(c){ return c.id === keep; }) ? keep : "";
+  document.getElementById("delBtn").disabled = !sel.value;
+}
+function entryById(id){
+  return library.comparisons.filter(function(c){ return c.id === id; })[0] || null;
+}
+function fillEntry(e, snap){
+  e.preparedFor = snap.preparedFor; e.property = snap.property; e.notes = snap.notes;
+  e.custom = snap.custom; e.facts = snap.facts; e.sheets = snap.sheets;
+}
+function saveEntry(asNew){
+  var snap = snapshot();
+  var who = (snap.preparedFor || "").trim(), where = (snap.property || "").trim();
+  var name = [who, where].filter(Boolean).join(", ") || ("Netsheets " + new Date().toLocaleDateString("en-US"));
+  var entry = asNew ? null : entryById(activeId);
+  if(!entry){ entry = {id:uid("c")}; library.comparisons.push(entry); }
+  entry.name = name;
+  entry.savedAt = new Date().toISOString();
+  fillEntry(entry, snap);
+  activeId = entry.id;
+  refreshLib();
+  persistLocal();
+  if(fileHandle) writeNow();
+  else flash("Saved in this browser. Connect " + LIB_NAME + " to keep it in the folder.", true);
+}
+function deleteEntry(){
+  var e = entryById(activeId);
+  if(!e) return;
+  if(!confirm("Delete the saved comparison \"" + e.name + "\"? This cannot be undone.")) return;
+  library.comparisons = library.comparisons.filter(function(c){ return c.id !== activeId; });
+  activeId = null;
+  refreshLib();
+  persistLocal();
+  if(fileHandle) writeNow();
+  flash("Deleted");
+}
+function persistLocal(){
+  if(!storageOK) return;
+  try{
+    localStorage.setItem(STORE, JSON.stringify({activeId:activeId, library:library, working:snapshot()}));
+  }catch(err){ storageOK = false; }
+}
+function autosave(){
+  var e = entryById(activeId);
+  if(e){
+    fillEntry(e, snapshot());
+    e.savedAt = new Date().toISOString();
+    queueWrite();
+  }
+  persistLocal();
+}
+function loadLocal(){
+  try{
+    var raw = localStorage.getItem(STORE);
+    if(!raw) return false;
+    var d = JSON.parse(raw);
+    if(d.library && Array.isArray(d.library.comparisons)) library = d.library;
+    activeId = d.activeId || null;
+    if(d.working){ applySnapshot(d.working); return true; }
+  }catch(err){}
+  return false;
+}
+function downloadLibrary(){
+  var blob = new Blob([libraryText()], {type:"application/json"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url; a.download = LIB_NAME;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+  flash("Downloaded " + LIB_NAME + ", put it in the same folder as this page");
+}
+
+document.getElementById("connectBtn").onclick = function(){ pendingHandle ? reconnect() : connectFile(false); };
+document.getElementById("createBtn").onclick  = function(){ connectFile(true); };
+document.getElementById("dlBtn").onclick      = downloadLibrary;
+document.getElementById("importBtn").onclick  = function(){ document.getElementById("openFile").click(); };
+document.getElementById("openFile").onchange  = function(){
+  var f = this.files[0]; this.value = "";
+  if(!f) return;
+  var fr = new FileReader();
+  fr.onload = function(){
+    var d = null; try{ d = JSON.parse(fr.result); }catch(err){}
+    if(adoptLibrary(d)){ persistLocal(); flash("Imported " + library.comparisons.length + " comparisons"); }
+    else flash("That file is not a netsheets library", true);
+  };
+  fr.readAsText(f);
+};
+document.getElementById("saveBtn").onclick   = function(){ saveEntry(false); };
+document.getElementById("saveAsBtn").onclick = function(){ saveEntry(true); };
+document.getElementById("delBtn").onclick    = deleteEntry;
+document.getElementById("libSelect").onchange = function(){
+  var id = this.value;
+  if(!id){ activeId = null; refreshLib(); return; }
+  var e = entryById(id);
+  if(!e) return;
+  activeId = id;
+  try{ applySnapshot(e); }catch(err){ flash("That saved comparison could not be opened", true); return; }
+  refreshLib();
+  flash("Opened " + e.name);
+};
+["preparedFor","property","keyNotes"].forEach(function(id){
+  document.getElementById(id).addEventListener("input", function(){ recalc(); });
+});
+if(!FSA){
+  document.getElementById("connectBtn").style.display = "none";
+  document.getElementById("createBtn").style.display  = "none";
+}
+
+/* ---------- preview and print ---------- */
+var baseTitle = document.title;
+function pdfTitle(){
+  var who = document.getElementById("preparedFor").value.trim();
+  var d = new Date();
+  var stamp = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  return "Netsheet Comparison" + (who ? " - " + who : "") + " - " + stamp;
+}
+document.getElementById("print").onclick = function(){ recalc(); document.body.classList.add("preview"); window.scrollTo(0,0); };
+document.getElementById("psExit").onclick = function(){ document.body.classList.remove("preview"); };
+/* shrink the sheet slightly when a long comparison would spill onto a second page */
+function fitSheet(){
+  var ps = document.getElementById("printsheet");
+  ps.style.zoom = "";
+  var wasPreview = document.body.classList.contains("preview");
+  if(!wasPreview) document.body.classList.add("preview");
+  var bar = ps.querySelector(".exitbar");
+  var h = ps.scrollHeight - (bar ? bar.offsetHeight + 18 : 0);
+  var avail = 9.7 * 96;
+  if(h > avail) ps.style.zoom = Math.max(0.72, avail / h).toFixed(3);
+  if(!wasPreview) document.body.classList.remove("preview");
+}
+document.getElementById("psPrint").onclick = function(){ document.title = pdfTitle(); fitSheet(); window.print(); };
+window.addEventListener("beforeprint", fitSheet);
+window.addEventListener("afterprint", function(){ document.title = baseTitle; document.getElementById("printsheet").style.zoom = ""; });
+document.addEventListener("keydown", function(e){ if(e.key === "Escape") document.body.classList.remove("preview"); });
+
+/* ---------- boot ---------- */
+try { localStorage.setItem(STORE + "_probe","1"); localStorage.removeItem(STORE + "_probe"); }
+catch(err){ storageOK = false; }
+
+if(!loadLocal()) renderLedger();
+refreshLib();
+setFileLabel();
+
+if(FSA){
+  idbGet("handle", function(h){
+    if(!h) return;
+    h.queryPermission({mode:"readwrite"}).then(function(perm){
+      if(perm === "granted"){
+        fileHandle = h; setFileLabel();
+        h.getFile().then(function(f){ return f.text(); }).then(function(t){
+          var d = null; try{ d = JSON.parse(t); }catch(err){}
+          if(adoptLibrary(d)) flash("Reading " + h.name + ", " + library.comparisons.length + " saved comparisons");
+        }).catch(function(){});
+      } else { pendingHandle = h; setFileLabel(); }
+    }).catch(function(){});
+  });
+}
+if(!fileHandle && location.protocol !== "file:"){
+  fetch("./" + LIB_NAME, {cache:"no-store"}).then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if(d && Array.isArray(d.comparisons) && !library.comparisons.length){
+        if(adoptLibrary(d)) flash("Read " + LIB_NAME + " from the folder", true);
+      }
+    }).catch(function(){});
+}
+</script>
+</body>
+</html>
