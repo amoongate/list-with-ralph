@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v22 -->
+<!-- admin.html build: cms-live-v23 -->
 <meta charset="utf-8">
 <link rel="icon" href="/favicon-admin.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-admin-32.png" sizes="32x32" type="image/png">
@@ -342,7 +342,7 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v22</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v23</div>
 </div>
 
 <div class="topbar">
@@ -1348,7 +1348,7 @@ function renderLeads(){
   let items = LEADS.slice();
   if(leadFilter!=="all") items = items.filter(l => l.source===leadFilter);
   if(q) items = items.filter(l => (l.name+" "+l.email).toLowerCase().includes(q));
-  items.sort((a,b) => (leadScore(b) - leadScore(a)) || (new Date(b.created) - new Date(a.created)));
+  items.sort((a,b) => new Date(b.created) - new Date(a.created));
   if(!items.length){
     $("#leadList").innerHTML = `<div class="empty"><h3>No leads here yet</h3><p>Nothing matches this view.</p></div>`;
     return;
