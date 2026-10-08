@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- admin.html build: cms-live-v23 -->
+<!-- admin.html build: cms-live-v24 -->
 <meta charset="utf-8">
 <link rel="icon" href="/favicon-admin.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-admin-32.png" sizes="32x32" type="image/png">
@@ -273,11 +273,6 @@
   .lead-actions a{text-decoration:none}
   .btn.danger{background:transparent;border:1px solid #b9442f;color:#b9442f}
   .btn.danger.armed{background:#b9442f;border-color:#b9442f;color:#fff}
-  .score{display:inline-block;font-family:var(--util);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;padding:.3em .6em;margin-left:.55em;vertical-align:middle}
-  .score.hot{background:#7a2f1d;color:#fff}
-  .score.warm{background:var(--gold);color:var(--ink)}
-  .score.cool{background:var(--cream-3);color:var(--ink-soft)}
-  .score.cold{background:var(--cream-2);color:var(--taupe)}
   .stage-sel{font-family:var(--util);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;padding:.45em .6em;border:1px solid var(--line);background:var(--cream);color:var(--ink);cursor:pointer;max-width:150px}
   .stage-sel.s-closed{border-color:var(--green);color:var(--green)}
   .stage-sel.s-lost{color:var(--taupe)}
@@ -294,7 +289,6 @@
   .pipe-card:hover{border-color:var(--gold)}
   .pc-name{font-family:var(--disp);font-weight:600;font-size:1rem;margin-bottom:5px}
   .pc-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px}
-  .pc-meta .score{margin-left:0}
   .pc-date{font-family:var(--util);font-size:.6rem;letter-spacing:.08em;color:var(--taupe);margin-bottom:8px}
   .pc-move{width:100%;font-size:.6rem}
   .pipe-empty{font-family:var(--util);font-size:.66rem;color:var(--taupe);padding:8px 0}
@@ -342,7 +336,7 @@
     <button class="btn gold" onclick="login()">Sign in</button>
     <div class="pwerr" id="pwErr"></div>
   </div>
-  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v23</div>
+  <div class="gatehint">Sign in with your Supabase admin account. &nbsp;build cms-live-v24</div>
 </div>
 
 <div class="topbar">
@@ -626,41 +620,6 @@ const STAGES = [
 ];
 function stageLabel(k){ const f=STAGES.find(s=>s[0]===k); return f?f[1]:k; }
 
-function leadScore(l){
-  const d = l.details || {};
-  let s;
-  if(l.source==="open_house"){
-    s = 60;
-    if((d.looking||"").toLowerCase().includes("sell")) s += 10;
-    if(l.phone) s += 5;
-    if(d.help) s += 4;
-    s = Math.min(s, 79);
-  } else if(l.source==="valuation"){
-    s = 70;
-    if(l.phone) s += 10;
-  } else if(l.source==="repair_checklist"){
-    const t = d.timeline||"";
-    s = t==="Within 3 months" ? 85 : t==="3 to 6 months" ? 70 : t==="6+ months" ? 55 : t==="Just curious" ? 40 : 50;
-    if(l.phone) s += 5;
-  } else if(l.source==="contact"){
-    s = 55;
-    if(l.phone) s += 10;
-  } else if(["referral","zillow","phone_call","instagram","facebook"].includes(l.source)){
-    const base = {referral:70, zillow:65, phone_call:60, instagram:55, facebook:55};
-    s = base[l.source];
-    if(l.phone) s += 10;
-  } else {
-    s = 50;
-    if(l.phone) s += 10;
-  }
-  return Math.max(0, Math.min(100, s));
-}
-function scoreBand(s){ return s>=80?"hot":s>=60?"warm":s>=40?"cool":"cold"; }
-function scoreTag(l){
-  const s = leadScore(l), b = scoreBand(s);
-  const lab = b.charAt(0).toUpperCase()+b.slice(1);
-  return `<span class="score ${b}" title="Lead score ${s} of 100">${lab} ${s}</span>`;
-}
 
 function mapLead(r){
   return {id:r.id, source:r.source, status:r.status||"new", created:r.created_at,
@@ -1356,7 +1315,7 @@ function renderLeads(){
   $("#leadList").innerHTML = `<div class="rows">` + items.map(l => `
     <div class="lead-row ${l.stage==='new'?'is-new':''}" onclick="openLead('${l.id}')">
       <div class="lead-main">
-        <div class="lead-name">${esc(l.name)}${scoreTag(l)}${l.stage==='new'?'<span class="newdot" title="New"></span>':''}</div>
+        <div class="lead-name">${esc(l.name)}${l.stage==='new'?'<span class="newdot" title="New"></span>':''}</div>
         <div class="lead-contact">${esc(l.email)}${l.phone?'  \u00b7  '+esc(l.phone):''}</div>
         <div class="lead-snip">${esc(leadSnippet(l))}</div>
       </div>
@@ -1786,7 +1745,7 @@ function renderPipeline(){
   const board = $("#pipeBoard");
   board.innerHTML = STAGES.map(([key, label]) => {
     const cards = LEADS.filter(l => l.stage===key)
-      .sort((a,b) => (leadScore(b)-leadScore(a)) || (new Date(b.created)-new Date(a.created)));
+      .sort((a,b) => new Date(b.created) - new Date(a.created));
     const stVol = cards.reduce((s,l) => s + (Number(l.salePrice)||0), 0);
     const stComm = cards.reduce((s,l) => s + (Number(l.commission)||0), 0);
     return `<div class="pipe-col">
@@ -1795,7 +1754,7 @@ function renderPipeline(){
       ${cards.map(l => `
         <div class="pipe-card" onclick="openLead('${l.id}')">
           <div class="pc-name">${esc(l.name||"(no name)")}</div>
-          <div class="pc-meta">${scoreTag(l)}<span class="badge ${SOURCE[l.source]?SOURCE[l.source].cls:''}">${SOURCE[l.source]?SOURCE[l.source].label:l.source}</span></div>
+          <div class="pc-meta"><span class="badge ${SOURCE[l.source]?SOURCE[l.source].cls:''}">${SOURCE[l.source]?SOURCE[l.source].label:l.source}</span></div>
           <div class="pc-date">${dateFmt(l.created)}${l.salePrice?` \u00b7 ${money(l.salePrice)}`:''}</div>
           <select class="stage-sel pc-move" onclick="event.stopPropagation()" onchange="setLeadStage('${l.id}', this.value)">${STAGES.map(x=>`<option value="${x[0]}" ${l.stage===x[0]?'selected':''}>${x[1]}</option>`).join("")}</select>
         </div>`).join("") || '<div class="pipe-empty">None</div>'}
@@ -1887,7 +1846,6 @@ function renderAnalytics(){
   const d30 = new Date(now - 30*864e5), d60 = new Date(now - 60*864e5);
   const last30 = LEADS.filter(l => new Date(l.created) >= d30).length;
   const prior30 = LEADS.filter(l => { const c = new Date(l.created); return c >= d60 && c < d30; }).length;
-  const hot = LEADS.filter(l => leadScore(l) >= 80 && !["closed","lost"].includes(l.stage)).length;
   const appts = LEADS.filter(l => l.stage==="appointment" || l.stage==="listed").length;
   const closed = LEADS.filter(l => l.stage==="closed");
   const vol = closed.reduce((s,l) => s + (Number(l.salePrice)||0), 0);
@@ -1906,7 +1864,6 @@ function renderAnalytics(){
   $("#anaBody").innerHTML = `
     <div class="ana-cards">
       <div class="ana-card"><div class="an">${last30}</div><div class="al">Leads, last 30 days${trend===null?'':` <span class="${trend>=0?'up':'down'}">${trend>=0?'+':''}${trend}%</span>`}</div></div>
-      <div class="ana-card"><div class="an">${hot}</div><div class="al">Hot leads right now</div></div>
       <div class="ana-card"><div class="an">${appts}</div><div class="al">Appointments and listings</div></div>
       <div class="ana-card"><div class="an">${money(LEADS.filter(l=>!["closed","lost"].includes(l.stage)).reduce((s,l)=>s+(Number(l.salePrice)||0),0))||"$0"}</div><div class="al">Pipeline value (open deals)</div></div>
       <div class="ana-card"><div class="an">${money(LEADS.filter(l=>!["closed","lost"].includes(l.stage)).reduce((s,l)=>s+(Number(l.commission)||0),0))||"$0"}</div><div class="al">Projected commission (not yet earned)</div></div>
