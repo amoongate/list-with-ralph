@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<!-- Payment Comparison Prototype  v1.7  -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- payment-comparison build: payment-gate-v1 -->
+<meta name="robots" content="noindex, nofollow">
+<style>html{visibility:hidden}</style>
+<title>Payment Comparison | List With Ralph</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0F2136;
+  --ink-2:#33465C;
+  --ink-3:#6E7F91;
+  --line:#D4DAE0;
+  --line-soft:#E6EAEE;
+  --paper:#E4E8EC;
+  --card:#FFFFFF;
+  --gold:#A9761F;
+  --gold-soft:#F6EBD4;
+  --c-pi:#17324F;
+  --c-tax:#C08427;
+  --c-mr:#A9482F;
+  --c-hoa:#2A7A70;
+  --c-pmi:#6F529E;
+  --c-ins:#8B9CAB;
+  --r:5px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Archivo",system-ui,sans-serif;
+  font-size:15px;
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* ---------- shell ---------- */
+.wrap{max-width:1720px;margin:0 auto;padding:26px 22px 60px}
+
+.masthead{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:20px}
+.masthead h1{font-size:32px;line-height:1.05;font-weight:700;letter-spacing:-.02em;margin:0 0 5px}
+.masthead p{margin:0;color:var(--ink-2);max-width:56ch;font-size:14px}
+.contact{text-align:right;font-size:12px;color:var(--ink-2);white-space:nowrap}
+.contact strong{display:block;color:var(--ink);font-size:13px}
+
+/* ---------- toolbar ---------- */
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.toolbar.second{margin-bottom:10px;padding-top:10px;border-top:1px solid var(--line)}
+.toolbar.third{margin-bottom:16px;padding-top:9px;border-top:1px dashed var(--line)}
+.prep select{border:1px solid var(--line);border-radius:var(--r);background:#fff;padding:7px 8px;
+  font-size:13px;max-width:240px;outline:none;cursor:pointer}
+.prep select:focus{border-color:var(--gold)}
+.prep{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+.prep input{border:1px solid var(--line);border-radius:var(--r);background:#fff;padding:7px 10px;
+  font-size:13.5px;min-width:230px;outline:none}
+.prep input:focus{border-color:var(--gold)}
+.savestate{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3)}
+.btn{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:8px 14px;
+  font-size:13px;font-weight:600;cursor:pointer;transition:border-color .12s,background .12s}
+.btn:hover{border-color:var(--ink-3)}
+.btn-primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn-primary:hover{background:#1B3550}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.spacer{flex:1}
+.toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);cursor:pointer;user-select:none}
+.toggle input{width:16px;height:16px;accent-color:var(--gold);cursor:pointer}
+.count{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3)}
+
+/* ---------- legend ---------- */
+.legend{display:flex;gap:16px;flex-wrap:wrap;padding:10px 0 16px;font-size:11.5px;color:var(--ink-2);
+  border-top:1px solid var(--line);}
+.lg{display:flex;align-items:center;gap:6px}
+.sw{width:11px;height:11px;border-radius:2px;flex:none}
+
+/* ---------- grid ---------- */
+.scroller{overflow-x:auto;padding-bottom:8px}
+.grid{display:grid;gap:14px;align-items:start;min-width:min-content}
+
+/* ---------- photo ---------- */
+.photo{position:relative;height:44px;background:#F1F4F6;overflow:hidden;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line-soft);
+  transition:background .12s}
+.photo:hover{background:#E8EDF1}
+.photo.has{height:auto;aspect-ratio:16/10}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-cta{text-align:center;padding:6px 10px;font-size:11.5px;line-height:1.3;color:var(--ink-3);pointer-events:none}
+.photo-cta b{font-size:12px;color:var(--ink-2);font-weight:600}
+.photo.drag{background:var(--gold-soft);box-shadow:inset 0 0 0 2px var(--gold)}
+.photo-x{position:absolute;top:7px;right:7px;width:23px;height:23px;border-radius:50%;border:none;
+  background:rgba(15,33,54,.82);color:#fff;font-size:14px;line-height:1;cursor:pointer;display:none;padding:0}
+.photo.has:hover .photo-x{display:block}
+
+/* ---------- card ---------- */
+.home{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  min-width:272px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.home.is-low{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.home .cap{height:4px;background:transparent}
+.home.is-low .cap{background:var(--gold)}
+
+.hhead{padding:12px 14px 10px;border-bottom:1px solid var(--line-soft)}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.slot{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.low-tag{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--gold-soft);color:var(--gold);padding:3px 6px;border-radius:2px;font-weight:600}
+.kill{background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:17px;line-height:1;padding:2px 4px;border-radius:3px}
+.kill:hover{color:var(--c-mr);background:#F7EEEC}
+.kill:disabled{opacity:.25;cursor:not-allowed}
+.hname{width:100%;border:none;border-bottom:1px dashed var(--line);background:none;padding:2px 0 5px;
+  font-size:16px;font-weight:600;letter-spacing:-.01em}
+.hname:focus{border-bottom-color:var(--gold);outline:none}
+.hname::placeholder{color:var(--ink-3);font-weight:400}
+
+/* segmented type switch */
+.seg{display:flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-top:10px}
+.seg button{flex:1;background:#F4F6F8;border:none;padding:7px 4px;font-size:11.5px;font-weight:600;
+  color:var(--ink-3);cursor:pointer;transition:background .12s,color .12s}
+.seg button + button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--ink);color:#fff}
+
+/* readout */
+.readout{padding:16px 14px 12px}
+.total{font-family:"IBM Plex Mono",monospace;font-size:34px;font-weight:600;letter-spacing:-.03em;line-height:1}
+.permo{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-top:5px}
+.delta{font-family:"IBM Plex Mono",monospace;font-size:12.5px;margin-top:9px;font-weight:500}
+.delta.up{color:var(--c-mr)}
+.delta.base{color:var(--gold)}
+
+/* stacked bar */
+.bar{display:flex;height:16px;background:#F1F3F5;border-radius:2px;overflow:hidden;margin:0 14px}
+.bar span{display:block;height:100%}
+.bar-scale{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--ink-3);padding:6px 14px 0}
+
+/* fields */
+.fields{padding:12px 14px 4px;display:flex;flex-direction:column;gap:9px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field > label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:600}
+.control{display:flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#fff}
+.control:focus-within{border-color:var(--gold)}
+.control input,.control select{flex:1;min-width:0;border:none;background:none;padding:8px 9px;
+  font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:500;outline:none}
+.control select{cursor:pointer;-webkit-appearance:none;appearance:none;padding-right:22px;
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);
+  background-position:calc(100% - 13px) 50%,calc(100% - 8px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.control input[readonly]{background:#F5F7F8;color:var(--ink-2)}
+.unit{display:flex;flex:none;border-left:1px solid var(--line)}
+.unit button{background:#F4F6F8;border:none;padding:0 9px;font-size:11.5px;font-weight:600;color:var(--ink-3);cursor:pointer}
+.unit button + button{border-left:1px solid var(--line)}
+.unit button.on{background:var(--ink);color:#fff}
+.hint{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3)}
+.subin{width:100%;border:none;border-bottom:1px dashed var(--line);background:none;
+  padding:4px 1px 4px;font-size:11.5px;color:var(--ink-2);outline:none}
+.subin:focus{border-bottom-color:var(--gold);color:var(--ink)}
+.subin::placeholder{color:var(--ink-3);font-style:italic}
+.field.hide{display:none}
+
+/* incentives note */
+.notes{padding:10px 14px 4px;display:flex;flex-direction:column;gap:5px}
+.notes > label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:600}
+.notes textarea{width:100%;min-height:74px;resize:vertical;border:1px solid var(--line);border-radius:var(--r);
+  padding:8px 9px;font-family:"Archivo",sans-serif;font-size:12.5px;line-height:1.45;background:#fff;outline:none}
+.notes textarea:focus{border-color:var(--gold)}
+.notes textarea::placeholder{color:var(--ink-3);font-size:11.5px}
+
+/* derived */
+.derived{margin:12px 0 0;padding:11px 14px 13px;border-top:1px solid var(--line-soft);background:#FAFBFC;
+  display:flex;flex-direction:column;gap:5px}
+.drow{display:flex;justify-content:space-between;gap:8px;font-size:12px}
+.drow dt{color:var(--ink-2)}
+.drow dd{margin:0;font-family:"IBM Plex Mono",monospace;font-weight:500}
+
+/* summary */
+.summary{margin-top:22px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:16px 18px}
+.summary h2{margin:0 0 10px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
+.sline{font-size:16px;line-height:1.55;max-width:88ch}
+.sline b{font-family:"IBM Plex Mono",monospace;font-weight:600}
+.note{margin-top:14px;padding-top:12px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--ink-3);max-width:92ch}
+
+footer.foot{margin-top:26px;font-size:11px;color:var(--ink-3);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* ---------- summary sheet (print / PDF) ---------- */
+#printsheet{display:none;color:var(--ink)}
+.exitbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;
+  padding:9px 12px;background:var(--ink);color:#fff;border-radius:var(--r);font-size:12.5px}
+.exitbar button{background:#fff;color:var(--ink);border:none;border-radius:3px;padding:6px 12px;font-weight:600;cursor:pointer;font-size:12.5px}
+
+body.preview{background:#fff}
+body.preview .wrap > *:not(#printsheet){display:none}
+body.preview #printsheet{display:block;max-width:1100px;margin:0 auto}
+
+.ps-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;
+  border-bottom:2px solid var(--ink);padding-bottom:9px;margin-bottom:12px}
+.ps-head h2{margin:0;font-size:18pt;line-height:1.05;letter-spacing:-.025em;font-weight:700}
+.ps-contact{text-align:right;font-size:8pt;line-height:1.55;color:var(--ink-2);white-space:nowrap}
+.ps-contact strong{color:var(--ink);font-size:9pt;display:block}
+.ps-lead{font-size:10pt;line-height:1.5;margin-bottom:11px;max-width:100ch}
+.ps-lead b{font-family:"IBM Plex Mono",monospace;font-weight:600}
+
+.ps-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.ps-table th,.ps-table td{padding:3.5pt 7pt;text-align:right;vertical-align:middle;
+  font-family:"IBM Plex Mono",monospace;font-size:9.5pt;font-weight:400;border-bottom:.5pt solid var(--line-soft)}
+.ps-table th.rl{text-align:left;font-family:"Archivo",sans-serif;font-size:8.5pt;font-weight:500;color:var(--ink-2);width:23%}
+.ps-table thead th{border-bottom:1pt solid var(--ink);padding-bottom:7pt;vertical-align:bottom}
+.ps-thumb{width:100%;height:52pt;object-fit:cover;border-radius:2px;display:block;margin-bottom:5pt;
+  border:.5pt solid var(--line)}
+.ps-prep{font-size:9pt;color:var(--ink-2);margin-top:4pt}
+.ps-slot{display:block;font-size:7pt;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-3);font-family:"Archivo",sans-serif}
+.ps-name{display:block;font-family:"Archivo",sans-serif;font-size:11pt;font-weight:700;letter-spacing:-.015em;line-height:1.2;margin-top:2pt;word-break:break-word}
+.ps-type{display:inline-block;margin-top:4pt;font-family:"Archivo",sans-serif;font-size:6.5pt;letter-spacing:.11em;
+  text-transform:uppercase;font-weight:600;padding:2pt 5pt;border-radius:2px;background:#EEF1F4;color:var(--ink-2)}
+.ps-type.new{background:var(--gold-soft);color:var(--gold)}
+tr.ps-inc td{text-align:left;vertical-align:top;font-family:"Archivo",sans-serif;font-size:8pt;
+  line-height:1.35;color:var(--ink);padding-top:7pt;padding-bottom:8pt;border-bottom:none}
+tr.ps-inc th.rl{border-bottom:none}
+.inc-li{position:relative;padding-left:8pt;margin-bottom:3pt}
+.inc-li:before{content:"";position:absolute;left:0;top:.45em;width:3pt;height:3pt;border-radius:50%;background:var(--gold)}
+.inc-none{color:var(--ink-3)}
+
+tr.ps-rate-paired td,tr.ps-rate-paired th{border-bottom:none;padding-bottom:1pt}
+tr.ps-source td{font-family:"Archivo",sans-serif;font-size:8pt;color:var(--ink-2);line-height:1.3;
+  padding-top:0;padding-bottom:5pt;border-bottom:.5pt solid var(--line-soft)}
+tr.ps-source th.rl{font-size:8pt;color:var(--ink-3);padding-top:0;padding-bottom:5pt}
+tr.ps-group th,tr.ps-group td{background:#F2F4F6;border-bottom:none;padding-top:7pt;padding-bottom:4pt;
+  font-family:"Archivo",sans-serif;font-size:7.5pt;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--ink-2)}
+tr.ps-bar td{border-bottom:none;padding-top:7pt;padding-bottom:2pt}
+.psbar{display:flex;height:9pt;background:#EDEFF1;border-radius:1pt;overflow:hidden}
+.psbar span{display:block;height:100%}
+tr.ps-total th,tr.ps-total td{border-top:1pt solid var(--ink);border-bottom:1pt solid var(--ink);padding-top:6pt;padding-bottom:6pt}
+tr.ps-total td{font-size:15pt;font-weight:600;letter-spacing:-.03em}
+tr.ps-total th.rl{font-size:9.5pt;font-weight:700;color:var(--ink)}
+td.ps-low{background:var(--gold-soft)}
+tr.ps-delta td{font-size:8.5pt;color:var(--c-mr);border-bottom:none;padding-top:5pt;padding-bottom:0}
+tr.ps-delta td.zero{color:var(--gold)}
+tr.ps-delta5 td{font-size:8.5pt;color:var(--ink-3);padding-top:1pt}
+tr.ps-delta5 th.rl,tr.ps-delta th.rl{color:var(--ink-3);font-size:8pt}
+
+.ps-legend{display:flex;gap:14pt;flex-wrap:wrap;margin-top:11pt;font-size:7.5pt;color:var(--ink-2)}
+.ps-legend .lg{gap:5px}
+.ps-legend .sw{width:8pt;height:8pt}
+.ps-note{margin-top:10pt;padding-top:8pt;border-top:.5pt solid var(--line);font-size:7pt;line-height:1.55;color:var(--ink-3)}
+.ps-sign{margin-top:9pt;font-size:7.5pt;color:var(--ink-3);display:flex;justify-content:space-between;gap:12px}
+
+@media print{
+  body{background:#fff}
+  .wrap{max-width:none;padding:0;margin:0}
+  .wrap > *:not(#printsheet){display:none!important}
+  #printsheet{display:block!important}
+  .noprint{display:none!important}
+  .ps-table tr{page-break-inside:avoid}
+  thead{display:table-header-group}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async function(){
+  function deny(){ location.replace("/admin"); }
+  try{
+    var SB = window.supabase.createClient("https://emguqhnftdvhbufcddtz.supabase.co","sb_publishable_emkrL8EVhWO0CAH4R0Wiug_BZtPGv9T");
+    var r = await SB.auth.getSession();
+    if(r && r.data && r.data.session){ document.documentElement.style.visibility = "visible"; }
+    else { deny(); }
+  }catch(e){ deny(); }
+})();
+</script>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <h1>Side by side payment comparison</h1>
+      <p>Two homes rarely cost what their price tags suggest. Change any number below and every payment updates at once.</p>
+    </div>
+    <div class="contact">
+      <strong>Ralph Richardson</strong>
+      Keller Williams Corona &nbsp;|&nbsp; DRE #02054110<br>
+      909.645.4394 &nbsp;|&nbsp; TheFutureHomeownerPlan.com
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button class="btn btn-primary" id="add">Add a home</button>
+    <button class="btn" id="reset">Start over</button>
+    <button class="btn" id="print">Preview PDF sheet</button>
+    <label class="toggle"><input type="checkbox" id="sync"> Match rate and term across all homes</label>
+    <div class="spacer"></div>
+    <div class="count" id="count"></div>
+  </div>
+
+  <div class="toolbar second">
+    <label class="prep">Prepared for <input type="text" id="preparedFor" placeholder="Buyer name" autocomplete="off"></label>
+    <label class="prep">Saved <select id="libSelect"></select></label>
+    <button class="btn" id="saveBtn">Save</button>
+    <button class="btn" id="saveAsBtn">Save as new</button>
+    <button class="btn" id="delBtn">Delete</button>
+    <div class="spacer"></div>
+    <span class="savestate" id="savestate"></span>
+  </div>
+
+  <div class="toolbar third">
+    <span class="savestate" id="fileLabel"></span>
+    <div class="spacer"></div>
+    <button class="btn" id="connectBtn">Connect comparisons.json</button>
+    <button class="btn" id="createBtn">Create a data file</button>
+    <button class="btn" id="dlBtn">Download comparisons.json</button>
+    <button class="btn" id="importBtn">Import a copy</button>
+    <input type="file" id="openFile" accept=".json,application/json" style="display:none">
+  </div>
+
+  <div class="legend">
+    <div class="lg"><span class="sw" style="background:var(--c-pi)"></span>Principal and interest</div>
+    <div class="lg"><span class="sw" style="background:var(--c-tax)"></span>Property tax</div>
+    <div class="lg"><span class="sw" style="background:var(--c-mr)"></span>Mello-Roos or special assessment</div>
+    <div class="lg"><span class="sw" style="background:var(--c-hoa)"></span>HOA</div>
+    <div class="lg"><span class="sw" style="background:var(--c-pmi)"></span>Mortgage insurance</div>
+    <div class="lg"><span class="sw" style="background:var(--c-ins)"></span>Homeowners insurance</div>
+  </div>
+
+  <div class="scroller">
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <section class="summary">
+    <h2>What this means</h2>
+    <div class="sline" id="sline"></div>
+    <div class="note">Estimates only. Principal and interest are calculated on a fixed rate loan. Mortgage insurance is estimated from the loan to value ratio and drops to zero at 20 percent down. Cash to close shows the down payment only and does not include closing costs, prepaids, or deposits. Confirm all figures with your lender before writing an offer.</div>
+  </section>
+
+  <footer class="foot">
+    <div>Prepared by Ralph Richardson, Keller Williams Corona</div>
+    <div>Prototype v1.7</div>
+  </footer>
+
+  <!-- ===== summary sheet: hidden on screen, printed to PDF ===== -->
+  <section id="printsheet">
+    <div class="exitbar noprint">
+      <span>Preview of the printed sheet. This is what saves to PDF.</span>
+      <span>
+        <button id="psPrint">Print or save PDF</button>
+        <button id="psExit" style="margin-left:8px">Back to editing</button>
+      </span>
+    </div>
+
+    <header class="ps-head">
+      <div>
+        <h2>Monthly payment comparison</h2>
+        <div class="ps-prep" id="psPrep"></div>
+      </div>
+      <div class="ps-contact">
+        <strong>Ralph Richardson</strong>
+        Keller Williams Corona &nbsp;|&nbsp; DRE #02054110<br>
+        909.645.4394 &nbsp;|&nbsp; TheFutureHomeownerPlan.com<br>
+        <span id="psDate"></span>
+      </div>
+    </header>
+
+    <div class="ps-lead" id="psLead"></div>
+    <table class="ps-table" id="psTable"></table>
+
+    <div class="ps-legend">
+      <div class="lg"><span class="sw" style="background:var(--c-pi)"></span>Principal and interest</div>
+      <div class="lg"><span class="sw" style="background:var(--c-tax)"></span>Property tax</div>
+      <div class="lg"><span class="sw" style="background:var(--c-mr)"></span>Mello-Roos</div>
+      <div class="lg"><span class="sw" style="background:var(--c-hoa)"></span>HOA</div>
+      <div class="lg"><span class="sw" style="background:var(--c-pmi)"></span>Mortgage insurance</div>
+      <div class="lg"><span class="sw" style="background:var(--c-ins)"></span>Homeowners insurance</div>
+    </div>
+
+    <div class="ps-note">Estimates only, prepared for discussion. Principal and interest are calculated on a fixed rate loan. Mortgage insurance is estimated from the loan to value ratio and drops off at 20 percent down. Cash down shows the down payment only and excludes closing costs, prepaids, and deposits. Property tax and special assessments vary by parcel. Confirm every figure with your lender and the preliminary title report before writing an offer.</div>
+
+    <div class="ps-sign">
+      <span>Ralph Richardson &nbsp;|&nbsp; Keller Williams Corona &nbsp;|&nbsp; DRE #02054110</span>
+      <span>v1.7</span>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   Payment Comparison Prototype v1.7
+   ============================================================ */
+
+var SLOTS = ["Home A","Home B","Home C","Home D","Home E","Home F"];
+
+function seed(kind){
+  if(kind === "new"){
+    return {
+      name:"", type:"new",
+      price:699900,
+      downMode:"pct", downPct:10, downAmt:69990,
+      rate:5.5, term:30, rateNote:"Builder promotional rate",
+      taxMode:"pct", taxPct:1.10, taxAmt:642,
+      mello:195, hoa:145,
+      pmiAuto:true, pmiRate:0.41,
+      ins:145, photo:"",
+      incentives:"$15,000 toward closing costs\nRate buydown paid by builder\nWindow blinds and appliances included"
+    };
+  }
+  return {
+    name:"", type:"resale",
+    price:675000,
+    downMode:"pct", downPct:10, downAmt:67500,
+    rate:6.5, term:30, rateNote:"",
+    taxMode:"pct", taxPct:1.20, taxAmt:675,
+    mello:0, hoa:65,
+    pmiAuto:true, pmiRate:0.41,
+    ins:135, photo:"",
+    incentives:""
+  };
+}
+
+var homes = [seed("resale"), seed("new")];
+var cards = [];
+
+/* ---------- helpers ---------- */
+function num(v){
+  if(typeof v === "number") return v;
+  var n = parseFloat(String(v).replace(/[^0-9.\-]/g,""));
+  return isFinite(n) ? n : 0;
+}
+function usd(n){
+  return "$" + Math.round(n).toLocaleString("en-US");
+}
+function usd2(n){
+  return "$" + n.toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:0});
+}
+
+/* downscale an image file so saved comparisons stay small */
+function readImage(file, cb){
+  var fr = new FileReader();
+  fr.onerror = function(){ flash("That image could not be read"); };
+  fr.onload = function(){
+    var img = new Image();
+    img.onerror = function(){ flash("That file is not an image the browser can open"); };
+    img.onload = function(){
+      var maxW = 760;
+      var sc = Math.min(1, maxW / img.width);
+      var cv = document.createElement("canvas");
+      cv.width  = Math.max(1, Math.round(img.width  * sc));
+      cv.height = Math.max(1, Math.round(img.height * sc));
+      var ctx = cv.getContext("2d");
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0,0,cv.width,cv.height);
+      ctx.drawImage(img, 0, 0, cv.width, cv.height);
+      try { cb(cv.toDataURL("image/jpeg", 0.78)); }
+      catch(err){ flash("That image could not be processed"); }
+    };
+    img.src = fr.result;
+  };
+  fr.readAsDataURL(file);
+}
+
+/* auto mortgage insurance rate by loan to value */
+function autoPmi(ltv){
+  if(ltv <= 80) return 0;
+  if(ltv <= 85) return 0.30;
+  if(ltv <= 90) return 0.41;
+  if(ltv <= 95) return 0.62;
+  return 1.03;
+}
+
+function calc(h){
+  var price = Math.max(0, num(h.price));
+  var down  = h.downMode === "pct" ? price * num(h.downPct)/100 : Math.min(price, num(h.downAmt));
+  var downPct = price > 0 ? down/price*100 : 0;
+  var loan  = Math.max(0, price - down);
+  var ltv   = price > 0 ? loan/price*100 : 0;
+
+  var i = num(h.rate)/100/12;
+  var n = num(h.term)*12;
+  var pi = 0;
+  if(loan > 0 && n > 0){
+    pi = i > 0 ? loan * i / (1 - Math.pow(1+i, -n)) : loan/n;
+  }
+
+  var tax = h.taxMode === "pct" ? price * num(h.taxPct)/100/12 : num(h.taxAmt);
+  var mello = h.type === "new" ? num(h.mello) : 0;
+  var hoa = num(h.hoa);
+  var ins = num(h.ins);
+
+  var pmiRate = h.pmiAuto ? autoPmi(ltv) : num(h.pmiRate);
+  var pmi = ltv > 80 ? loan * pmiRate/100/12 : 0;
+
+  var total = pi + tax + mello + hoa + ins + pmi;
+
+  return {price:price, down:down, downPct:downPct, loan:loan, ltv:ltv,
+          pi:pi, tax:tax, mello:mello, hoa:hoa, ins:ins,
+          pmi:pmi, pmiRate:pmiRate, total:total};
+}
+
+/* ---------- card construction ---------- */
+function el(tag, cls, html){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html != null) e.innerHTML = html;
+  return e;
+}
+
+function field(label, opts){
+  var f = el("div","field");
+  f.appendChild(el("label", null, label));
+  var c = el("div","control");
+  var input;
+  if(opts.select){
+    input = document.createElement("select");
+    opts.select.forEach(function(o){
+      var op = document.createElement("option");
+      op.value = o[0]; op.textContent = o[1];
+      input.appendChild(op);
+    });
+  } else {
+    input = document.createElement("input");
+    input.type = "text";
+    input.inputMode = "decimal";
+    input.autocomplete = "off";
+  }
+  c.appendChild(input);
+  var units = null;
+  if(opts.units){
+    units = el("div","unit");
+    opts.units.forEach(function(u){
+      var b = el("button", null, u[1]);
+      b.type = "button";
+      b.dataset.u = u[0];
+      units.appendChild(b);
+    });
+    c.appendChild(units);
+  }
+  f.appendChild(c);
+  var sub = null;
+  if(opts.sub){
+    sub = document.createElement("input");
+    sub.type = "text";
+    sub.className = "subin";
+    sub.autocomplete = "off";
+    sub.placeholder = opts.sub;
+    f.appendChild(sub);
+  }
+  var hint = null;
+  if(opts.hint){ hint = el("div","hint",""); f.appendChild(hint); }
+  return {wrap:f, input:input, units:units, hint:hint, sub:sub};
+}
+
+function buildCard(idx){
+  var h = homes[idx];
+  var art = el("article","home");
+  art.appendChild(el("div","cap"));
+
+  /* photo */
+  var photo = el("div","photo");
+  var pimg = document.createElement("img");
+  var pcta = el("div","photo-cta","<b>Add a photo</b> &nbsp;click or drag one here");
+  var px = el("button","photo-x","\u00D7");
+  px.type = "button"; px.title = "Remove photo";
+  var pfile = document.createElement("input");
+  pfile.type = "file"; pfile.accept = "image/*"; pfile.style.display = "none";
+  photo.appendChild(pimg); photo.appendChild(pcta); photo.appendChild(px); photo.appendChild(pfile);
+  function paintPhoto(){
+    if(h.photo){ pimg.src = h.photo; pimg.style.display = "block"; pcta.style.display = "none"; photo.classList.add("has"); }
+    else { pimg.removeAttribute("src"); pimg.style.display = "none"; pcta.style.display = "block"; photo.classList.remove("has"); }
+  }
+  function takeFile(f){
+    if(!f || !/^image\//.test(f.type)) return;
+    readImage(f, function(dataUrl){ h.photo = dataUrl; paintPhoto(); recalc(); });
+  }
+  photo.onclick = function(e){ if(e.target !== px) pfile.click(); };
+  pfile.onchange = function(){ takeFile(pfile.files[0]); pfile.value = ""; };
+  px.onclick = function(e){ e.stopPropagation(); h.photo = ""; paintPhoto(); recalc(); };
+  ["dragenter","dragover"].forEach(function(ev){
+    photo.addEventListener(ev, function(e){ e.preventDefault(); photo.classList.add("drag"); });
+  });
+  ["dragleave","drop"].forEach(function(ev){
+    photo.addEventListener(ev, function(e){ e.preventDefault(); photo.classList.remove("drag"); });
+  });
+  photo.addEventListener("drop", function(e){ takeFile(e.dataTransfer.files[0]); });
+  paintPhoto();
+  art.appendChild(photo);
+
+  /* head */
+  var head = el("div","hhead");
+  var row = el("div","hrow");
+  var slot = el("div","slot", SLOTS[idx]);
+  var right = el("div","hrow");
+  right.style.gap = "6px";
+  var lowTag = el("span","low-tag","Lowest");
+  lowTag.style.display = "none";
+  var kill = el("button","kill","\u00D7");
+  kill.type = "button";
+  kill.title = "Remove this home";
+  kill.onclick = function(){ removeHome(idx); };
+  right.appendChild(lowTag); right.appendChild(kill);
+  row.appendChild(slot); row.appendChild(right);
+  head.appendChild(row);
+
+  var name = el("input","hname");
+  name.type = "text";
+  name.placeholder = "Address or nickname";
+  name.value = h.name;
+  name.oninput = function(){ h.name = name.value; recalc(); };
+  head.appendChild(name);
+
+  var seg = el("div","seg");
+  [["resale","Re-Sale"],["new","New Construction"]].forEach(function(t){
+    var b = el("button", null, t[1]);
+    b.type = "button";
+    b.dataset.type = t[0];
+    b.onclick = function(){
+      h.type = t[0];
+      seg.querySelectorAll("button").forEach(function(x){ x.classList.toggle("on", x.dataset.type === h.type); });
+      c.melloField.wrap.classList.toggle("hide", h.type !== "new");
+      recalc();
+    };
+    seg.appendChild(b);
+  });
+  head.appendChild(seg);
+  art.appendChild(head);
+
+  /* readout */
+  var ro = el("div","readout");
+  var total = el("div","total","$0");
+  var permo = el("div","permo","Total monthly payment");
+  var delta = el("div","delta","");
+  ro.appendChild(total); ro.appendChild(permo); ro.appendChild(delta);
+  art.appendChild(ro);
+
+  /* bar */
+  var bar = el("div","bar");
+  var segs = {};
+  ["pi","tax","mello","hoa","pmi","ins"].forEach(function(k){
+    var s = document.createElement("span");
+    s.style.background = "var(--c-" + (k === "mello" ? "mr" : k) + ")";
+    s.style.width = "0%";
+    bar.appendChild(s);
+    segs[k] = s;
+  });
+  art.appendChild(bar);
+  var scale = el("div","bar-scale","");
+  art.appendChild(scale);
+
+  /* fields */
+  var fields = el("div","fields");
+  var c = {};
+
+  c.price = field("Purchase price", {});
+  c.down  = field("Down payment", {units:[["pct","%"],["amt","$"]], hint:true});
+  c.rate  = field("Interest rate", {sub:"Rate quoted by"});
+  c.term  = field("Term", {select:[[30,"30 years"],[25,"25 years"],[20,"20 years"],[15,"15 years"],[10,"10 years"]]});
+  c.tax   = field("Property tax", {units:[["pct","%/yr"],["amt","$/mo"]], hint:true});
+  c.melloField = field("Mello-Roos or CFD", {hint:true});
+  c.hoa   = field("HOA dues", {hint:false});
+  c.pmi   = field("Mortgage insurance", {units:[["auto","Auto"],["man","Set"]], hint:true});
+  c.ins   = field("Homeowners insurance", {hint:false});
+
+  [c.price,c.down,c.rate,c.term,c.tax,c.melloField,c.hoa,c.pmi,c.ins].forEach(function(f){
+    fields.appendChild(f.wrap);
+  });
+  art.appendChild(fields);
+
+  if(h.type !== "new") c.melloField.wrap.classList.add("hide");
+
+  /* incentives note */
+  var notes = el("div","notes");
+  var nLabel = el("label", null, "Seller or builder incentives");
+  var nArea = document.createElement("textarea");
+  nArea.placeholder = "One per line. Closing cost credit, rate buydown, upgrades, appliances, HOA paid, price reduction.";
+  nArea.value = h.incentives || "";
+  nArea.rows = 3;
+  nArea.addEventListener("input", function(){ h.incentives = nArea.value; recalc(); });
+  notes.appendChild(nLabel);
+  notes.appendChild(nArea);
+  art.appendChild(notes);
+
+  /* derived */
+  var dl = el("dl","derived");
+  function drow(label){
+    var r = el("div","drow");
+    r.appendChild(el("dt", null, label));
+    var dd = el("dd", null, "");
+    r.appendChild(dd);
+    dl.appendChild(r);
+    return dd;
+  }
+  var dLoan = drow("Loan amount");
+  var dCash = drow("Cash down");
+  var dFive = drow("Payments over 5 years");
+  art.appendChild(dl);
+
+  /* wiring */
+  function bind(f, key, isMoney){
+    f.input.addEventListener("input", function(){
+      h[key] = num(f.input.value);
+      if(key === "rate" || key === "term") pushSync(idx, key);
+      recalc();
+    });
+    f.input.addEventListener("blur", function(){ paint(); });
+  }
+
+  c.price.input.addEventListener("input", function(){ h.price = num(c.price.input.value); recalc(); });
+  c.price.input.addEventListener("blur", function(){ paint(); });
+
+  c.down.input.addEventListener("input", function(){
+    if(h.downMode === "pct") h.downPct = num(c.down.input.value);
+    else h.downAmt = num(c.down.input.value);
+    recalc();
+  });
+  c.down.input.addEventListener("blur", function(){ paint(); });
+  c.down.units.querySelectorAll("button").forEach(function(b){
+    b.onclick = function(){
+      var r = calc(h);
+      h.downMode = b.dataset.u;
+      if(h.downMode === "pct") h.downPct = Math.round(r.downPct*100)/100;
+      else h.downAmt = Math.round(r.down);
+      paint(); recalc();
+    };
+  });
+
+  bind(c.rate,"rate");
+  c.rate.sub.value = h.rateNote || "";
+  c.rate.sub.addEventListener("input", function(){
+    h.rateNote = c.rate.sub.value;
+    recalc();
+  });
+  c.term.input.addEventListener("change", function(){
+    h.term = num(c.term.input.value);
+    pushSync(idx,"term");
+    recalc(); paint();
+  });
+
+  c.tax.input.addEventListener("input", function(){
+    if(h.taxMode === "pct") h.taxPct = num(c.tax.input.value);
+    else h.taxAmt = num(c.tax.input.value);
+    recalc();
+  });
+  c.tax.input.addEventListener("blur", function(){ paint(); });
+  c.tax.units.querySelectorAll("button").forEach(function(b){
+    b.onclick = function(){
+      var r = calc(h);
+      h.taxMode = b.dataset.u;
+      if(h.taxMode === "pct") h.taxPct = r.price > 0 ? Math.round(r.tax*12/r.price*10000)/100 : 0;
+      else h.taxAmt = Math.round(r.tax);
+      paint(); recalc();
+    };
+  });
+
+  bind(c.melloField,"mello");
+  bind(c.hoa,"hoa");
+  bind(c.ins,"ins");
+
+  c.pmi.input.addEventListener("input", function(){
+    if(!h.pmiAuto){ h.pmiRate = num(c.pmi.input.value); recalc(); }
+  });
+  c.pmi.input.addEventListener("blur", function(){ paint(); });
+  c.pmi.units.querySelectorAll("button").forEach(function(b){
+    b.onclick = function(){
+      if(b.dataset.u === "auto"){
+        h.pmiAuto = true;
+      } else {
+        var r = calc(h);
+        h.pmiAuto = false;
+        h.pmiRate = r.pmiRate;
+      }
+      paint(); recalc();
+    };
+  });
+
+  /* paint writes state back into the inputs */
+  function paint(){
+    var r = calc(h);
+    if(document.activeElement !== c.price.input) c.price.input.value = usd2(r.price);
+    if(document.activeElement !== c.down.input)
+      c.down.input.value = h.downMode === "pct" ? (Math.round(r.downPct*100)/100) + "%" : usd2(r.down);
+    if(document.activeElement !== c.rate.input) c.rate.input.value = num(h.rate).toFixed(3).replace(/0+$/,"").replace(/\.$/,"") + "%";
+    c.term.input.value = h.term;
+    if(document.activeElement !== c.tax.input)
+      c.tax.input.value = h.taxMode === "pct" ? (Math.round(num(h.taxPct)*1000)/1000) + "%" : usd2(num(h.taxAmt));
+    if(document.activeElement !== c.melloField.input) c.melloField.input.value = usd2(num(h.mello)) + "/mo";
+    if(document.activeElement !== c.hoa.input) c.hoa.input.value = usd2(num(h.hoa)) + "/mo";
+    if(document.activeElement !== c.ins.input) c.ins.input.value = usd2(num(h.ins)) + "/mo";
+
+    c.down.units.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", b.dataset.u === h.downMode); });
+    c.tax.units.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", b.dataset.u === h.taxMode); });
+    c.pmi.units.querySelectorAll("button").forEach(function(b){
+      b.classList.toggle("on", (b.dataset.u === "auto") === !!h.pmiAuto);
+    });
+    c.pmi.input.readOnly = !!h.pmiAuto;
+    if(document.activeElement !== c.pmi.input) c.pmi.input.value = (Math.round(r.pmiRate*100)/100) + "%";
+
+    seg.querySelectorAll("button").forEach(function(x){ x.classList.toggle("on", x.dataset.type === h.type); });
+  }
+
+  cards[idx] = {
+    el:art, total:total, delta:delta, segs:segs, scale:scale, lowTag:lowTag,
+    kill:kill, dLoan:dLoan, dCash:dCash, dFive:dFive, ctrls:c, paint:paint
+  };
+  paint();
+  return art;
+}
+
+/* ---------- sync rate and term ---------- */
+function pushSync(fromIdx, key){
+  if(!document.getElementById("sync").checked) return;
+  var v = homes[fromIdx][key];
+  homes.forEach(function(h,i){
+    if(i !== fromIdx){ h[key] = v; }
+  });
+  cards.forEach(function(cd,i){ if(i !== fromIdx) cd.paint(); });
+}
+
+/* ---------- render ---------- */
+function renderGrid(){
+  var grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  cards = [];
+  grid.style.gridTemplateColumns = "repeat(" + homes.length + ", minmax(272px, 1fr))";
+  homes.forEach(function(h,i){ grid.appendChild(buildCard(i)); });
+  document.getElementById("add").disabled = homes.length >= 6;
+  cards.forEach(function(cd){ cd.kill.disabled = homes.length <= 2; });
+  document.getElementById("count").textContent = homes.length + " of 6 homes";
+  recalc();
+}
+
+function recalc(){
+  var res = homes.map(calc);
+  var totals = res.map(function(r){ return r.total; });
+  var max = Math.max.apply(null, totals) || 1;
+  var min = Math.min.apply(null, totals);
+  var lowIdx = totals.indexOf(min);
+
+  res.forEach(function(r,i){
+    var cd = cards[i];
+    if(!cd) return;
+    cd.total.textContent = usd(r.total);
+    cd.el.classList.toggle("is-low", i === lowIdx && homes.length > 1);
+    cd.lowTag.style.display = (i === lowIdx && homes.length > 1) ? "" : "none";
+
+    var diff = r.total - min;
+    if(diff < 1){
+      cd.delta.textContent = "Lowest payment of the group";
+      cd.delta.className = "delta base";
+    } else {
+      cd.delta.textContent = "+" + usd(diff) + "/mo  \u2022  +" + usd(diff*12) + "/yr";
+      cd.delta.className = "delta up";
+    }
+
+    ["pi","tax","mello","hoa","pmi","ins"].forEach(function(k){
+      cd.segs[k].style.width = (r[k]/max*100) + "%";
+      cd.segs[k].title = k + ": " + usd(r[k]) + "/mo";
+    });
+    cd.scale.textContent = usd(r.pi) + " P&I  \u2022  " + usd(r.total - r.pi) + " everything else";
+
+    cd.dLoan.textContent = usd(r.loan);
+    cd.dCash.textContent = usd(r.down) + "  (" + (Math.round(r.downPct*10)/10) + "%)";
+    cd.dFive.textContent = usd(r.total*60);
+  });
+
+  /* summary */
+  var hiIdx = totals.indexOf(Math.max.apply(null, totals));
+  var nameOf = function(i){ return homes[i].name.trim() || SLOTS[i]; };
+  var spread = Math.max.apply(null, totals) - min;
+  var s = document.getElementById("sline");
+  if(homes.length < 2 || spread < 1){
+    s.innerHTML = "These homes land at the same monthly payment. The deciding factors are cash down, the loan balance you carry, and what you get for the money.";
+  } else {
+    s.innerHTML =
+      "<b>" + nameOf(lowIdx) + "</b> has the lowest payment at <b>" + usd(min) + "</b> per month. " +
+      "<b>" + nameOf(hiIdx) + "</b> is the highest at <b>" + usd(Math.max.apply(null,totals)) + "</b>. " +
+      "That is a spread of <b>" + usd(spread) + "</b> a month, <b>" + usd(spread*12) + "</b> a year, and <b>" +
+      usd(spread*60) + "</b> over five years.";
+  }
+
+  buildSheet(res, min, lowIdx, max, s.innerHTML);
+  autosave();
+}
+
+/* ---------- summary sheet ---------- */
+var pageStyle = document.createElement("style");
+document.head.appendChild(pageStyle);
+
+function esc(s){
+  return String(s).replace(/[&<>"]/g, function(m){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m];
+  });
+}
+
+function buildSheet(res, min, lowIdx, max, leadHTML){
+  var n = homes.length;
+
+  /* landscape once the table gets wide */
+  pageStyle.textContent = "@page{size:" + (n >= 5 ? "landscape" : "portrait") + ";margin:0.45in}";
+
+  document.getElementById("psDate").textContent = new Date().toLocaleDateString("en-US",
+    {month:"long", day:"numeric", year:"numeric"});
+  document.getElementById("psLead").innerHTML = leadHTML;
+  var prep = (document.getElementById("preparedFor").value || "").trim();
+  document.getElementById("psPrep").innerHTML = prep ? "Prepared for " + esc(prep) : "";
+  document.getElementById("psPrep").style.display = prep ? "" : "none";
+
+  var nameOf = function(i){ return homes[i].name.trim() || SLOTS[i]; };
+  var used = function(k){ return res.some(function(r){ return r[k] >= 0.5; }); };
+
+  function row(label, vals, cls, cellCls){
+    var h = "<tr" + (cls ? " class='" + cls + "'" : "") + "><th class='rl'>" + label + "</th>";
+    vals.forEach(function(v,i){
+      h += "<td" + (cellCls ? " class='" + cellCls(i) + "'" : "") + ">" + v + "</td>";
+    });
+    return h + "</tr>";
+  }
+  function money(k){ return res.map(function(r){ return usd(r[k]); }); }
+
+  var html = "<thead><tr><th class='rl'></th>";
+  res.forEach(function(r,i){
+    html += "<th>" +
+            (homes[i].photo ? "<img class='ps-thumb' src='" + homes[i].photo + "' alt=''>" : "") +
+            "<span class='ps-slot'>" + SLOTS[i] + "</span>" +
+            "<span class='ps-name'>" + esc(nameOf(i)) + "</span>" +
+            "<span class='ps-type" + (homes[i].type === "new" ? " new" : "") + "'>" +
+            (homes[i].type === "new" ? "New construction" : "Re-sale") + "</span></th>";
+  });
+  html += "</tr></thead><tbody>";
+
+  /* the deal */
+  html += row("Purchase price", money("price"));
+  html += row("Cash down", res.map(function(r){
+    return usd(r.down) + "  <span style='color:var(--ink-3)'>(" + (Math.round(r.downPct*10)/10) + "%)</span>";
+  }));
+  html += row("Loan amount", money("loan"));
+  var hasSource = homes.some(function(h){ return (h.rateNote||"").trim(); });
+  html += row("Rate and term", res.map(function(r,i){
+    return (Math.round(num(homes[i].rate)*1000)/1000) + "%  /  " + num(homes[i].term) + " yr";
+  }), hasSource ? "ps-rate-paired" : "");
+  if(hasSource){
+    html += row("Rate quoted by", homes.map(function(h){
+      var v = (h.rateNote||"").trim();
+      return v ? esc(v) : "Not specified";
+    }), "ps-source");
+  }
+
+  /* the payment */
+  html += "<tr class='ps-group'><th class='rl'>Monthly payment</th><td colspan='" + n + "'></td></tr>";
+  html += row("Principal and interest", money("pi"));
+  html += row("Property tax", money("tax"));
+  if(used("mello")) html += row("Mello-Roos or CFD", res.map(function(r){ return r.mello >= 0.5 ? usd(r.mello) : "None"; }));
+  if(used("hoa"))   html += row("HOA dues", res.map(function(r){ return r.hoa >= 0.5 ? usd(r.hoa) : "None"; }));
+  if(used("pmi"))   html += row("Mortgage insurance", res.map(function(r){ return r.pmi >= 0.5 ? usd(r.pmi) : "Not required"; }));
+  if(used("ins"))   html += row("Homeowners insurance", money("ins"));
+
+  /* shared scale bar */
+  html += "<tr class='ps-bar'><th class='rl'></th>";
+  res.forEach(function(r){
+    var b = "<div class='psbar'>";
+    ["pi","tax","mello","hoa","pmi","ins"].forEach(function(k){
+      b += "<span style='width:" + (r[k]/max*100) + "%;background:var(--c-" + (k === "mello" ? "mr" : k) + ")'></span>";
+    });
+    html += "<td>" + b + "</div></td>";
+  });
+  html += "</tr>";
+
+  html += row("Total monthly payment", money("total"), "ps-total", function(i){
+    return i === lowIdx ? "ps-low" : "";
+  });
+  html += row("Compared to the lowest", res.map(function(r){
+    return (r.total - min) < 1 ? "Lowest" : "+" + usd(r.total - min) + "/mo";
+  }), "ps-delta", function(i){ return (res[i].total - min) < 1 ? "zero" : ""; });
+  html += row("Same difference over 5 years", res.map(function(r){
+    return (r.total - min) < 1 ? "\u2014" : "+" + usd((r.total - min) * 60);
+  }), "ps-delta5");
+
+  /* incentives */
+  if(homes.some(function(h){ return (h.incentives||"").trim(); })){
+    html += "<tr class='ps-group'><th class='rl'>Seller or builder incentives</th><td colspan='" + n + "'></td></tr>";
+    html += row("", homes.map(function(h){
+      var v = (h.incentives||"").trim();
+      if(!v) return "<span class='inc-none'>None offered</span>";
+      return v.split(/\n+/).map(function(line){
+        line = line.trim();
+        return line ? "<div class='inc-li'>" + esc(line) + "</div>" : "";
+      }).join("");
+    }), "ps-inc");
+  }
+
+  html += "</tbody>";
+  document.getElementById("psTable").innerHTML = html;
+}
+
+/* a dropped image outside a photo slot should not navigate the page away */
+["dragover","drop"].forEach(function(ev){
+  window.addEventListener(ev, function(e){
+    if(!e.target.closest || !e.target.closest(".photo")) e.preventDefault();
+  });
+});
+
+/* ---------- data file + saved comparisons ---------- */
+var LIB_NAME = "comparisons.json";
+var STORE    = "fhpPaymentComparison";
+var FSA = (typeof window.showOpenFilePicker === "function" && typeof window.showSaveFilePicker === "function");
+
+var library    = {format:"payment-comparison-library", version:1, updatedAt:"", comparisons:[]};
+var activeId   = null;
+var fileHandle = null;   /* connected and writable */
+var pendingHandle = null;/* remembered from last session, needs one click to re-permit */
+var writeTimer = null;
+var storageOK  = true;
+
+/* ---- tiny key value store, needed because a file handle cannot go in localStorage ---- */
+function idb(cb){
+  try{
+    var r = indexedDB.open("paymentComparison", 1);
+    r.onupgradeneeded = function(){ r.result.createObjectStore("kv"); };
+    r.onsuccess = function(){ cb(r.result); };
+    r.onerror   = function(){ cb(null); };
+  }catch(err){ cb(null); }
+}
+function idbSet(k,v){ idb(function(db){ if(!db) return;
+  try{ db.transaction("kv","readwrite").objectStore("kv").put(v,k); }catch(err){} }); }
+function idbGet(k,cb){ idb(function(db){ if(!db) return cb(null);
+  try{ var q = db.transaction("kv").objectStore("kv").get(k);
+       q.onsuccess = function(){ cb(q.result || null); };
+       q.onerror   = function(){ cb(null); };
+  }catch(err){ cb(null); } }); }
+
+/* ---- status line ---- */
+function idleStatus(){
+  if(fileHandle)    return "Saving to " + fileHandle.name;
+  if(pendingHandle) return "Click Reconnect to resume saving to " + pendingHandle.name;
+  return storageOK ? "This browser only, no data file connected" : "Nothing is being saved, connect a data file";
+}
+function flash(msg, sticky){
+  var e = document.getElementById("savestate");
+  if(!e) return;
+  e.textContent = msg;
+  clearTimeout(flash.t);
+  if(!sticky) flash.t = setTimeout(function(){ e.textContent = idleStatus(); }, 2800);
+}
+function setFileLabel(){
+  var lab = document.getElementById("fileLabel");
+  var btn = document.getElementById("connectBtn");
+  if(fileHandle){ lab.textContent = "Data file: " + fileHandle.name; btn.textContent = "Use a different file"; }
+  else if(pendingHandle){ lab.textContent = "Data file: " + pendingHandle.name + " (needs a click)"; btn.textContent = "Reconnect " + pendingHandle.name; }
+  else { lab.textContent = "No data file connected"; btn.textContent = "Connect " + LIB_NAME; }
+  document.getElementById("savestate").textContent = idleStatus();
+}
+
+function uid(){ return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+/* ---- current screen state ---- */
+function snapshot(){
+  return {
+    preparedFor: document.getElementById("preparedFor").value,
+    sync: document.getElementById("sync").checked,
+    homes: JSON.parse(JSON.stringify(homes))
+  };
+}
+function applySnapshot(data){
+  if(!data || !Array.isArray(data.homes) || !data.homes.length) throw new Error("bad data");
+  var clean = data.homes.slice(0,6).map(function(h){
+    var base = seed(h && h.type === "new" ? "new" : "resale");
+    base.incentives = ""; base.rateNote = ""; base.name = ""; base.photo = "";
+    Object.keys(base).forEach(function(k){
+      if(h && h[k] !== undefined && h[k] !== null) base[k] = h[k];
+    });
+    return base;
+  });
+  while(clean.length < 2) clean.push(seed("resale"));
+  homes = clean;
+  document.getElementById("preparedFor").value = data.preparedFor || "";
+  document.getElementById("sync").checked = !!data.sync;
+  renderGrid();
+}
+
+/* ---- the data file ---- */
+function libraryText(){
+  library.updatedAt = new Date().toISOString();
+  library.format = "payment-comparison-library";
+  library.version = 1;
+  return JSON.stringify(library, null, 2);
+}
+
+function writeNow(){
+  if(!fileHandle) return;
+  fileHandle.queryPermission({mode:"readwrite"}).then(function(perm){
+    if(perm !== "granted"){ pendingHandle = fileHandle; fileHandle = null; setFileLabel(); return; }
+    return fileHandle.createWritable().then(function(w){
+      return w.write(libraryText()).then(function(){ return w.close(); });
+    }).then(function(){ flash("Saved to " + fileHandle.name); });
+  }).catch(function(){
+    flash("Could not write to the data file, check it is not open elsewhere", true);
+  });
+}
+function queueWrite(){
+  if(!fileHandle) return;
+  clearTimeout(writeTimer);
+  writeTimer = setTimeout(writeNow, 700);
+}
+
+function adoptLibrary(d){
+  if(!d || !Array.isArray(d.comparisons)) return false;
+  library = {format:"payment-comparison-library", version:1,
+             updatedAt:d.updatedAt || "", comparisons:d.comparisons};
+  refreshLib();
+  return true;
+}
+
+function connectFile(create){
+  var opts = {types:[{description:"Comparison data", accept:{"application/json":[".json"]}}]};
+  var pick = create
+    ? window.showSaveFilePicker({suggestedName:LIB_NAME, types:opts.types})
+    : window.showOpenFilePicker({types:opts.types, multiple:false}).then(function(a){ return a[0]; });
+
+  pick.then(function(h){
+    return h.requestPermission({mode:"readwrite"}).then(function(perm){
+      if(perm !== "granted"){ flash("Write permission was not granted", true); return; }
+      fileHandle = h; pendingHandle = null;
+      idbSet("handle", h);
+      setFileLabel();
+      if(create){ writeNow(); return; }
+      return h.getFile().then(function(f){ return f.text(); }).then(function(t){
+        var d = null;
+        try{ d = JSON.parse(t); }catch(err){}
+        if(adoptLibrary(d)) flash("Connected to " + h.name + ", " + library.comparisons.length + " saved comparisons");
+        else { flash("Connected to " + h.name + ", starting a new library"); writeNow(); }
+      });
+    });
+  }).catch(function(){ /* picker cancelled */ });
+}
+
+function reconnect(){
+  if(!pendingHandle) return;
+  pendingHandle.requestPermission({mode:"readwrite"}).then(function(perm){
+    if(perm !== "granted"){ flash("Permission was not granted", true); return; }
+    fileHandle = pendingHandle; pendingHandle = null;
+    setFileLabel();
+    return fileHandle.getFile().then(function(f){ return f.text(); }).then(function(t){
+      var d = null; try{ d = JSON.parse(t); }catch(err){}
+      if(adoptLibrary(d)) flash("Reconnected, " + library.comparisons.length + " saved comparisons");
+    });
+  }).catch(function(){});
+}
+
+/* ---- the saved comparison list ---- */
+function refreshLib(){
+  var sel = document.getElementById("libSelect");
+  var keep = activeId;
+  sel.innerHTML = "<option value=''>Working copy, not saved</option>";
+  library.comparisons.slice().sort(function(a,b){
+    return (b.savedAt||"").localeCompare(a.savedAt||"");
+  }).forEach(function(c){
+    var o = document.createElement("option");
+    o.value = c.id;
+    o.textContent = c.name + (c.savedAt ? "  \u00b7  " + new Date(c.savedAt).toLocaleDateString("en-US") : "");
+    sel.appendChild(o);
+  });
+  sel.value = keep && library.comparisons.some(function(c){ return c.id === keep; }) ? keep : "";
+  document.getElementById("delBtn").disabled = !sel.value;
+}
+
+function entryById(id){
+  return library.comparisons.filter(function(c){ return c.id === id; })[0] || null;
+}
+
+function saveEntry(asNew){
+  var snap = snapshot();
+  var name = (snap.preparedFor || "").trim() ||
+             ("Comparison " + new Date().toLocaleDateString("en-US"));
+  var entry = asNew ? null : entryById(activeId);
+  if(!entry){ entry = {id:uid()}; library.comparisons.push(entry); }
+  entry.name = name;
+  entry.savedAt = new Date().toISOString();
+  entry.preparedFor = snap.preparedFor;
+  entry.sync = snap.sync;
+  entry.homes = snap.homes;
+  activeId = entry.id;
+  refreshLib();
+  persistLocal();
+  if(fileHandle){ writeNow(); }
+  else { flash("Saved in this browser. Connect " + LIB_NAME + " to keep it in the folder.", true); }
+}
+
+function deleteEntry(){
+  var e = entryById(activeId);
+  if(!e) return;
+  if(!confirm("Delete the saved comparison \"" + e.name + "\"? This cannot be undone.")) return;
+  library.comparisons = library.comparisons.filter(function(c){ return c.id !== activeId; });
+  activeId = null;
+  refreshLib();
+  persistLocal();
+  if(fileHandle) writeNow();
+  flash("Deleted");
+}
+
+/* ---- browser backstop so a refresh never loses work ---- */
+function persistLocal(){
+  if(!storageOK) return;
+  try{
+    localStorage.setItem(STORE, JSON.stringify({
+      activeId:activeId, library:library, working:snapshot()
+    }));
+  }catch(err){ storageOK = false; }
+}
+function autosave(){
+  var e = entryById(activeId);
+  if(e){
+    var snap = snapshot();
+    e.preparedFor = snap.preparedFor; e.sync = snap.sync; e.homes = snap.homes;
+    e.savedAt = new Date().toISOString();
+    queueWrite();
+  }
+  persistLocal();
+}
+function loadLocal(){
+  try{
+    var raw = localStorage.getItem(STORE);
+    if(!raw) return false;
+    var d = JSON.parse(raw);
+    if(d.library && Array.isArray(d.library.comparisons)) library = d.library;
+    activeId = d.activeId || null;
+    if(d.working){ applySnapshot(d.working); return true; }
+  }catch(err){}
+  return false;
+}
+
+/* ---- export and import, for browsers without the file API ---- */
+function downloadLibrary(){
+  var blob = new Blob([libraryText()], {type:"application/json"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url; a.download = LIB_NAME;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+  flash("Downloaded " + LIB_NAME + ", put it in the same folder as this page");
+}
+
+/* ---- wiring ---- */
+document.getElementById("connectBtn").onclick = function(){ pendingHandle ? reconnect() : connectFile(false); };
+document.getElementById("createBtn").onclick  = function(){ connectFile(true); };
+document.getElementById("dlBtn").onclick      = downloadLibrary;
+document.getElementById("importBtn").onclick  = function(){ document.getElementById("openFile").click(); };
+document.getElementById("openFile").onchange  = function(){
+  var f = this.files[0]; this.value = "";
+  if(!f) return;
+  var fr = new FileReader();
+  fr.onload = function(){
+    var d = null; try{ d = JSON.parse(fr.result); }catch(err){}
+    if(adoptLibrary(d)){ persistLocal(); flash("Imported " + library.comparisons.length + " comparisons"); }
+    else flash("That file is not a comparisons library", true);
+  };
+  fr.readAsText(f);
+};
+document.getElementById("saveBtn").onclick   = function(){ saveEntry(false); };
+document.getElementById("saveAsBtn").onclick = function(){ saveEntry(true); };
+document.getElementById("delBtn").onclick    = deleteEntry;
+document.getElementById("libSelect").onchange = function(){
+  var id = this.value;
+  if(!id){ activeId = null; refreshLib(); return; }
+  var e = entryById(id);
+  if(!e) return;
+  activeId = id;
+  applySnapshot(e);
+  refreshLib();
+  flash("Opened " + e.name);
+};
+document.getElementById("preparedFor").addEventListener("input", function(){ recalc(); });
+
+if(!FSA){
+  document.getElementById("connectBtn").style.display = "none";
+  document.getElementById("createBtn").style.display  = "none";
+}
+
+/* ---------- actions ---------- */
+function removeHome(i){
+  if(homes.length <= 2) return;
+  homes.splice(i,1);
+  renderGrid();
+}
+document.getElementById("add").onclick = function(){
+  if(homes.length >= 6) return;
+  var last = homes[homes.length-1];
+  var n = seed(last.type === "new" ? "resale" : "new");
+  n.rate = last.rate; n.term = last.term;
+  homes.push(n);
+  renderGrid();
+};
+document.getElementById("reset").onclick = function(){
+  if(!confirm("Clear every home and start over? Save the comparison first if you want to keep it.")) return;
+  homes = [seed("resale"), seed("new")];
+  document.getElementById("sync").checked = false;
+  document.getElementById("preparedFor").value = "";
+  activeId = null;
+  refreshLib();
+  renderGrid();
+  flash("Cleared. Saved comparisons were not touched.");
+};
+document.getElementById("print").onclick = function(){ document.body.classList.add("preview"); window.scrollTo(0,0); };
+document.getElementById("psExit").onclick = function(){ document.body.classList.remove("preview"); };
+document.getElementById("psPrint").onclick = function(){ window.print(); };
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape") document.body.classList.remove("preview");
+});
+document.getElementById("sync").onchange = function(){
+  if(this.checked && homes.length){
+    var r = homes[0].rate, t = homes[0].term;
+    homes.forEach(function(h){ h.rate = r; h.term = t; });
+    cards.forEach(function(cd){ cd.paint(); });
+    recalc();
+  }
+};
+
+/* ---------- boot ---------- */
+try { localStorage.setItem(STORE + "_probe","1"); localStorage.removeItem(STORE + "_probe"); }
+catch(err){ storageOK = false; }
+
+if(!loadLocal()) renderGrid();
+refreshLib();
+setFileLabel();
+
+/* resume the data file from last session if the browser still remembers it */
+if(FSA){
+  idbGet("handle", function(h){
+    if(!h) return;
+    h.queryPermission({mode:"readwrite"}).then(function(perm){
+      if(perm === "granted"){
+        fileHandle = h; setFileLabel();
+        h.getFile().then(function(f){ return f.text(); }).then(function(t){
+          var d = null; try{ d = JSON.parse(t); }catch(err){}
+          if(adoptLibrary(d)) flash("Reading " + h.name + ", " + library.comparisons.length + " saved comparisons");
+        }).catch(function(){});
+      } else {
+        pendingHandle = h; setFileLabel();
+      }
+    }).catch(function(){});
+  });
+}
+
+/* Online, this page never reads a comparisons.json from the website folder:
+   files in the site are public even though this page is login-gated.
+   Saved comparisons live in this browser, or in a data file you connect. */
+</script>
+</body>
+</html>
